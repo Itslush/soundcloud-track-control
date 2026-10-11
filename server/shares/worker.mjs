@@ -1,13 +1,16 @@
 import { spawn } from 'node:child_process';
 import { readFile, writeFile, stat } from 'node:fs/promises';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createSoundCloud } from '../soundcloud.mjs';
 import { renderPcm, SAMPLE_RATE, MAX_SOURCE_SECONDS } from './audio.mjs';
 import { downloadMedia } from './download.mjs';
+import { renderSet } from './set-worker.mjs';
 
 const ffmpeg = process.env.FFMPEG_PATH || 'ffmpeg';
-export function runFfmpeg(args) {
+export function runFfmpeg(args, input) {
   return new Promise((resolve, reject) => {
     const child = spawn(
       ffmpeg,
@@ -24,11 +27,19 @@ export function runFfmpeg(args) {
       ],
       {
         windowsHide: true,
-        stdio: ['ignore', 'ignore', 'pipe'],
+        stdio: [input ? 'pipe' : 'ignore', 'ignore', 'pipe'],
       },
     );
     let detail = '';
     const timer = setTimeout(() => child.kill('SIGKILL'), 180000);
+    if (input)
+      pipeline(
+        Readable.from(input, { objectMode: false, highWaterMark: 128 * 1024 }),
+        child.stdin,
+      ).catch((error) => {
+        child.kill('SIGKILL');
+        reject(error);
+      });
     child.stderr.on('data', (chunk) => {
       detail = (detail + chunk).slice(-2000);
     });
@@ -47,6 +58,7 @@ export function runFfmpeg(args) {
 async function render(directory) {
   const file = (name) => path.join(directory, name);
   const profile = JSON.parse(await readFile(file('profile.json'), 'utf8'));
+  if (profile.tracks) return renderSet(directory, profile, runFfmpeg);
   const track = await createSoundCloud().resolve(
     'https://soundcloud.com' + profile.track,
     AbortSignal.timeout(35000),

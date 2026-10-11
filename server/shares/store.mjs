@@ -13,6 +13,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { decodeTempoCode, encodeTempoCode } from '../../src/tempo-share.js';
 import { validateProfile } from '../../src/tempo-profile.js';
+import { decodeTempoSet, encodeTempoSet } from '../../src/tempo-set.js';
 import { ServiceError, trackUrl } from '../soundcloud.mjs';
 
 export const TTL = 7 * 86400000;
@@ -43,6 +44,7 @@ export function parseRenderCode(code) {
   try {
     if (typeof code !== 'string' || code.length > 16000)
       throw new Error('Invalid sharing code.');
+    if (code.startsWith('SCS1.')) return decodeTempoSet(code, parseTrack);
     const profile = decodeTempoCode(
       code,
       (value) => validateProfile(value, parseTrack),
@@ -145,7 +147,9 @@ export async function createShareStore(
     read,
     async create(code) {
       const profile = parseRenderCode(code);
-      const canonical = encodeTempoCode(profile);
+      const canonical = profile.tracks
+        ? encodeTempoSet(profile)
+        : encodeTempoCode(profile);
       const id = createHash('sha256')
         .update('discord-render-v1:' + canonical)
         .digest('hex')

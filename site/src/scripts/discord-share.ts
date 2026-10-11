@@ -1,6 +1,9 @@
 import { release } from '../lib/release';
 
-export function initDiscordShare(code: string) {
+export function initDiscordShare(
+  code: string | (() => string),
+  onReady?: (link: URL) => void,
+) {
   const root = document.querySelector<HTMLElement>('#discord-sharing');
   if (!root) return;
   const create = root.querySelector<HTMLButtonElement>('.discord-create')!;
@@ -15,6 +18,7 @@ export function initDiscordShare(code: string) {
   let job = '';
   let timer: ReturnType<typeof setTimeout>;
   let deadline = 0;
+  let epoch = 0;
   const controller = new AbortController();
   window.addEventListener(
     'pagehide',
@@ -25,12 +29,17 @@ export function initDiscordShare(code: string) {
     { once: true },
   );
 
-  async function request(url: string, options: RequestInit = {}) {
+  async function request(
+    url: string,
+    options: RequestInit = {},
+    started = epoch,
+  ) {
     const response = await fetch(url, {
       ...options,
       signal: AbortSignal.any([controller.signal, AbortSignal.timeout(20000)]),
     });
     const value: unknown = await response.json();
+    if (started !== epoch) return;
     if ([404, 410].includes(response.status)) job = '';
     if (!value || typeof value !== 'object')
       throw new Error('Sharing returned an unreadable response. Try again.');
@@ -47,6 +56,10 @@ export function initDiscordShare(code: string) {
       !/^[a-f0-9]{32}$/.test(value.id)
     )
       throw new Error('Sharing returned an invalid link. Try again.');
+    if (url !== api.href && value.id !== url.split('/').at(-1))
+      throw new Error(
+        'Sharing returned a different rendered copy. Ask for a new link.',
+      );
     job = value.id;
     if (value.state === 'failed') {
       job = '';
@@ -75,6 +88,7 @@ export function initDiscordShare(code: string) {
       create.hidden = true;
       status.textContent =
         'Ready to share. The audio copy expires after seven days.';
+      onReady?.(shared);
       return;
     }
     if (value.state !== 'rendering')
@@ -83,7 +97,13 @@ export function initDiscordShare(code: string) {
       throw new Error('Still waiting for the render. Check it again shortly.');
     status.textContent =
       'Rendering the shared track. This can take several minutes.';
-    timer = setTimeout(() => request(`${api.href}/${job}`).catch(failed), 3000);
+    timer = setTimeout(
+      () =>
+        request(`${api.href}/${job}`, {}, started).catch((error) => {
+          if (started === epoch) failed(error);
+        }),
+      3000,
+    );
   }
   function failed(error: unknown) {
     if (controller.signal.aborted) return;
@@ -99,14 +119,24 @@ export function initDiscordShare(code: string) {
     deadline = Date.now() + 16 * 60000;
     create.disabled = true;
     status.textContent = 'Starting the render…';
-    const task = job
-      ? request(`${api.href}/${job}`)
-      : request(api.href, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, publish: true }),
-        });
-    task.catch(failed);
+    const started = epoch;
+    try {
+      const task = job
+        ? request(`${api.href}/${job}`)
+        : request(api.href, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              code: typeof code === 'function' ? code() : code,
+              publish: true,
+            }),
+          });
+      task.catch((error) => {
+        if (started === epoch) failed(error);
+      });
+    } catch (error) {
+      failed(error);
+    }
   });
   copy.addEventListener('click', async () => {
     try {
@@ -120,4 +150,23 @@ export function initDiscordShare(code: string) {
         'Copy the link above. Clipboard access is unavailable.';
     }
   });
+  return {
+    async readReady(id: string) {
+      if (!/^[a-f0-9]{32}$/.test(id))
+        throw new Error('The rendered link is invalid. Ask for a new copy.');
+      clearTimeout(timer);
+      deadline = Date.now() + 16 * 60000;
+      await request(`${api.href}/${id}`);
+    },
+    reset() {
+      epoch++;
+      clearTimeout(timer);
+      job = '';
+      result.hidden = true;
+      create.hidden = false;
+      create.disabled = false;
+      create.textContent = 'Create public Discord link';
+      status.textContent = '';
+    },
+  };
 }

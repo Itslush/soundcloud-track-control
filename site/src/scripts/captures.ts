@@ -9,15 +9,46 @@ document
       picture.toggleAttribute('data-error', image.naturalWidth === 0);
       picture.setAttribute('aria-busy', 'false');
     }
+    image.addEventListener('load', finish);
+    image.addEventListener('error', finish);
     if (image.complete) {
       finish();
       return;
     }
     picture.dataset.loading = '';
     picture.setAttribute('aria-busy', 'true');
-    image.addEventListener('load', finish);
-    image.addEventListener('error', finish);
   });
+
+function updateCaptureThemes() {
+  const theme = document.documentElement.dataset.theme || 'charcoal';
+  document
+    .querySelectorAll<HTMLAnchorElement>('a[data-capture]')
+    .forEach((link) => {
+      const sources =
+        link.querySelectorAll<HTMLSourceElement>('source[data-theme]');
+      for (const source of sources) {
+        source.media =
+          source.dataset.theme === theme
+            ? source.dataset.size === 'mobile'
+              ? '(max-width: 600px)'
+              : 'all'
+            : 'not all';
+        if (
+          source.dataset.theme === theme &&
+          source.dataset.size === 'desktop'
+        ) {
+          link.href = source.srcset;
+          link.dataset.nativeWidth = source.dataset.nativeWidth;
+          link.dataset.nativeHeight = source.dataset.nativeHeight;
+        }
+      }
+    });
+}
+updateCaptureThemes();
+new MutationObserver(updateCaptureThemes).observe(document.documentElement, {
+  attributes: true,
+  attributeFilter: ['data-theme'],
+});
 
 if (dialog) {
   const image = dialog.querySelector<HTMLImageElement>('.viewer-image')!;

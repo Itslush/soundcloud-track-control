@@ -22,6 +22,15 @@ const { shared = false } = Astro.props;
       <strong>{shared ? 'Listen' : 'Preview'}</strong>
     </header>
     <div class="preview-meta">
+      <img
+        id="preview-artwork"
+        class="preview-artwork"
+        alt=""
+        width="80"
+        height="80"
+        hidden
+        referrerpolicy="no-referrer"
+      />
       <span id="preview-title">{shared ? '' : demoTrack.title}</span>
     </div>
     <ApplePlaybackNotice />

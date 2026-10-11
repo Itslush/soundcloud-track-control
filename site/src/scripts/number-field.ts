@@ -1,6 +1,6 @@
-export function initNumberFields() {
+export function initNumberFields(root: ParentNode = document) {
   const fields = Array.from(
-    document.querySelectorAll<HTMLElement>('[data-number-field]'),
+    root.querySelectorAll<HTMLElement>('[data-number-field]'),
     (element) => {
       const input = element.querySelector('input')!;
       const buttons = Array.from(
@@ -45,7 +45,10 @@ export function initNumberFields() {
           ? input.valueAsNumber
           : previous;
         const amount = Number(input.step) || 1;
-        const precision = Math.max(3, Math.min(6, Math.ceil(-Math.log10(amount))));
+        const precision = Math.max(
+          3,
+          Math.min(6, Math.ceil(-Math.log10(amount))),
+        );
         input.value = String(
           clamp(Number((value + direction * amount).toFixed(precision))),
         );

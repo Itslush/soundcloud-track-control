@@ -4,7 +4,9 @@ On a shared-track page, open **Share in Discord** and choose **Create public Dis
 
 **Copy Discord link** copies a Markdown link labelled with the website address, without `https://`. Its destination remains the rendered-track URL. This shortens the visible message text; it does not hide the server address from inspection or move the audio to GitHub Pages. If clipboard access fails, the full rendered URL remains available above the button.
 
-The renderer downloads publicly playable audio, applies the canonical tempo and pitch timeline through the pinned Signalsmith WASM library, then combines AAC audio and a still cover into an H.264 MP4. The finished URL serves Open Graph video metadata. Opening it in a browser returns to the original shared-track page.
+The renderer downloads publicly playable audio, applies the canonical tempo and pitch timeline through the pinned Signalsmith WASM library, then combines AAC audio and a cover into an H.264 MP4. Sets contain two to ten tracks, with a separate crossfade for each join. Their artwork blends on the same clock as the audio; titles and creators remain readable during the transition. Set video runs at four frames per second to fit the server budget. The finished URL serves Open Graph video metadata, including tempo and semitone settings. Opening it in a browser returns to the shared track or set, where an existing render can play without publishing another copy.
+
+Use **Build a set** in the plugin or open the website's [set editor](https://itslush.github.io/soundcloud-tempo-control/set/). Add public SoundCloud links or existing shared settings, order the tracks, and adjust each join. See [Sets](SETS.md) for the link format and rendering checks.
 
 The public media hostname is `tempo.88-96-45-138.sslip.io`, a free DNS name pointing to the Oracle IP. On 2026-10-11, the captured Discord video source returned HTTP 403 with `Invalid resource` when its upstream URL used the raw IP. The same 5,298,758-byte MP4 played in the user's Discord DM after switching its URL to the hostname, without changing its encoding. This verifies that test track and client; Discord still decides whether to display a player for other links.
 
@@ -12,7 +14,7 @@ The public media hostname is `tempo.88-96-45-138.sslip.io`, a free DNS name poin
 
 - One render at a time, with a 15-minute deadline. A busy server asks the sender to retry; it does not build an unbounded queue.
 - Six creation requests per IP per hour. IP counters remain in memory, capped at 2,048 addresses.
-- Source duration up to 15 minutes; adjusted duration up to 30 minutes. The source must match the shared timeline's duration.
+- Source duration up to 15 minutes; adjusted duration up to 30 minutes. Both limits apply to the whole set before subtracting crossfades, not to each track. Each source must match its shared timeline's duration.
 - Downloads up to 64 MiB of audio and 5 MiB of artwork. Only validated SoundCloud CDN HTTPS URLs are fetched; every redirect is checked. FFmpeg receives local files only.
 - Progressive audio and unencrypted HLS with AAC/MP3 segments or one fragmented-MP4 initialization segment. Private, DRM, encrypted, live, preview-only and byte-range playlists are not rendered.
 - Up to 64 completed jobs and 1 GiB of media, with a 48 MiB limit per MP4. The current render's temporary PCM files are additional disk use, bounded by duration.
@@ -28,10 +30,10 @@ Only publish audio you have permission to share. The preview resolver still retu
 Required files in `/opt/tempo-preview`:
 
 - `server/shares/`, `server/soundcloud.mjs`, `server/ytdlp.mjs`, `server/errors.mjs`
-- `src/tempo-profile.js`, `src/tempo-share.js`, `vendor/signalsmith/wasm-factory.mjs`
+- `src/tempo-profile.js`, `src/tempo-share.js`, `src/tempo-set.js`, `vendor/signalsmith/wasm-factory.mjs`
 - `scripts/config.cjs`, `release.config.json`, and the existing `.venv` extractor installation
 
-Node 24 and FFmpeg with AAC and libx264 support are required. Set `SHARE_ORIGIN` to the public HTTPS backend origin, `SHARE_ROOT` to the state directory, and `FFMPEG_PATH` to its executable. The checked-in unit uses the existing Oracle paths. Build the website with `PUBLIC_API_BASE` pointing to the backend prefix.
+Node 24 and FFmpeg with AAC, libx264 and drawtext support, plus a readable DejaVu Sans font, are required. Set `SHARE_ORIGIN` to the public HTTPS backend origin, `SHARE_ROOT` to the state directory, and `FFMPEG_PATH` to its executable. The checked-in unit uses the existing Oracle paths. Build the website with `PUBLIC_API_BASE` pointing to the backend prefix.
 
 Back up the existing nginx configuration before installing `deploy/tempo-https.conf` and `deploy/tempo-hostname-https.conf` under `/etc/nginx/conf.d/`, and `deploy/tempo-routes.conf` at `/etc/nginx/tempo-routes.conf`. Both HTTPS hosts include those shared routes. Keep the IP host as the default server so clients without SNI still receive its IP certificate. Run `nginx -t` before reloading. Share routes proxy to port 4324; media is served directly by nginx with range requests and a 1 MiB/s per-request limit. Preview routes remain on port 4322. Enable `tempo-shares.service` after installing the unit and reloading systemd. On SELinux hosts, configure the media path as `httpd_sys_content_t` and verify an external range request; do not disable SELinux.
 

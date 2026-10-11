@@ -2,6 +2,7 @@
 import Icon from './Icon.astro';
 import { route } from '../lib/release';
 import evidence from '../../../docs/screenshot-evidence.json';
+import features from '../../../docs/feature-capture-evidence.json';
 
 interface Props {
   image: string;
@@ -9,19 +10,45 @@ interface Props {
   title: string;
   alt: string;
   variant?: string;
+  themed?: boolean;
 }
 
-const { image, mobile, title, alt, variant = '' } = Astro.props;
+const { image, mobile, title, alt, variant = '', themed = false } = Astro.props;
 const findCapture = (name: string) => {
-  const capture = evidence.screenshots.find((item) => item.file === name);
+  const capture = [...evidence.screenshots, ...features.screenshots].find(
+    (item) => item.file === name,
+  );
   if (!capture) throw new Error(`Missing verified capture: ${name}`);
   return capture;
 };
 const desktop = findCapture(image);
 const narrow = mobile ? findCapture(mobile) : null;
+const themeSources = themed
+  ? ['charcoal', 'light', 'oled'].flatMap((theme) => [
+      ...(mobile
+        ? [
+            {
+              theme,
+              size: 'mobile',
+              capture: findCapture(mobile.replace('-charcoal', `-${theme}`)),
+            },
+          ]
+        : []),
+      {
+        theme,
+        size: 'desktop',
+        capture: findCapture(image.replace('-charcoal', `-${theme}`)),
+      },
+    ])
+  : [];
 ---
 
-<figure class:list={['product-capture', variant]}>
+<figure
+  class:list={['product-capture', variant]}
+  style={variant === 'capture-controls'
+    ? `--capture-native-width: ${desktop.cssWidth}px`
+    : undefined}
+>
   <a
     class="capture-link"
     href={route(`screenshots/${image}`)}
@@ -36,7 +63,27 @@ const narrow = mobile ? findCapture(mobile) : null;
     <div class="capture-surface">
       <picture>
         {
-          narrow && (
+          themeSources.map(({ theme, size, capture }) => (
+            <source
+              data-theme={theme}
+              data-size={size}
+              data-native-width={capture.cssWidth}
+              data-native-height={capture.cssHeight}
+              media={
+                theme === 'charcoal'
+                  ? size === 'mobile'
+                    ? '(max-width: 600px)'
+                    : 'all'
+                  : 'not all'
+              }
+              srcset={route(`screenshots/${capture.file}`)}
+              width={capture.width}
+              height={capture.height}
+            />
+          ))
+        }
+        {
+          narrow && !themed && (
             <source
               media="(max-width: 600px)"
               srcset={route(`screenshots/${mobile}`)}

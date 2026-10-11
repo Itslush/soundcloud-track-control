@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0
+
+- Build a shared set from 2 to 10 public tracks, with separate tempo, pitch and crossfade settings. Existing shared links retain both automation lanes.
+- Render the set as one playable Discord video. Artwork fades with the audio, and track titles and creators stay visible during each overlap.
+- Duration limits apply to the whole set: 15 minutes of original audio and 30 minutes after adjustment. Public copies expire after seven days.
+- Shared-track playback shows artwork after loading. Discord preview titles include tempo and semitone adjustments.
+- The landing page shows current controls with focused screenshots that follow the selected website theme. Technical details have a visible summary and expandable controls.
+
 ## 1.1.0
 
 ### Playback and controls

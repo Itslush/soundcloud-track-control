@@ -322,6 +322,7 @@ test('HTTP shares require explicit publishing, enforce CORS, and hide internal p
   assert.ok(html.includes('video/mp4'));
   assert.ok(html.includes('&lt;script&gt;'));
   assert.ok(!html.includes('<script>alert'));
+  assert.ok(html.includes('Tempo: 0.75× · Semitone: -3 st'));
   assert.equal(
     (await fetch(origin + 'api/shares/../../etc/passwd')).status,
     404,
@@ -334,5 +335,85 @@ test('HTTP shares require explicit publishing, enforce CORS, and hide internal p
       })
     ).status,
     204,
+  );
+});
+
+test('embed adjustments describe fixed, fractional and automated settings without changing media URLs', () => {
+  const render = (settings) =>
+    embedHtml({
+      id: 'a'.repeat(32),
+      data: {
+        title: 'Track & title',
+        artist: 'Artist',
+        code: encodeTempoCode(settings),
+      },
+      publicOrigin: 'https://render.example',
+      siteUrl: 'https://site.example/',
+    });
+  assert.ok(
+    render({ ...profile, keyShift: -4.5 }).includes('Semitone: -4.5 st'),
+  );
+  assert.ok(render({ ...profile, keyShift: 0 }).includes('Semitone: 0 st'));
+  assert.ok(render({ ...profile, keyShift: 2.5 }).includes('Semitone: 2.5 st'));
+  const html = render({
+    ...profile,
+    points: [
+      { t: 0, r: 0.75, d: 0, c: 'instant' },
+      { t: 3, r: 1.5, d: 2, c: 'smooth' },
+    ],
+    pitchPoints: [
+      { t: 0, k: -3, d: 0, c: 'instant' },
+      { t: 3, k: 2, d: 2, c: 'linear' },
+    ],
+  });
+  assert.ok(
+    html.includes(
+      'Tempo: 0.75× to 1.5× timeline · Semitone: -3 st to 2 st timeline',
+    ),
+  );
+  assert.ok(html.includes('Track &amp; title'));
+  assert.ok(
+    html.includes(
+      'https://render.example/soundcloud-tempo-control/media/' +
+        'a'.repeat(32) +
+        '.mp4',
+    ),
+  );
+});
+
+test('set embeds describe all tracks and redirect to the set player without changing the video endpoint', async () => {
+  const { encodeTempoSet } = await import('../src/tempo-set.js');
+  const code = encodeTempoSet({
+    v: 1,
+    tracks: [
+      profile,
+      {
+        ...profile,
+        track: '/artist/second',
+        keyShift: 2.5,
+        points: [{ t: 0, r: 1.25, d: 0, c: 'instant' }],
+      },
+    ],
+    overlaps: [2],
+  });
+  const html = embedHtml({
+    id: 'a'.repeat(32),
+    data: { title: 'First / Second', artist: 'A / B', code },
+    publicOrigin: 'https://render.example',
+    siteUrl: 'https://site.example/',
+  });
+  assert.ok(html.includes('Tempo: 0.75× to 1.25× · Semitone: -3 st to 2.5 st'));
+  assert.ok(html.includes('2 tracks · Crossfade: 2 s'));
+  assert.ok(
+    html.includes(
+      'https://site.example/set/?render=' + 'a'.repeat(32) + '#scs=SCS1.',
+    ),
+  );
+  assert.ok(
+    html.includes(
+      'https://render.example/soundcloud-tempo-control/media/' +
+        'a'.repeat(32) +
+        '.mp4',
+    ),
   );
 });

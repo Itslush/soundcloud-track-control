@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { isIP } from 'node:net';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { createShareStore } from './store.mjs';
+import { createShareStore, parseRenderCode } from './store.mjs';
 import { ServiceError } from '../errors.mjs';
 import config from '../../scripts/config.cjs';
 
@@ -17,18 +17,44 @@ const escape = (value) =>
 const base = '/soundcloud-tempo-control/';
 export function embedHtml({ id, data, publicOrigin, siteUrl }) {
   const media = `${publicOrigin}${base}media/${id}`;
-  const website = new URL('share/', siteUrl);
-  website.hash = 'sct=' + data.code;
-  const title = escape(data.title);
+  const profile = parseRenderCode(data.code);
+  const isSet = Array.isArray(profile.tracks);
+  const website = new URL(isSet ? 'set/' : 'share/', siteUrl);
+  if (isSet) website.searchParams.set('render', id);
+  website.hash = (isSet ? 'scs=' : 'sct=') + data.code;
+  const tracks = isSet ? profile.tracks : [profile];
+  const range = (values, unit) => {
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    return min === max ? `${min}${unit}` : `${min}${unit} to ${max}${unit}`;
+  };
+  const tempo = range(
+    tracks.flatMap((track) => track.points.map((point) => point.r)),
+    '×',
+  );
+  const semitone = range(
+    tracks.flatMap(
+      (track) =>
+        track.pitchPoints?.map((point) => point.k) || [track.keyShift ?? 0],
+    ),
+    ' st',
+  );
+  const adjustments = `Tempo: ${tempo}${tracks.some((track) => track.points.length > 1) ? ' timeline' : ''} · Semitone: ${semitone}${tracks.some((track) => track.pitchPoints) ? ' timeline' : ''}`;
+  const mode = isSet
+    ? `${tracks.length} tracks · Crossfade: ${range(profile.overlaps, ' s')}`
+    : profile.pitch === 'preserve'
+      ? 'Preserve key'
+      : 'Natural pitch';
+  const title = escape(`${data.title} · ${adjustments}`);
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${title}</title>
 <meta property="og:type" content="video.other"><meta property="og:title" content="${title}">
-<meta property="og:description" content="${escape(data.artist)} · Shared tempo and pitch">
+<meta property="og:description" content="${escape(data.artist)} · ${escape(mode)} · ${escape(adjustments)}">
 <meta property="og:url" content="${publicOrigin}${base}listen/${id}">
 <meta property="og:image" content="${media}.jpg">
 <meta property="og:video" content="${media}.mp4"><meta property="og:video:secure_url" content="${media}.mp4">
 <meta property="og:video:type" content="video/mp4"><meta property="og:video:width" content="640"><meta property="og:video:height" content="640">
 <meta name="twitter:card" content="player"><meta name="twitter:player:stream" content="${media}.mp4"><meta name="twitter:player:stream:content_type" content="video/mp4">
-</head><body><a href="${escape(website.href)}">Open shared track</a><script>location.replace(${JSON.stringify(website.href).replaceAll('<', '\\u003c')})</script></body></html>`;
+</head><body><a href="${escape(website.href)}">Open shared ${isSet ? 'set' : 'track'}</a><script>location.replace(${JSON.stringify(website.href).replaceAll('<', '\\u003c')})</script></body></html>`;
 }
 
 function send(response, status, body, type = 'application/json') {

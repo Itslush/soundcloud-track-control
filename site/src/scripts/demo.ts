@@ -27,6 +27,11 @@ export function initDemo(sharedProfile?: TempoProfile) {
   const loader = get<HTMLDetailsElement>('preview-loader');
   const urlInput = get<HTMLInputElement>('preview-url');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const artwork = get<HTMLImageElement>('preview-artwork');
+  artwork.addEventListener('error', () => {
+    artwork.hidden = true;
+    artwork.removeAttribute('src');
+  });
   const preview = new AudioPreview(
     (message) => {
       status.textContent = message;
@@ -280,6 +285,8 @@ export function initDemo(sharedProfile?: TempoProfile) {
     trackPath = null;
     buffering = false;
     original = false;
+    artwork.hidden = true;
+    artwork.removeAttribute('src');
     status.textContent = 'Loading audio…';
     get<HTMLAnchorElement>('preview-credit').hidden = true;
     get<HTMLButtonElement>('preview-sample').hidden = true;
@@ -359,6 +366,19 @@ export function initDemo(sharedProfile?: TempoProfile) {
       }
       trackPath = track.preview ? null : new URL(track.permalink).pathname;
       get('preview-title').textContent = `${track.title} · ${track.artist}`;
+      if (track.artwork) {
+        const cover = new URL(track.artwork);
+        if (
+          cover.protocol === 'https:' &&
+          cover.hostname.endsWith('.sndcdn.com') &&
+          !cover.username &&
+          !cover.password &&
+          !cover.port
+        ) {
+          artwork.src = cover.href;
+          artwork.hidden = false;
+        }
+      }
       const credit = get<HTMLAnchorElement>('preview-credit');
       credit.href = track.permalink;
       credit.hidden = false;

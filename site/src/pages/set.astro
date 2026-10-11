@@ -1,0 +1,227 @@
+---
+import Page from '../layouts/Page.astro';
+import NumberField from '../components/NumberField.astro';
+import Icon from '../components/Icon.astro';
+import { release } from '../lib/release';
+import '../styles/set.css';
+---
+
+<Page
+  title="Shared set"
+  description="Join SoundCloud tracks with tempo, pitch and crossfade settings, then share one playable set."
+>
+  <article
+    class="reading shell set-page"
+    id="set-editor"
+    data-website={release.siteUrl}
+  >
+    <h1>Shared set</h1>
+    <p>
+      Join tracks with their tempo and pitch settings. Choose the order and
+      crossfades, then create one playable copy.
+    </p>
+    <noscript>Enable JavaScript to configure a set.</noscript>
+    <form id="set-add-form" class="set-add" novalidate>
+      <label for="set-source">SoundCloud track or shared settings link</label>
+      <div class="set-add-row">
+        <input
+          id="set-source"
+          type="text"
+          inputmode="url"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Paste a track URL or SCT1 code"
+          aria-describedby="set-status"
+          required
+        />
+        <button class="button" type="submit" id="set-add">Add track</button>
+      </div>
+    </form>
+    <p id="set-status" role="status" aria-live="polite"></p>
+    <div class="set-budget" aria-live="polite">
+      <p id="set-budget">0:00 / 15:00 original · 0:00 / 30:00 adjusted</p>
+      <p id="set-length"></p>
+      <p id="set-validation" role="status"></p>
+    </div>
+    <p id="set-empty">
+      Add at least two tracks. Existing shared links retain tempo and pitch
+      automation.
+    </p>
+    <ol id="set-tracks" class="set-tracks" aria-label="Set order"></ol>
+    <div class="set-actions">
+      <button class="button" id="set-copy" type="button" disabled
+        ><Icon name="link" />Copy settings link</button
+      >
+    </div>
+    <p id="set-settings-result" hidden>
+      <a id="set-settings-link" class="discord-link"></a>
+    </p>
+    <section
+      id="set-listen"
+      class="set-listen"
+      aria-labelledby="set-listen-title"
+      hidden
+    >
+      <h2 id="set-listen-title">Listen</h2>
+      <video
+        id="set-video"
+        playsinline
+        preload="none"
+        aria-label="Shared set artwork and track credits"></video>
+      <div class="set-transport">
+        <button id="set-play" class="button" type="button">Play</button>
+        <output id="set-position">0:00</output>
+        <label class="preview-volume"
+          >Volume <input
+            id="set-volume"
+            type="range"
+            min="0"
+            max="1"
+            value="0.15"
+            step="0.01"
+            aria-label="Set volume"
+          /></label
+        >
+      </div>
+      <label class="preview-seek"
+        ><input
+          id="set-seek"
+          type="range"
+          value="0"
+          min="0"
+          max="1"
+          step="0.1"
+          aria-label="Set position"
+        /></label
+      >
+      <p id="set-play-status" role="status" aria-live="polite"></p>
+    </section>
+    <details id="discord-sharing" class="demo-details set-publish">
+      <summary>Create a playable share</summary>
+      <p>
+        The rendered audio and video will be public for seven days. Only create
+        a link if you have permission to share every track. The total limit is
+        15 minutes of original audio and 30 minutes after adjustment. The
+        playable set includes crossfades, track artwork and credits.
+      </p>
+      <button class="button primary discord-create" type="button" disabled
+        >Create public Discord link</button
+      >
+      <p class="discord-status" role="status" aria-live="polite"></p>
+      <div class="discord-result" hidden>
+        <a class="discord-link"></a>
+        <button class="button discord-copy" type="button"
+          >Copy Discord link</button
+        >
+      </div>
+    </details>
+    <p class="set-note">
+      Settings links keep the configuration, not an audio copy. Create a
+      playable share to listen to the joined set here or in Discord. Restricted
+      or unavailable tracks cannot be rendered.
+    </p>
+  </article>
+  <template id="set-track-template">
+    <li class="set-track">
+      <div class="set-track-heading">
+        <img
+          class="set-artwork"
+          width="72"
+          height="72"
+          alt=""
+          loading="lazy"
+          referrerpolicy="no-referrer"
+          hidden
+        />
+        <div class="set-track-title">
+          <a class="set-track-link" target="_blank" rel="noopener noreferrer"
+          ></a><p class="set-track-artist"></p><p class="set-track-duration">
+          </p>
+        </div>
+        <div class="set-order">
+          <button
+            class="button"
+            data-move="-1"
+            type="button"
+            aria-label="Move track earlier"><Icon name="chevron" /></button
+          >
+          <button
+            class="button"
+            data-move="1"
+            type="button"
+            aria-label="Move track later"><Icon name="chevron" /></button
+          >
+          <button class="button set-remove" type="button">Remove</button>
+        </div>
+      </div>
+      <div class="set-adjustments">
+        <div>
+          <NumberField
+            id="set-track-tempo"
+            label="Tempo"
+            value={1}
+            min={0.25}
+            max={4}
+            step={0.025}
+            unit="×"
+            visibleLabel
+          /><button type="button" class="button set-fixed-tempo" hidden
+            >Use fixed tempo</button
+          >
+        </div>
+        <div>
+          <NumberField
+            id="set-track-pitch"
+            label="Semitone shift"
+            value={0}
+            min={-12}
+            max={12}
+            step={0.5}
+            unit="st"
+            visibleLabel
+          /><button type="button" class="button set-fixed-pitch" hidden
+            >Use fixed pitch</button
+          >
+        </div>
+        <fieldset class="set-pitch-mode">
+          <legend>Pitch mode</legend><div>
+            <button
+              class="button"
+              type="button"
+              data-pitch="natural"
+              aria-pressed="true">Natural</button
+            ><button
+              class="button"
+              type="button"
+              data-pitch="preserve"
+              aria-pressed="false">Preserve key</button
+            >
+          </div>
+        </fieldset>
+      </div>
+      <p class="set-automation" hidden></p>
+      <div class="set-track-tools">
+        <a
+          class="button set-edit-link"
+          target="_blank"
+          rel="noopener noreferrer">Open track editor</a
+        ><button class="button set-details" type="button"
+          >Load artwork and title</button
+        >
+      </div>
+      <div class="set-overlap">
+        <NumberField
+          id="set-track-overlap"
+          label="Crossfade into next track"
+          value={5}
+          min={0}
+          max={10}
+          step={0.5}
+          unit="s"
+          visibleLabel
+        />
+      </div>
+    </li>
+  </template>
+</Page>
+<script src="../scripts/set-editor.ts"></script>

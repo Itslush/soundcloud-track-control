@@ -253,8 +253,12 @@ export function createTempoEditor(api) {
       : displayedDuration();
   }
 
-  function shareLink(text) {
-    if (!api.copyLinks || typeof text !== 'string' || text.length > 8000)
+  function shareLink(text, force = false) {
+    if (
+      (!api.copyLinks && !force) ||
+      typeof text !== 'string' ||
+      text.length > 8000
+    )
       return text;
     try {
       const url = new URL(text);

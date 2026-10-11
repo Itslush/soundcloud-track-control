@@ -5,13 +5,133 @@ import TimelineDemo from '../components/TimelineDemo.astro';
 import Capture from '../components/Capture.astro';
 import CaptureViewer from '../components/CaptureViewer.astro';
 import { installUrl, route, release } from '../lib/release';
+
+const features = [
+  {
+    id: 'player',
+    title: 'Adjust speed and semitones',
+    text: 'Type a speed from 0.25× to 4×, or use the arrows and slider. Shift pitch separately in fractional semitones. Natural lets pitch follow speed; Preserve key keeps it steady while speed changes.',
+    images: ['player'],
+    alt: 'Current player controls at 0.9× with a -3 semitone shift.',
+    variant: 'capture-player',
+  },
+  {
+    id: 'styles',
+    title: 'Use a slider, dial or vertical fader',
+    text: 'Choose a control on first install, then change it in Appearance. The dial and fader have scale markings, keyboard control and a reset to 1×.',
+    images: ['dial', 'vertical'],
+    alt: 'The current marked tempo control with a separate semitone field.',
+    variant: 'capture-controls',
+  },
+  {
+    id: 'tempo',
+    title: 'Draw speed changes over time',
+    text: 'Add points, drag them into place and set how long each transition takes. Choose an instant change or a gradual curve. Zoom into a fade, or set your own visible speed range.',
+    images: ['tempo'],
+    alt: 'The real timeline editor with a three-point speed curve, fades and editable graph bounds.',
+  },
+  {
+    id: 'pitch',
+    title: 'Draw pitch changes too',
+    text: 'Switch to the Pitch lane to add semitone changes over time. Its points have their own timing and fades. Both lanes stay together when you save or share a track.',
+    images: ['pitch'],
+    alt: 'The Pitch lane of the same editor, with fractional semitone values and automation points.',
+  },
+  {
+    id: 'saved',
+    title: 'Keep a setup for each track',
+    text: 'Remember a speed, pitch shift or timeline. Saved settings apply when you return to the track. Find a saved track, turn its settings off, edit them or remove them with undo.',
+    images: ['saved'],
+    alt: 'The searchable saved-track library with speed and timeline settings for Drown.',
+  },
+  {
+    id: 'shared',
+    title: 'Share it without making someone install',
+    text: 'A shared link opens the website player with both timelines and the pitch settings intact. The recipient can listen there without the plugin, compare with the original, or install to use the setup on SoundCloud.',
+    images: ['shared'],
+    alt: 'The shared-track website player with the received tempo and pitch timeline.',
+  },
+  {
+    id: 'set',
+    title: 'Join tracks into one shared set',
+    text: 'Add 2 to 10 public tracks, choose their order and set a crossfade at each join. Each track keeps its own speed and pitch settings, including imported timelines. A playable copy fades the artwork with the audio and shows track names and creators. The whole set must fit within 15 minutes of original audio and 30 minutes after adjustment.',
+    images: ['set'],
+    alt: 'Two real public tracks in the set editor with separate tempo, semitone and crossfade controls.',
+  },
+  {
+    id: 'discord',
+    title: 'Make a playable Discord link',
+    text: 'Publish an audio copy with the shared adjustments applied. Its preview shows the tempo and semitone settings. Copy a neatly labelled link for Discord; the public copy lasts seven days. Only publish audio you have permission to share.',
+    images: ['discord'],
+    alt: 'The opt-in Discord sharing controls and public-copy expiry notice.',
+  },
+  {
+    id: 'appearance',
+    title: 'Choose the appearance',
+    text: 'The website has Light, Charcoal and OLED themes. On SoundCloud, keep its own theme or use Charcoal or OLED. Turn the drifting stars on or off, adjust their speed in the plugin, and hide the player’s semitone controls without resetting the shift.',
+    images: ['appearance'],
+    alt: 'Appearance settings with control style, semitone visibility, theme and star-motion controls.',
+  },
+];
+const technical = [
+  {
+    id: 'increments',
+    title: 'Tempo increments',
+    overview: 'Set how much one arrow press changes speed.',
+    text: 'The default is 0.025×. Choose an increment from 0.001× to 1× for player and editor stepping. Typing and pointer dragging can still make finer adjustments.',
+    alt: 'The custom control-style choice and editable default tempo increment.',
+  },
+  {
+    id: 'semitones',
+    title: 'Semitone bounds and increments',
+    overview: 'Choose a pitch range and arrow step.',
+    text: 'Set your minimum, maximum and default increment within -12 to +12 semitones. The initial step is 0.5 st. Direct typing supports finer fractional values.',
+    alt: 'Semitone customization with separate minimum, maximum and default increment fields.',
+  },
+  {
+    id: 'crossfade',
+    title: 'Crossfade',
+    overview: 'Overlap compatible queued tracks for 1–10 seconds.',
+    text: 'The engine prepares the outgoing tail and next track’s opening before starting the overlap. It needs an identified, supported stream and a ready queue item. Unsupported streams or incoming tempo timelines play normally; status and local diagnostics explain why.',
+    alt: 'Crossfade controls, overlap duration and the diagnostics disclosure.',
+  },
+  {
+    id: 'output',
+    title: 'Output gain',
+    overview: 'Reduce the level or boost it above 0 dB.',
+    text: 'Use the dB slider or type a value. Typed boosts have no product ceiling, but must be finite and supported by the audio engine. Positive gain can clip and become very loud. Start low; SoundCloud’s own volume and mute still apply.',
+    alt: 'Output level field and styled gain slider beside the clipping warning.',
+  },
+  {
+    id: 'backup',
+    title: 'Backups',
+    overview: 'Move saved settings between browsers with a JSON file.',
+    text: 'Export saved tracks, timelines and preferences. Import shows a preview before you confirm a replacement. Settings are stored in your browser, not a cloud account.',
+    alt: 'Export backup and Import backup controls in the settings panel.',
+  },
+  {
+    id: 'shortcuts',
+    title: 'Keyboard shortcuts',
+    overview: 'Step, reset and edit without dragging.',
+    text: 'Use the player’s arrow controls or keyboard shortcuts to change speed and reset to 1×. Timeline points can be selected and adjusted by keyboard as well.',
+    alt: 'The player shortcut reference in the settings panel.',
+  },
+  {
+    id: 'local',
+    title: 'Your own audio',
+    overview: 'Preview a SoundCloud link or a local audio file.',
+    text: 'The website preview can load another public SoundCloud track or an audio file from your device. Local files stay in the browser. Shared links reference tracks and adjustments, not your local file.',
+    alt: 'The website preview’s SoundCloud-link loader and local audio-file control.',
+  },
+];
 ---
 
 <Page>
   <section class="hero shell" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <h1 id="hero-title">Change the speed<br />{' '}of a SoundCloud track.</h1><p>
-        Save a speed for each track, or draw a timeline that changes it as you listen.
+      <h1 id="hero-title">Change speed and pitch<br />on SoundCloud.</h1><p>
+        Save a setup for each track, draw changes over time, and share the
+        adjusted version.
       </p><div class="hero-actions">
         <a class="button primary" href={installUrl}
           ><Icon name="download" />Install userscript</a
@@ -23,68 +143,91 @@ import { installUrl, route, release } from '../lib/release';
     <TimelineDemo />
   </section>
   <section class="product-proof shell" aria-labelledby="proof-title">
-    <article class="proof-row proof-player">
-      <div class="proof-copy">
-        <h2 id="proof-title">Change speed in the player</h2>
-        <p>Set a speed. Tap the bookmark to remember it for that track.</p>
-      </div>
-      <Capture
-        image="player-controls.png"
-        title="Tempo controls in SoundCloud"
-        variant="capture-player"
-        alt="SoundCloud player at 0.9× speed, with adjustment arrows, tempo slider, saved bookmark and settings."
-      />
-    </article>
-    <article class="proof-row">
-      <div class="proof-copy">
-        <h2>Set changes over time</h2>
-        <p>
-          Start at 1×, slow to 0.75×, then ease back to 0.90×. Set the fade
-          duration for each change.
-        </p>
-      </div>
-      <Capture
-        image="timeline-curve.png"
-        mobile="timeline-detail.png"
-        title="Saved tempo timeline"
-        variant="capture-timeline"
-        alt="A saved tempo curve from 1× to 0.75× and back to 0.9×, joined by gradual fades."
-      />
-    </article>
-    <article class="proof-row">
-      <div class="proof-copy">
-        <h2>Keep a speed for each track</h2>
-        <p>Saved speeds apply when you return to a track. Change or remove them in settings.</p>
-      </div>
-      <Capture
-        image="saved-tracks.png"
-        mobile="saved-tracks-mobile.png"
-        title="Saved track tempos"
-        variant="capture-memory"
-        alt="One track with a saved 0.9× speed and tempo timeline in the settings panel."
-      />
-    </article>
-    <article class="proof-row">
-      <div class="proof-copy">
-        <h2>Share a timeline</h2>
-        <p>
-          Copy a link with your tempo and pitch changes. Whoever opens it can
-          preview the settings, apply them once or save the timeline.
-        </p>
-        <p class="proof-detail">
-          Both listeners need Tempo Control. <a href={route('guide/#sharing')}
-            >How sharing works</a
+    {
+      features.map((feature, index) => (
+        <article class="proof-row" id={`feature-${feature.id}`}>
+          <div class="proof-copy">
+            <h2 id={index === 0 ? 'proof-title' : undefined}>
+              {feature.title}
+            </h2>
+            <p>{feature.text}</p>
+            {feature.id === 'shared' && (
+              <a class="text-link" href={route('guide/#sharing')}>
+                How sharing works
+              </a>
+            )}
+            {feature.id === 'set' && (
+              <a class="text-link" href={route('set/')}>
+                Build a set
+              </a>
+            )}
+          </div>
+          <div
+            class:list={[
+              'proof-images',
+              { 'proof-control-styles': feature.images.length > 1 },
+            ]}
           >
-        </p>
-      </div>
-      <Capture
-        image="share-actions.png"
-        mobile="share-actions-mobile.png"
-        title="Receiving a shared timeline"
-        variant="capture-sharing"
-        alt="The received-link preview with enabled Apply once and Save timeline buttons."
-      />
-    </article>
+            {feature.images.map((image) => (
+              <Capture
+                image={`feature-${image}-charcoal.png`}
+                mobile={`feature-${image}-charcoal-mobile.png`}
+                themed
+                title={
+                  feature.images.length > 1
+                    ? `${image === 'dial' ? 'Dial' : 'Vertical fader'} tempo control`
+                    : feature.title
+                }
+                variant={feature.variant}
+                alt={feature.alt}
+              />
+            ))}
+          </div>
+        </article>
+      ))
+    }
+  </section>
+  <section class="feature-information shell" aria-labelledby="details-title">
+    <h2 id="details-title">More details</h2>
+    <dl class="feature-overview">
+      {
+        technical.map((feature) => (
+          <div>
+            <>
+              <dt>{feature.title}</dt>
+              <dd>{feature.overview}</dd>
+            </>
+          </div>
+        ))
+      }
+    </dl>
+    <details class="feature-details">
+      <summary
+        >View controls and technical details<Icon
+          name="chevron"
+          size={18}
+        /></summary
+      >
+      {
+        technical.map((feature) => (
+          <article class="proof-row" id={`feature-${feature.id}`}>
+            <div class="proof-copy">
+              <>
+                <h3>{feature.title}</h3>
+                <p>{feature.text}</p>
+              </>
+            </div>
+            <Capture
+              image={`feature-${feature.id}-charcoal.png`}
+              mobile={`feature-${feature.id}-charcoal-mobile.png`}
+              themed
+              title={feature.title}
+              alt={feature.alt}
+            />
+          </article>
+        ))
+      }
+    </details>
   </section>
   <section
     class="install-section shell"
@@ -92,7 +235,9 @@ import { installUrl, route, release } from '../lib/release';
     aria-labelledby="install-title"
   >
     <div>
-      <h2 id="install-title">Install Tempo Control</h2><a class="text-link" href={route('guide/')}
+      <h2 id="install-title">Install Tempo Control</h2><a
+        class="text-link"
+        href={route('guide/')}
         >Full setup guide<Icon name="arrow" size={20} /></a
       >
     </div>

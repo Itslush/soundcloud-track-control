@@ -17,6 +17,7 @@ export type Track = {
   stream: string;
   format: string;
   preview: boolean;
+  artwork?: string;
 };
 
 async function deadline<T>(promise: Promise<T>): Promise<T> {

@@ -3,7 +3,11 @@ import {
   pitchSettingsKey,
   validPitchSettings,
 } from './tempo-pitch-settings.js';
-import { readTempoIncrement, tempoIncrementKey, validTempoIncrement } from './tempo-increment.js';
+import {
+  readTempoIncrement,
+  tempoIncrementKey,
+  validTempoIncrement,
+} from './tempo-increment.js';
 import { enhanceTempoFields } from './tempo-fields.js';
 import { controlsTemplate } from './tempo-controls-template.js';
 import * as audioModules from './audio/index.mjs';
@@ -822,7 +826,8 @@ import { showReleaseNotice } from './tempo-updates.js';
     get('#tempo-increment').addEventListener('change', (event) => {
       const increment = Number(event.target.value);
       if (!validTempoIncrement(increment)) {
-        ui.settingsStatus.textContent = 'Choose a tempo increment from 0.001 to 1.';
+        ui.settingsStatus.textContent =
+          'Choose a tempo increment from 0.001 to 1.';
       } else {
         try {
           localStorage.setItem(tempoIncrementKey, String(increment));
@@ -896,7 +901,8 @@ import { showReleaseNotice } from './tempo-updates.js';
       });
     const stepTempo = (event) => {
       if (event.altKey || event.ctrlKey || event.metaKey) return;
-      const limit = event.currentTarget === ui.slider ? Number(ui.slider.max) : MAX;
+      const limit =
+        event.currentTarget === ui.slider ? Number(ui.slider.max) : MAX;
       const current = Math.min(rate, limit);
       const changes = {
         ArrowUp: readTempoIncrement(),
@@ -908,13 +914,16 @@ import { showReleaseNotice } from './tempo-updates.js';
       };
       if (event.key === 'Home' || event.key === 'End' || event.key in changes) {
         event.preventDefault();
-        setRate(Math.min(limit,
-          event.key === 'Home'
-            ? MIN
-            : event.key === 'End'
-              ? limit
-              : current + changes[event.key] * (event.shiftKey ? 0.2 : 1),
-        ));
+        setRate(
+          Math.min(
+            limit,
+            event.key === 'Home'
+              ? MIN
+              : event.key === 'End'
+                ? limit
+                : current + changes[event.key] * (event.shiftKey ? 0.2 : 1),
+          ),
+        );
       }
     };
     ui.dial.addEventListener('keydown', stepTempo);
@@ -1011,6 +1020,20 @@ import { showReleaseNotice } from './tempo-updates.js';
       }
     });
     get('.open-editor').addEventListener('click', () => timeline.open());
+    if (WEBSITE) {
+      const buildSet = document.createElement('button');
+      buildSet.type = 'button';
+      buildSet.className = 'build-set';
+      buildSet.textContent = 'Build a set';
+      buildSet.addEventListener('click', () => {
+        const original = trackKey ? 'https://soundcloud.com' + trackKey : '';
+        const shared = timeline.shareLink(original, true);
+        const destination = new URL('set/', WEBSITE);
+        if (shared !== original) destination.hash = new URL(shared).hash;
+        window.open(destination.href, '_blank', 'noopener,noreferrer');
+      });
+      get('.settings-actions').prepend(buildSet);
+    }
     ui.pitchToggle.setAttribute('aria-describedby', 'pitch-mode-help');
     ui.pitchToggle.disabled = !pitchNames.some((name) => native[name]?.set);
     if (ui.pitchToggle.disabled) {
@@ -1125,7 +1148,9 @@ import { showReleaseNotice } from './tempo-updates.js';
           repeated = false;
           return;
         }
-        setRate(rate + direction * (event.shiftKey ? 0.01 : readTempoIncrement()));
+        setRate(
+          rate + direction * (event.shiftKey ? 0.01 : readTempoIncrement()),
+        );
       });
     }
     ui.slider.addEventListener('dblclick', () => setRate(1));
@@ -1741,9 +1766,16 @@ import { showReleaseNotice } from './tempo-updates.js';
     ui.wasmStatus.textContent = bufferedAudio?.label() || wasmAudio.label();
     const increment = readTempoIncrement();
     const incrementInput = ui.root.querySelector('#tempo-increment');
-    if (ui.root.activeElement !== incrementInput) incrementInput.value = String(increment);
-    ui.stepUp.setAttribute('aria-label', `Increase speed by ${increment}×; Shift for 0.01×`);
-    ui.stepDown.setAttribute('aria-label', `Decrease speed by ${increment}×; Shift for 0.01×`);
+    if (ui.root.activeElement !== incrementInput)
+      incrementInput.value = String(increment);
+    ui.stepUp.setAttribute(
+      'aria-label',
+      `Increase speed by ${increment}×; Shift for 0.01×`,
+    );
+    ui.stepDown.setAttribute(
+      'aria-label',
+      `Decrease speed by ${increment}×; Shift for 0.01×`,
+    );
     ui.root.querySelector('#crossfade').checked = crossfade?.enabled() ?? false;
     ui.root.querySelector('#crossfade-seconds').value = String(
       crossfade?.seconds() ?? 5,

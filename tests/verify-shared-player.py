@@ -59,7 +59,9 @@ try:
           };
         })();''')
         response = {'title': 'Shared song', 'artist': 'Listener', 'permalink': 'https://soundcloud.com' + profile['track'],
-                    'duration': 24, 'stream': base + 'tone.wav', 'format': 'progressive', 'preview': False}
+                    'duration': 24, 'stream': base + 'tone.wav', 'format': 'progressive', 'preview': False,
+                    'artwork': 'https://i1.sndcdn.com/fixture.png'}
+        page.route('https://i1.sndcdn.com/fixture.png', lambda route: route.fulfill(path=str(ROOT / 'site/public/screenshots/feature-player-charcoal.png'), content_type='image/png'))
 
         def resolve(route):
             requests.append(parse_qs(urlparse(route.request.url).query)['url'][0])
@@ -81,10 +83,17 @@ try:
         expect(page.locator('#preview-loader')).to_be_hidden()
         assert requests == [], requests
         assert page.locator('audio').evaluate('el=>el.paused && !el.currentSrc')
+        expect(page.locator('#preview-artwork')).to_be_hidden()
+        assert page.locator('#preview-artwork').get_attribute('src') is None
         before_storage = page.evaluate('JSON.stringify(localStorage)')
         page.locator('#preview-play').click()
         page.wait_for_function('Math.abs(frequency() - 440 * 2 ** (-5/12)) < 4')
         assert requests == ['https://soundcloud.com' + profile['track']], requests
+        expect(page.locator('#preview-artwork')).to_be_visible()
+        assert page.locator('#preview-artwork').evaluate('image=>image.complete && image.naturalWidth > 0')
+        page.locator('#preview-artwork').dispatch_event('error')
+        expect(page.locator('#preview-artwork')).to_be_hidden()
+        assert page.locator('.timeline-demo').get_attribute('data-playback') != 'error'
         assert page.locator('audio').evaluate('el=>el.playbackRate') == .75
         page.locator('#preview-compare').click()
         page.wait_for_function('Math.abs(frequency() - 440) < 4')

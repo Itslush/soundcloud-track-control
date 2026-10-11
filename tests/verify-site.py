@@ -35,7 +35,11 @@ with sync_playwright() as p:
                     continue
                 target = href.split('#')[0]
                 assert context.request.get(target).ok, target
+            if not route:
+                page.locator('.feature-details summary').click()
             for image in page.locator('img[src]').all():
+                if image.get_attribute('hidden') is not None:
+                    continue
                 image.scroll_into_view_if_needed()
                 expect(image).to_be_visible()
                 image.evaluate('image=>image.decode()')

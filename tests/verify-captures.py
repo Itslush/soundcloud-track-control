@@ -13,8 +13,6 @@ assert evidence['deviceScaleFactor'] == 3
 assert evidence['muted'] is True
 assert evidence['status'] == 'CAPTURED'
 assert evidence['track'] == 'https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix'
-artifact_verification = subprocess.run([os.environ.get('NODE', 'node'), str(ROOT / 'tests/capture-artifact.cjs')], check=True, capture_output=True, text=True, timeout=30)
-print(artifact_verification.stdout.strip())
 assert evidence['contextClosed'] and evidence['recipientContextClosed'] and evidence['browserClosed']
 for playback in [evidence['audio'], evidence['recipientAudio']]:
     assert playback['media'] and playback['contexts']
@@ -28,6 +26,22 @@ for capture in evidence['screenshots']:
     image = (ROOT / 'site/public/screenshots' / capture['file']).read_bytes()
     assert hashlib.sha256(image).hexdigest() == capture['sha256'], capture['file']
 
+features = json.loads((ROOT / 'docs/feature-capture-evidence.json').read_text(encoding='utf-8'))
+assert features['status'] == 'CAPTURED'
+assert features['artifactSha256'] == hashlib.sha256((ROOT / 'dist/soundcloud-tempo-control.user.js').read_bytes()).hexdigest()
+assert not features['pageErrors']
+assert features['audio']['media'] and all(item['muted'] and item['volume'] == 0 and item['paused'] for item in features['audio']['media'])
+assert all(item['sinkGain'] == 0 for item in features['audio']['contexts'])
+assert features['sharedAudio']['media'] and all(item['muted'] and item['volume'] == 0 and item['paused'] for item in features['sharedAudio']['media'])
+assert all(item['sinkGain'] == 0 for item in features['sharedAudio']['contexts'])
+for capture in features['screenshots']:
+    image = (ROOT / 'site/public/screenshots' / capture['file']).read_bytes()
+    assert hashlib.sha256(image).hexdigest() == capture['sha256'], capture['file']
+    assert capture['width'] == round(capture['cssWidth'] * features['deviceScaleFactor'])
+    assert capture['height'] == round(capture['cssHeight'] * features['deviceScaleFactor'])
+count = len(features['screenshots']) // 6
+assert len(features['screenshots']) == count * 6
+
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch(**browser_options(), headless=True, args=['--mute-audio'])
     context = browser.new_context(device_scale_factor=2)
@@ -39,7 +53,9 @@ with sync_playwright() as playwright:
         page.set_viewport_size({'width': width, 'height': 950})
         page.goto(BASE, wait_until='networkidle')
         links = page.locator('a[data-capture]')
-        expect(links).to_have_count(4)
+        expect(links).to_have_count(count)
+        expect(page.locator('.feature-details')).not_to_have_attribute('open', '')
+        page.locator('.feature-details summary').click()
         expect(page.locator('.product-capture figcaption')).to_have_count(0)
         expect(page.locator('#capture-description, .viewer-hint')).to_have_count(0)
         assert page.locator('.product-proof').bounding_box()['y'] < page.locator('#install').bounding_box()['y']
@@ -50,9 +66,11 @@ with sync_playwright() as playwright:
             source = image.evaluate('image => image.currentSrc')
             assert image.get_attribute('width') and image.get_attribute('height')
             assert image.get_attribute('alt')
+            if link.locator('..').evaluate('figure => figure.classList.contains("capture-controls")'):
+                assert image.bounding_box()['width'] <= float(link.get_attribute('data-native-width')) + 1
             assert link.get_attribute('data-description') is None
-            if width <= 600 and 'player-controls' not in source:
-                assert 'mobile.png' in source or 'timeline-detail.png' in source, source
+            if width <= 600:
+                assert 'mobile.png' in source, source
             link.click()
             expect(page.locator('.capture-viewer')).to_be_visible()
             expect(page.locator('.viewer-image')).to_be_visible()
@@ -84,13 +102,23 @@ with sync_playwright() as playwright:
         assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), width
         measurements.append({'width': width, 'images': page.locator('.product-capture img').evaluate_all('images => images.map(image => ({source: image.currentSrc.split("/").pop(), width: image.getBoundingClientRect().width, height: image.getBoundingClientRect().height}))')})
     page.goto(BASE)
-    page.route('**/share-actions.png', lambda route: route.abort())
+    for theme in ['light', 'oled', 'charcoal']:
+        page.locator('html').evaluate('(root, theme) => root.dataset.theme = theme', theme)
+        page.locator('.feature-details').evaluate('details => details.open = true')
+        for index, link in enumerate(page.locator('a[data-capture]').all()):
+            image = link.locator('img')
+            image.scroll_into_view_if_needed()
+            page.wait_for_function('(args) => {const image=document.querySelectorAll("a[data-capture] img")[args.index];return image.complete && image.currentSrc.includes(args.theme)}', arg={'index':index, 'theme':theme})
+            assert f'-{theme}.png' in link.get_attribute('href')
+    failed_image = page.locator('a[data-capture]').last.get_attribute('href')
+    failure_pattern = '**/' + failed_image.split('/')[-1]
+    page.route(failure_pattern, lambda route: route.abort())
     page.locator('a[data-capture]').last.click()
     expect(page.locator('.viewer-error')).to_be_visible()
     expect(page.locator('.viewer-fit')).to_be_disabled()
     expect(page.locator('.viewer-in')).to_be_disabled()
-    expect(page.locator('.viewer-original')).to_have_attribute('href', BASE + 'screenshots/share-actions.png')
-    page.unroute('**/share-actions.png')
+    expect(page.locator('.viewer-original')).to_have_attribute('href', urljoin(BASE, failed_image))
+    page.unroute(failure_pattern)
     page.locator('.viewer-retry').click()
     expect(page.locator('.viewer-image')).to_be_visible()
     page.locator('.viewer-close').click()
@@ -98,11 +126,11 @@ with sync_playwright() as playwright:
     no_js = browser.new_context(java_script_enabled=False)
     fallback = no_js.new_page()
     fallback.goto(BASE)
-    expect(fallback.locator('a[data-capture]')).to_have_count(4)
+    expect(fallback.locator('a[data-capture]')).to_have_count(count)
     for link in fallback.locator('a[data-capture]').all():
         assert no_js.request.get(urljoin(BASE, link.get_attribute('href'))).ok
     assert not errors, errors
     browser.close()
     server.shutdown()
     (ROOT / 'test-results/capture-verification.json').write_text(json.dumps(measurements, indent=2) + '\n', encoding='utf-8')
-    print('Passed: 4 genuine capture views at 7 widths, responsive sources at DPR 2, focal subject visibility, focus restoration, Escape, zoom, loading failure/retry, no-JS originals and muted provenance.')
+    print(f'Passed: {count} focused capture views at 7 widths, all 3 theme sources, focus restoration, Escape, zoom, loading failure/retry, no-JS originals and muted provenance.')
