@@ -116,10 +116,19 @@ export async function* artworkFrames(
         ? Math.max(0, Math.min(1, (time - timings[index + 1].start) / join))
         : 0;
     if (progress > 0) {
-      for (let byte = 0; byte < size; byte++)
-        blended[byte] = Math.round(
-          current[byte] * (1 - progress) + next[byte] * progress,
-        );
+      const edge = 1.2 - 1.4 * progress;
+      for (let x = 0; x < 640; x++) {
+        const incoming = Math.max(0, Math.min(1, (x / 639 - edge + 0.1) / 0.2));
+        for (let y = 0; y < 640; y++) {
+          const offset = (y * 640 + x) * 3;
+          for (let channel = 0; channel < 3; channel++) {
+            const byte = offset + channel;
+            blended[byte] = Math.round(
+              current[byte] * (1 - incoming) + next[byte] * incoming,
+            );
+          }
+        }
+      }
       if (footer) footer.copy(blended, 476 * 640 * 3, 476 * 640 * 3);
       yield Buffer.from(blended);
     } else yield current;

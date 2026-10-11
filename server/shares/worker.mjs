@@ -8,6 +8,7 @@ import { createSoundCloud } from '../soundcloud.mjs';
 import { renderPcm, SAMPLE_RATE, MAX_SOURCE_SECONDS } from './audio.mjs';
 import { downloadMedia } from './download.mjs';
 import { renderSet } from './set-worker.mjs';
+import { formatPitchNotice } from '../../src/tempo-pitch-notice.js';
 
 const ffmpeg = process.env.FFMPEG_PATH || 'ffmpeg';
 export function runFfmpeg(args, input) {
@@ -134,6 +135,27 @@ async function render(directory) {
       file('poster.jpg'),
     ]);
   }
+  const notice = formatPitchNotice(
+    profile.pitchPoints?.map((point) => point.k) || profile.keyShift || 0,
+  );
+  const noticeFilter = [];
+  if (notice) {
+    await writeFile(file('pitch-notice.txt'), notice);
+    const filterPath = (filename) =>
+      filename
+        .replaceAll('\\', '/')
+        .replaceAll(':', '\\:')
+        .replaceAll("'", "\\'");
+    const font =
+      process.env.SHARE_FONT_PATH ||
+      (process.platform === 'win32'
+        ? 'C:/Windows/Fonts/arial.ttf'
+        : '/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf');
+    noticeFilter.push(
+      '-vf',
+      `drawbox=x=0:y=584:w=640:h=56:color=black@0.85:t=fill,drawtext=fontfile='${filterPath(font)}':textfile='${filterPath(file('pitch-notice.txt'))}':expansion=none:fontcolor=white:fontsize=20:x=24:y=600`,
+    );
+  }
   await runFfmpeg([
     '-loop',
     '1',
@@ -153,6 +175,7 @@ async function render(directory) {
     '0:v:0',
     '-map',
     '1:a:0',
+    ...noticeFilter,
     '-c:v',
     'libx264',
     '-threads',

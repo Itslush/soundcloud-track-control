@@ -7,7 +7,7 @@ import wave
 from urllib.parse import parse_qs, urlparse
 
 from playwright.sync_api import sync_playwright, expect
-from userscript_fixture import ROOT, browser_options, serve_site
+from userscript_fixture import ROOT, browser_options, serve_site, text_contrast
 
 
 def code(profile):
@@ -90,14 +90,17 @@ try:
         page.wait_for_function('Math.abs(frequency() - 440 * 2 ** (-5/12)) < 4')
         assert requests == ['https://soundcloud.com' + profile['track']], requests
         expect(page.locator('#preview-artwork')).to_be_visible()
+        expect(page.locator('#preview-pitch-notice')).to_have_text('Pitch shifted −5 st')
         assert page.locator('#preview-artwork').evaluate('image=>image.complete && image.naturalWidth > 0')
         page.locator('#preview-artwork').dispatch_event('error')
         expect(page.locator('#preview-artwork')).to_be_hidden()
         assert page.locator('.timeline-demo').get_attribute('data-playback') != 'error'
         assert page.locator('audio').evaluate('el=>el.playbackRate') == .75
         page.locator('#preview-compare').click()
+        expect(page.locator('#preview-pitch-notice')).to_be_hidden()
         page.wait_for_function('Math.abs(frequency() - 440) < 4')
         page.locator('#preview-compare').click()
+        expect(page.locator('#preview-pitch-notice')).to_have_text('Pitch shifted −5 st')
         page.wait_for_function('Math.abs(frequency() - 440 * 2 ** (-5/12)) < 4')
         page.locator('#preview-play').click()
         page.locator('#preview-seek').fill('8')
@@ -107,16 +110,22 @@ try:
         page.locator('#preview-seek').dispatch_event('input')
         page.locator('#preview-play').click()
         page.wait_for_function('Math.abs(frequency() - 440 * 2 ** (3/12)) < 4')
+        expect(page.locator('#preview-pitch-notice')).to_have_text('Pitch shifted +3 st')
         page.locator('#preview-play').click()
         page.locator('#demo-copy').click()
         expect(page.locator('#demo-status')).to_have_text('Tempo link copied.')
         copied = page.evaluate('navigator.clipboard.readText()').split('#sct=SCT1.')[1]
         assert json.loads(base64.urlsafe_b64decode(copied + '=' * (-len(copied) % 4))) == profile
         assert page.evaluate('JSON.stringify(localStorage)') == before_storage
-        for width in [320, 390, 768, 1440]:
-            page.set_viewport_size({'width': width, 'height': 1000})
-            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), width
-            page.screenshot(path=str(ROOT / f'test-results/shared-player-{width}.png'), full_page=True)
+        captures = ROOT / '.impeccable/review/artwork'
+        captures.mkdir(parents=True, exist_ok=True)
+        for theme in ['charcoal', 'light', 'oled']:
+            page.locator('html').evaluate('(html, theme)=>html.dataset.theme=theme', theme)
+            for width in [320, 390, 768, 1440]:
+                page.set_viewport_size({'width': width, 'height': 1000})
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, theme)
+                assert text_contrast(page.locator('#preview-pitch-notice')) >= 4.5
+                page.locator('.timeline-demo').screenshot(path=str(captures / f'shared-{width}-{theme}.png'))
 
         fixed = {**profile, 'points': [{'t': 0, 'r': .9, 'd': 0, 'c': 'instant'}], 'pitch': 'natural'}
         del fixed['pitchPoints']

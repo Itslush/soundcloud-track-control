@@ -248,7 +248,7 @@ test('set store persists canonical profiles and uses the existing single-worker 
   }
 });
 
-test('artwork fades linearly on the audio join clock and retains only current/next posters', async () => {
+test('artwork keeps outgoing left and incoming right on the audio join clock', async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'tempo-set-art-'));
   try {
     const files = [path.join(dir, 'first.rgb'), path.join(dir, 'second.rgb')];
@@ -259,7 +259,11 @@ test('artwork fades linearly on the audio join clock and retains only current/ne
       2,
     ])) {
       if (count === 4) assert.equal(frame[0], 0);
-      if (count === 12) assert.equal(frame[0], 100);
+      if (count === 12) {
+        assert.equal(frame[0], 0);
+        assert.equal(frame[639 * 3], 200);
+        assert.ok(Math.abs(frame[320 * 3] - 100) < 2);
+      }
       if (count === 20) assert.equal(frame[0], 200);
       count++;
     }
@@ -339,6 +343,10 @@ test(
       const result = JSON.parse(
         await readFile(path.join(dir, 'result.json'), 'utf8'),
       );
+      assert.equal(
+        await readFile(path.join(dir, 'notice-0.txt'), 'utf8'),
+        'Pitch shifted −4.5 st',
+      );
       assert.equal(result.tracks.length, 2);
       assert.equal(result.tracks[0].artist, 'First creator');
       assert.equal(result.tracks[1].title, 'Second fixture track');
@@ -410,8 +418,9 @@ test(
       ]);
       const mid = await readFile(path.join(dir, 'mid.rgb'));
       const center = (100 * 640 + 100) * 3;
-      assert.ok(mid[center] > 100 && mid[center + 2] > 100);
-      assert.ok(Math.abs(mid[center] - mid[center + 2]) < 15);
+      const right = (100 * 640 + 540) * 3;
+      assert.ok(mid[center] > 200 && mid[center + 2] < 30);
+      assert.ok(mid[right] < 30 && mid[right + 2] > 200);
     } finally {
       globalThis.fetch = fetcher;
       await rm(dir, { recursive: true, force: true });

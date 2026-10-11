@@ -3,6 +3,7 @@ import os
 import json
 import io
 import wave
+import struct
 from urllib.parse import urljoin, urlparse
 from playwright.sync_api import sync_playwright, expect
 from userscript_fixture import ROOT, browser_options, choose_option, serve_site, text_contrast
@@ -28,6 +29,16 @@ with sync_playwright() as p:
         for route in ['', 'updates/', 'guide/', 'privacy/']:
             response = page.goto(BASE+route, wait_until='networkidle')
             assert response.ok
+            assert page.locator('meta[property="og:title"]').get_attribute('content') == page.title()
+            image_url = page.locator('meta[property="og:image"]').get_attribute('content')
+            assert image_url == 'https://itslush.github.io/soundcloud-tempo-control/share-icon.png'
+            assert page.locator('meta[property="og:image:type"]').get_attribute('content') == 'image/png'
+            assert page.locator('meta[name="twitter:card"]').get_attribute('content') == 'summary'
+            icon = context.request.get(BASE + 'share-icon.png')
+            assert icon.ok and icon.headers['content-type'].startswith('image/png')
+            pixels = icon.body()
+            assert pixels[:8] == b'\x89PNG\r\n\x1a\n'
+            assert struct.unpack('>II', pixels[16:24]) == (512, 512)
             assert page.locator('h1').count() == 1
             assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), (width, route)
             for href in page.locator('a[href]').evaluate_all('(links)=>links.map(a=>a.href)'):

@@ -7,7 +7,7 @@ const { createCrossfade } = vm.runInNewContext(source + '\nfixtureModule;', {
 });
 const settle = () => new Promise(setImmediate);
 
-function fixture() {
+function fixture(onVisual) {
   const values = new Map();
   const audio = Object.assign(new EventTarget(), {
     currentTime: 20,
@@ -43,6 +43,7 @@ function fixture() {
   };
   let tick;
   const api = createCrossfade({
+    onVisual,
     readNextRate: () => state.nextRate,
     preloadNext: async () => {
       state.preloads++;
@@ -162,7 +163,8 @@ function fixture() {
 }
 
 test('crossfade is opt-in, overlaps once, then restores normal playback', async () => {
-  const f = fixture();
+  const visuals = [];
+  const f = fixture((value) => visuals.push(value));
   f.tick();
   assert.equal(f.state.reads, 0);
   f.api.set(true, 5);
@@ -178,6 +180,7 @@ test('crossfade is opt-in, overlaps once, then restores normal playback', async 
   assert.equal(f.state.clicks, 1);
   assert.equal(f.state.start.offset, 2);
   assert.equal(f.state.start.seconds, 5);
+  assert.equal(visuals.at(-1).progress, 0);
   f.audio.dispatchEvent(new Event('pause'));
   assert.equal(f.state.stops, 0);
   f.state.track = 'second';
@@ -197,6 +200,7 @@ test('crossfade is opt-in, overlaps once, then restores normal playback', async 
   );
   f.tick();
   assert.equal(f.state.clicks, 1);
+  assert.ok(Math.abs(visuals.at(-1).progress - 0.2) < 1e-12);
   f.context.currentTime = 5;
   f.audio.currentTime = 5;
   f.tick();
@@ -205,7 +209,25 @@ test('crossfade is opt-in, overlaps once, then restores normal playback', async 
   f.tick();
   assert.equal(f.state.stops, 1);
   assert.equal(f.state.releases, 1);
+  assert.equal(visuals.at(-1), null);
   f.api.dispose();
+});
+
+test('failed artwork cannot interrupt the audio overlap or cancellation', async () => {
+  const f = fixture(() => {
+    throw new Error('Detached artwork');
+  });
+  f.api.set(true, 5);
+  f.state.cached = 24;
+  f.tick();
+  await settle();
+  await f.opening();
+  f.audio.currentTime = 25;
+  f.tick();
+  assert.equal(f.state.clicks, 1);
+  assert.equal(f.api.diagnostics().stage, 'buffered-overlap');
+  f.api.cancel();
+  assert.equal(f.state.stops, 1);
 });
 
 test('pending identification waits for proof and cannot resume after cancellation', async () => {

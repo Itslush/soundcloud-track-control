@@ -31,7 +31,11 @@ const { shared = false } = Astro.props;
         hidden
         referrerpolicy="no-referrer"
       />
-      <span id="preview-title">{shared ? '' : demoTrack.title}</span>
+      <div>
+        <span id="preview-title">{shared ? '' : demoTrack.title}</span>
+        <span id="preview-pitch-notice" class="preview-pitch-notice" hidden
+        ></span>
+      </div>
     </div>
     <ApplePlaybackNotice />
     <div class="preview-transport">

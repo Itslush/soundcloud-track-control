@@ -18,6 +18,7 @@ import { createOutputLevel } from './tempo-output.js';
 import { createWasmAudio } from './tempo-wasm.js';
 import { createBufferedPlayback } from './tempo-buffered.js';
 import { createCrossfade } from './tempo-crossfade.js';
+import { createTrackVisuals } from './tempo-track-visuals.js';
 import { createTempoEditor } from './tempo-editor.js';
 import { createTempoLibrary, createTempoStore } from './tempo-library.js';
 import { createTempoEmbeddedPages } from './tempo-embedded-pages.js';
@@ -47,6 +48,10 @@ import { showReleaseNotice } from './tempo-updates.js';
   let contextLink = null;
   let bufferedAudio = null;
   let crossfade = null;
+  const trackVisuals = createTrackVisuals({
+    document,
+    readTrack: () => currentTrackKey(),
+  });
   let badgeAnimations = [];
   let appearance = null;
   const MIN = 0.25;
@@ -306,6 +311,7 @@ import { showReleaseNotice } from './tempo-updates.js';
     if (
       trackKey &&
       next &&
+      crossfade?.diagnostics().stage !== 'buffered-overlap' &&
       !matchMedia('(prefers-reduced-motion: reduce)').matches
     ) {
       badgeAnimations = [
@@ -1286,6 +1292,38 @@ import { showReleaseNotice } from './tempo-updates.js';
         position: relative;
       }
 
+      .soundcloud-tempo-crossfade-artwork,
+      .soundcloud-tempo-crossfade-artwork > span {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-size: cover;
+        background-position: center;
+      }
+      .soundcloud-tempo-crossfade-artwork {
+        overflow: hidden;
+        z-index: 2;
+      }
+      .soundcloud-tempo-incoming-artwork {
+        mask-image: linear-gradient(to right, transparent var(--fade-start), #000 var(--fade-end));
+      }
+      .soundcloud-tempo-pitch-notice {
+        display: block;
+        font-size: 10px;
+        line-height: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+      .soundcloud-tempo-pitch-notice[hidden] { display: none; }
+      .soundcloud-tempo-footer .playbackSoundBadge__titleContextContainer:has(.soundcloud-tempo-pitch-notice:not([hidden])) {
+        height: auto;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .soundcloud-tempo-incoming-artwork {
+          mask-image: none;
+          opacity: var(--incoming-progress);
+        }
+      }
+
       .soundcloud-tempo-page-position {
         position: relative;
       }
@@ -1797,6 +1835,7 @@ import { showReleaseNotice } from './tempo-updates.js';
         : '';
     const text = formatRate(rate);
     const shift = timeline.keyShift() ?? keyShift;
+    trackVisuals.pitch(trackKey && !failure ? shift : 0);
     const pitch = 12 * Math.log2(rate) + shift;
     const pitchText = `${pitch > 0 ? '+' : ''}${pitch.toFixed(2)} st`;
     const description = preservesKey()
@@ -2050,6 +2089,7 @@ import { showReleaseNotice } from './tempo-updates.js';
         : null;
     },
     onState: render,
+    onVisual: trackVisuals.overlap,
   });
   crossfade.reload();
   document.addEventListener(

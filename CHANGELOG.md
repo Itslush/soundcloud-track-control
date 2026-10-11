@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1
+
+- Crossfades keep the current artwork on the left and blend in the next artwork from the right, following the audio overlap. Reduced-motion users get a simple opacity blend in the plugin.
+- The plugin and shared players show a pitch-change notice for nonzero semitone adjustments. Timeline changes update the live notice; rendered videos show the configured pitch range.
+- Website link previews include the existing orange Tempo Control icon.
+
 ## 1.2.0
 
 - Build a shared set from 2 to 10 public tracks, with separate tempo, pitch and crossfade settings. Existing shared links retain both automation lanes.

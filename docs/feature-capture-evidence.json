@@ -1,7 +1,7 @@
 {
-  "capturedAt": "2026-10-11T12:46:30.099676+00:00",
+  "capturedAt": "2026-10-11T13:38:39.709830+00:00",
   "capture": "Unedited screenshots of the exact built userscript on the public Drown track and the built website. Native light variants switch SoundCloud existing body theme classes in an isolated capture browser; the plugin does not add a Light theme. A test-only CORS relay loads real public metadata for the local shared player. No audio is audible. Website sharing captures are before publication, not fabricated render results.",
-  "artifactSha256": "e1e4d70b2ce4bf95d2e82272810e3d7bf61a4e5abb6b50ef0dfd2a33859a7115",
+  "artifactSha256": "8073ba0987218141bf501e1438c479fb8d24e086b42ab1118515edb4ac86e43b",
   "deviceScaleFactor": 2,
   "screenshots": [
     {
@@ -18,7 +18,7 @@
         "width": 428.0,
         "height": 44
       },
-      "sha256": "9334d2298883f5af825ee713d72b43c64b5835f5616bc02697259e6932235206"
+      "sha256": "bfc2772b433d9c7e400ecd83039ff74c0705faef0b175dcf2507f269ae738a36"
     },
     {
       "file": "feature-player-charcoal-mobile.png",
@@ -34,7 +34,7 @@
         "width": 428.0,
         "height": 44
       },
-      "sha256": "272f326022aa6eabfc2cf8dfe545195e848a39b32c6f3148bd66bc7989b29902"
+      "sha256": "0eb79a371f48881c4fc3b3dbc5cfe6c919739a6eb92a4b9bdbb5b81926df629f"
     },
     {
       "file": "feature-dial-charcoal.png",
@@ -50,7 +50,7 @@
         "width": 324,
         "height": 44
       },
-      "sha256": "f2452dbf4e7b52dc83b27712782ea900620794dd7847f6010c15dad3123c7522"
+      "sha256": "df14983a38c21a3b563c910ee3d4682ba0b5fc35fc6ec4d3f6f0fe12e451eb50"
     },
     {
       "file": "feature-dial-charcoal-mobile.png",
@@ -66,7 +66,7 @@
         "width": 324,
         "height": 44
       },
-      "sha256": "f2452dbf4e7b52dc83b27712782ea900620794dd7847f6010c15dad3123c7522"
+      "sha256": "df14983a38c21a3b563c910ee3d4682ba0b5fc35fc6ec4d3f6f0fe12e451eb50"
     },
     {
       "file": "feature-vertical-charcoal.png",
@@ -82,7 +82,7 @@
         "width": 108,
         "height": 246
       },
-      "sha256": "601671d0c5e34000f0d399b0ae897929c6f43f759f47e3bcc6806a73eee6c4ef"
+      "sha256": "b4b2bb55db463e3a12435488665ccb34be8e056f7a21b4ee1c4338e50ce256d8"
     },
     {
       "file": "feature-vertical-charcoal-mobile.png",
@@ -98,7 +98,7 @@
         "width": 108,
         "height": 246
       },
-      "sha256": "601671d0c5e34000f0d399b0ae897929c6f43f759f47e3bcc6806a73eee6c4ef"
+      "sha256": "b4b2bb55db463e3a12435488665ccb34be8e056f7a21b4ee1c4338e50ce256d8"
     },
     {
       "file": "feature-player-light.png",
@@ -114,7 +114,7 @@
         "width": 428.0,
         "height": 44
       },
-      "sha256": "8042116d4aba4b7236166fe7bc194e07c4ee70e9783ebec3f75c759b011ece25"
+      "sha256": "e6b531f9c7887c7bf86f2eac97a921b1d819d7273800c04d294630980836d7b8"
     },
     {
       "file": "feature-player-light-mobile.png",
@@ -130,7 +130,7 @@
         "width": 428.0,
         "height": 44
       },
-      "sha256": "8042116d4aba4b7236166fe7bc194e07c4ee70e9783ebec3f75c759b011ece25"
+      "sha256": "e6b531f9c7887c7bf86f2eac97a921b1d819d7273800c04d294630980836d7b8"
     },
     {
       "file": "feature-dial-light.png",
@@ -146,7 +146,7 @@
         "width": 324,
         "height": 44
       },
-      "sha256": "bd30a91a7aaa048ead476df809fac0505ea55901e3287df7df8fdb21853e975e"
+      "sha256": "e4793379ed358b96d2513376a3fd8fa0860279981931f8feb918b737da27e6a5"
     },
     {
       "file": "feature-dial-light-mobile.png",
@@ -162,7 +162,7 @@
         "width": 324,
         "height": 44
       },
-      "sha256": "bd30a91a7aaa048ead476df809fac0505ea55901e3287df7df8fdb21853e975e"
+      "sha256": "e4793379ed358b96d2513376a3fd8fa0860279981931f8feb918b737da27e6a5"
     },
     {
       "file": "feature-vertical-light.png",
@@ -178,7 +178,7 @@
         "width": 108,
         "height": 246
       },
-      "sha256": "55a23fae28f91822029f362f6a29da6f23bb7e053cf652d877ff0e0373d443fc"
+      "sha256": "5b6e1ce587931d2f0b2b871f0e97d70a850d97b250d63fd61cfb2565ed51f4da"
     },
     {
       "file": "feature-vertical-light-mobile.png",
@@ -194,7 +194,7 @@
         "width": 108,
         "height": 246
       },
-      "sha256": "55a23fae28f91822029f362f6a29da6f23bb7e053cf652d877ff0e0373d443fc"
+      "sha256": "5b6e1ce587931d2f0b2b871f0e97d70a850d97b250d63fd61cfb2565ed51f4da"
     },
     {
       "file": "feature-player-oled.png",
@@ -210,7 +210,7 @@
         "width": 428.0,
         "height": 44
       },
-      "sha256": "52b1d534f89aa80ecfdc0086eaa050dcdda200652a543d2830922eb50d710806"
+      "sha256": "224424c08b4d33cd18b6056d242c587a6f51af3561d9115d35f83dc3d1977dc0"
     },
     {
       "file": "feature-player-oled-mobile.png",
@@ -226,7 +226,7 @@
         "width": 428.0,
         "height": 44
       },
-      "sha256": "52b1d534f89aa80ecfdc0086eaa050dcdda200652a543d2830922eb50d710806"
+      "sha256": "224424c08b4d33cd18b6056d242c587a6f51af3561d9115d35f83dc3d1977dc0"
     },
     {
       "file": "feature-dial-oled.png",
@@ -242,7 +242,7 @@
         "width": 324,
         "height": 44
       },
-      "sha256": "7830c2fb709b78565ca397ba0a66f167bbc183880fe6ae096153179f39789099"
+      "sha256": "9919177065314668168b8ef723b91d05e30f95987cacf507eb74d46f8aebb180"
     },
     {
       "file": "feature-dial-oled-mobile.png",
@@ -258,7 +258,7 @@
         "width": 324,
         "height": 44
       },
-      "sha256": "7830c2fb709b78565ca397ba0a66f167bbc183880fe6ae096153179f39789099"
+      "sha256": "9919177065314668168b8ef723b91d05e30f95987cacf507eb74d46f8aebb180"
     },
     {
       "file": "feature-vertical-oled.png",
@@ -274,7 +274,7 @@
         "width": 108,
         "height": 246
       },
-      "sha256": "ab762b2d294f4a00238ccfcd31b573a6d30ed22b4716e1585d7cfaf1c067597f"
+      "sha256": "e176adfe7576404ba72c4a50f3d02a0b75c885ede3536e73ec793f51c70af5ae"
     },
     {
       "file": "feature-vertical-oled-mobile.png",
@@ -290,7 +290,7 @@
         "width": 108,
         "height": 246
       },
-      "sha256": "ab762b2d294f4a00238ccfcd31b573a6d30ed22b4716e1585d7cfaf1c067597f"
+      "sha256": "e176adfe7576404ba72c4a50f3d02a0b75c885ede3536e73ec793f51c70af5ae"
     },
     {
       "file": "feature-tempo-charcoal.png",
@@ -306,7 +306,7 @@
         "width": 698,
         "height": 336
       },
-      "sha256": "00a28a9ad99dddb0ab8bed02fed20b60c93fe1bf8bb15218053049bf575546ca"
+      "sha256": "ec372c0814d2248bbcccaecaa2d10afdddbb1800d3f65a3d1232ff05960ad55a"
     },
     {
       "file": "feature-tempo-charcoal-mobile.png",
@@ -322,7 +322,7 @@
         "width": 344,
         "height": 408
       },
-      "sha256": "66cc1d9c816211605bb9b959583c0bb587de487237f0c8d27227b25a197f45ba"
+      "sha256": "b6000783ade319817c243f07c5a9e28e5c7a35629fae85ac7e74b7ed77e92b73"
     },
     {
       "file": "feature-pitch-charcoal.png",
@@ -338,7 +338,7 @@
         "width": 698,
         "height": 380
       },
-      "sha256": "07eb8c99f03463055ced80eba1eef0b9c64386f42bd2ed1ba4f6569d19935280"
+      "sha256": "afadc565f42d9b132723500768287eded41495cf4469bccb9829762942f112ca"
     },
     {
       "file": "feature-pitch-charcoal-mobile.png",
@@ -354,7 +354,7 @@
         "width": 344,
         "height": 416
       },
-      "sha256": "dacb86ab8188bc55beeb15c14d2a19253a512b54a8fb8efb83eeb9bdfbdcd9e4"
+      "sha256": "0a30abe70fc6f9a2ac68a45562eb0eb6ebb7413b5fbc7cfb843c45004f96a0c5"
     },
     {
       "file": "feature-saved-charcoal.png",
@@ -370,7 +370,7 @@
         "width": 586,
         "height": 180.0
       },
-      "sha256": "acdecf47904eaff52a09018d1737a5eae5f33c3eccb5caf6d9be0ce3d87fd3f8"
+      "sha256": "e23ae0a86f310b0b5876a602db31073f1ef32b082bdfaac6c21437deb0e1e672"
     },
     {
       "file": "feature-saved-charcoal-mobile.png",
@@ -386,7 +386,7 @@
         "width": 352,
         "height": 180.0
       },
-      "sha256": "885f2a5ae81acc9cfca75a72a0feae90354d34961f4185bca3c4c75478bcbdb5"
+      "sha256": "6ebf830d561f807200a74f17871ce2340789b89dbd535a8296b850e5456f5b59"
     },
     {
       "file": "feature-appearance-charcoal.png",
@@ -402,7 +402,7 @@
         "width": 586,
         "height": 282.0
       },
-      "sha256": "91ea444aad849301b2c65be3b3740cc0c3facda95e7669c41073347274a905f0"
+      "sha256": "33a801ab5491476dcf6b6da4704a8c2d43761722dde4ebcba07c9b103d04fbc4"
     },
     {
       "file": "feature-appearance-charcoal-mobile.png",
@@ -418,7 +418,7 @@
         "width": 352,
         "height": 282.0
       },
-      "sha256": "15d4efb489f0fb7b5090a383811e2ad90b8b9c78da88c440139cbee4345d5cef"
+      "sha256": "050b180e51f0e705502c3c87054dfe155f6a76ba6daadc5d3f4464f3e1cab056"
     },
     {
       "file": "feature-increments-charcoal.png",
@@ -434,7 +434,7 @@
         "width": 586,
         "height": 96.0
       },
-      "sha256": "5a5208c72c1b0d94ff65d3e894a52a7d135ab628ff127019d25f704dc26be239"
+      "sha256": "6da7604dcca9ad4d55bcc32a11d3ba2f9d66c3c624d4136ae60b04ba94973099"
     },
     {
       "file": "feature-increments-charcoal-mobile.png",
@@ -450,7 +450,7 @@
         "width": 352,
         "height": 96.0
       },
-      "sha256": "eea8f1050b8daa245c8d97ca2d8f7501ab0258a8d96ce5357a5fe90c6e3a0779"
+      "sha256": "c48fe7a0bece7e2c6308d3a6a61908fdac66ddccc139814ae13546b7e068d1d1"
     },
     {
       "file": "feature-crossfade-charcoal.png",
@@ -466,7 +466,7 @@
         "width": 586,
         "height": 156.0
       },
-      "sha256": "9d0ef92b128d5c30fea8cc5b58c5eef96a41d5fe9b681f4dda9a27145a0cf7b5"
+      "sha256": "83dacffd449a2a9a23c224df12ca209324959d82041147e5fab36710956d80d0"
     },
     {
       "file": "feature-crossfade-charcoal-mobile.png",
@@ -482,7 +482,7 @@
         "width": 352,
         "height": 156.0
       },
-      "sha256": "ccaaabc8f6e31ab2354002215bc92a939705e52e249d4801d6ea681c1cc1054b"
+      "sha256": "5536ddccbfac3581f80334283024c2ebe65e6e28458fbcc84266477fc3c5157b"
     },
     {
       "file": "feature-semitones-charcoal.png",
@@ -498,7 +498,7 @@
         "width": 586,
         "height": 184.0
       },
-      "sha256": "b6edc813db32874b47a54be465038f0b88b7a78ed58d29577d530be8b916b615"
+      "sha256": "a37bc9b786d7fb55ca4d02b33f5ad48bbde72b7fd8dccaf05767de0b1b06a31a"
     },
     {
       "file": "feature-semitones-charcoal-mobile.png",
@@ -514,7 +514,7 @@
         "width": 352,
         "height": 184.0
       },
-      "sha256": "0979a29442116fcad532c4b5672d4483680dca04f0a03943e862c8d5303e84a8"
+      "sha256": "79d5fd0d7dab7804a3422c02a76187e02156aacd20cf1f2ec38a8c5d5a6ecf40"
     },
     {
       "file": "feature-output-charcoal.png",
@@ -530,7 +530,7 @@
         "width": 586,
         "height": 100.0
       },
-      "sha256": "9ba03d58cce8f1c3a39a710b0ca01ac9651ce95169f47f63f95db3e97b48f152"
+      "sha256": "30093c272e38fb02737c7166a598f571b1fc86be26e3820f26c11c12ef661647"
     },
     {
       "file": "feature-output-charcoal-mobile.png",
@@ -546,7 +546,7 @@
         "width": 352,
         "height": 100.0
       },
-      "sha256": "0da7de567cef676499bb679d6a1f733d24ee1e00064a528ac833e33b365139d6"
+      "sha256": "e58dc1c7a64fdbc9187ea96e5df8fa6a4de5c070d7443259ab9867e8ce395514"
     },
     {
       "file": "feature-shortcuts-charcoal.png",
@@ -562,7 +562,7 @@
         "width": 586,
         "height": 118.0
       },
-      "sha256": "630b94b409774a0386d22410f8d2a6a7914aa4a3db7a4465022afb7f7ff4153e"
+      "sha256": "5df6bd146be1d5ef10ae86a24eb3f89dd31689654e598055e71089ef9a47da4c"
     },
     {
       "file": "feature-shortcuts-charcoal-mobile.png",
@@ -578,7 +578,7 @@
         "width": 352,
         "height": 118.0
       },
-      "sha256": "63b23951c4ef621403aab805396737af42caabe00889b4446083578b55db4f22"
+      "sha256": "7b00b68d56f9a00709a79c4e8790d31827af4a4e335544da0c6ae7266da58720"
     },
     {
       "file": "feature-backup-charcoal.png",
@@ -594,7 +594,7 @@
         "width": 586,
         "height": 78.0
       },
-      "sha256": "3d2ff3e018d705541742575a9934f7cf3f3d4eff771894dfe7f159720b61e532"
+      "sha256": "93d99bb2344eaef107f03e81cfd9dd5ee6aecececdf42008721b94e302fa9514"
     },
     {
       "file": "feature-backup-charcoal-mobile.png",
@@ -610,7 +610,7 @@
         "width": 352,
         "height": 78.0
       },
-      "sha256": "36f9bb38204ee459f6ee7a9d1a4c4acccf418ce78a50641a07be0bbe463cc97c"
+      "sha256": "c16dc797fb9d77c135b5158749852a294693031bee8c635374b1b84e31257408"
     },
     {
       "file": "feature-tempo-light.png",
@@ -626,7 +626,7 @@
         "width": 698,
         "height": 336
       },
-      "sha256": "1e93fb5aa9864af78f286d7e07be325329da2e44de7a84925b859a1f5dfa7a1d"
+      "sha256": "8d2f8dc8147497631a78ee37cec778f35bfa3754371324f42434ca3947d637b7"
     },
     {
       "file": "feature-tempo-light-mobile.png",
@@ -642,7 +642,7 @@
         "width": 344,
         "height": 408
       },
-      "sha256": "4a09b5c10a3279f7f42fe64bbf643e6dd24b9a28544d4786a603570e033fb00d"
+      "sha256": "386d803af206308803b23ae44b39fcaa857d60382e9c3935d49b853886bd9010"
     },
     {
       "file": "feature-pitch-light.png",
@@ -658,7 +658,7 @@
         "width": 698,
         "height": 380
       },
-      "sha256": "682f3652b9030fb2d889c605b56fa1386bee7bcbf5b35cf086d6e55f7c5cb647"
+      "sha256": "d04d76033c14383b5d417402fd43d65aaeb9cbd4e3ee8f584494a7b1d8585de9"
     },
     {
       "file": "feature-pitch-light-mobile.png",
@@ -674,7 +674,7 @@
         "width": 344,
         "height": 416
       },
-      "sha256": "e24292e0445b36d86eb2e634cfa9bfe3468b958c91f6289cef62e65c654137bd"
+      "sha256": "22a3b203f7caaac6b15e20fc79b4f5e5e665c9410b4ea43aa247c6bb1d7d3619"
     },
     {
       "file": "feature-saved-light.png",
@@ -690,7 +690,7 @@
         "width": 586,
         "height": 180.0
       },
-      "sha256": "dda55279d4375be6fdc016d3602235499db565e9838c31c35a4f887a8b2b1d15"
+      "sha256": "cd06dc53ed338dd1204b44392c587f72c714b02ccad8c3b3a7599dbbe02ba375"
     },
     {
       "file": "feature-saved-light-mobile.png",
@@ -706,7 +706,7 @@
         "width": 352,
         "height": 180.0
       },
-      "sha256": "1a20f0533565050828e9fbecff10649e2e003b4f1dbe41a43cda2194c733124e"
+      "sha256": "9c33513b7935ca3ce922e9211c0aec086f0b1818ea92f4c4bade85aae39af11d"
     },
     {
       "file": "feature-appearance-light.png",
@@ -722,7 +722,7 @@
         "width": 586,
         "height": 282.0
       },
-      "sha256": "518f2ca79076e66eb2f6906f6febb2882fe05c9eb7834eb12146a04683640beb"
+      "sha256": "c51b9554c37bd728bfbe8d3f660adf11ac03c4c4676ff9b5a23c935811569ad5"
     },
     {
       "file": "feature-appearance-light-mobile.png",
@@ -738,7 +738,7 @@
         "width": 352,
         "height": 282.0
       },
-      "sha256": "c3c9e224d74cf21ff69341727f24fd8cd5840dbe2adee85dd4b088547808ad9f"
+      "sha256": "edd1a4a5d216dd6ac29951ce50d9a0b2b485f59d589517f7d70f62dd84d97270"
     },
     {
       "file": "feature-increments-light.png",
@@ -754,7 +754,7 @@
         "width": 586,
         "height": 96.0
       },
-      "sha256": "20e574f9332dc586fa5f3504b98afae793b74167f1c79dbfe6bae65d635b247d"
+      "sha256": "030c678fbd7988d094d1df323b2036b9cd40956b1cf1fb178f3f06f5e8fd70da"
     },
     {
       "file": "feature-increments-light-mobile.png",
@@ -770,7 +770,7 @@
         "width": 352,
         "height": 96.0
       },
-      "sha256": "af9f18dd5419f9af98cdb7c307dbf42f1a45b3e3eaa96b4fa0124a86735fb094"
+      "sha256": "020caaa60b09164ece04e3d47f809addc18458b97d1a0766ad7997e250d6d796"
     },
     {
       "file": "feature-crossfade-light.png",
@@ -786,7 +786,7 @@
         "width": 586,
         "height": 156.0
       },
-      "sha256": "f1cd093568167a311de2a15b3f7de5f63f9a3c1c17322d17dfd9a68033a197d3"
+      "sha256": "ebe0e999d901a595a2094db1babf6c85d6b90647d6a692d896d06d598f323576"
     },
     {
       "file": "feature-crossfade-light-mobile.png",
@@ -802,7 +802,7 @@
         "width": 352,
         "height": 156.0
       },
-      "sha256": "b11790ddf9ab3ac91c744f6e7a92ba45ea50aeea7860073b9c264536c5357d7b"
+      "sha256": "98fff18581a4e13aa493cdb96d2d416be9f93d6bbaacfcd21179f60c19be9f67"
     },
     {
       "file": "feature-semitones-light.png",
@@ -818,7 +818,7 @@
         "width": 586,
         "height": 184.0
       },
-      "sha256": "d68d583f4da9b5ba0612b6868e7efad698369793cb47ed2c0cb7faa9337e6561"
+      "sha256": "284291e5329505e07fa4fa443bcca0d34911efe7c817fd8dde773b52680fe889"
     },
     {
       "file": "feature-semitones-light-mobile.png",
@@ -834,7 +834,7 @@
         "width": 352,
         "height": 184.0
       },
-      "sha256": "30b728704af8963a74bcb5d67d3422b57bff579da837fd2ec2c9e83aa266261e"
+      "sha256": "f1f35a21a8401a561fa6bf09dc5c03f21a8e3395b057fadb316018d2eab14ecc"
     },
     {
       "file": "feature-output-light.png",
@@ -850,7 +850,7 @@
         "width": 586,
         "height": 100.0
       },
-      "sha256": "c73460bd0ca10323d8625ff35d89874ab49a5daddcf8bb7e86c393da6aded126"
+      "sha256": "33ab7db4f69ca9af648badb2653ff334734d6857b60b4ddace5592d7c71fddf4"
     },
     {
       "file": "feature-output-light-mobile.png",
@@ -866,7 +866,7 @@
         "width": 352,
         "height": 100.0
       },
-      "sha256": "a87d0493b1cd5d0be0cc1a3c2ff66a4773ec4e25393a9051cd78312f6c615129"
+      "sha256": "3aaa27e95727dca9a9d0d24c96d32dbe39d65e5efccc6f2566387cd1e5c8d56a"
     },
     {
       "file": "feature-shortcuts-light.png",
@@ -882,7 +882,7 @@
         "width": 586,
         "height": 118.0
       },
-      "sha256": "63275b8bbda726a2d2225822ff24a88068d513591fc0b444d028d59f8b5557fe"
+      "sha256": "49c96a884e55be92f4e9d7be26c687203715a38bf70daa9b4543a1ad60421d73"
     },
     {
       "file": "feature-shortcuts-light-mobile.png",
@@ -898,7 +898,7 @@
         "width": 352,
         "height": 118.0
       },
-      "sha256": "61d79f15774a1c5dd9c7a24672a8b689ae97221739b6b765ebe6ae96a6abb945"
+      "sha256": "30180655d23d844465bc71a13feeb1525c942871f10847b5534ceed2612623ba"
     },
     {
       "file": "feature-backup-light.png",
@@ -914,7 +914,7 @@
         "width": 586,
         "height": 78.0
       },
-      "sha256": "6c3454db51ff561cb83dcf3e3bfed17460df02006a777f2cb65f797fb1386572"
+      "sha256": "4f707dde359ed35dff957e41484aada254c19fc406db9b2c1ede3657ecbe00df"
     },
     {
       "file": "feature-backup-light-mobile.png",
@@ -930,7 +930,7 @@
         "width": 352,
         "height": 78.0
       },
-      "sha256": "c1b27425e9d69541e36dc1b5da38fef7b25e24778f0746a05a7619ec02b5d27e"
+      "sha256": "c8033453bc1684f3f6a721b69363b97298657accc939fc2b9ab39c536f27bc02"
     },
     {
       "file": "feature-tempo-oled.png",
@@ -946,7 +946,7 @@
         "width": 698,
         "height": 336
       },
-      "sha256": "d7c87e9e5b815342a14848d993e7e738d1d339deaf0e9a658262d3e45f617356"
+      "sha256": "90b98c72919333a3275f0b93a278e7d5359f1bfbe8f387068e15891b659df26c"
     },
     {
       "file": "feature-tempo-oled-mobile.png",
@@ -962,7 +962,7 @@
         "width": 344,
         "height": 408
       },
-      "sha256": "65b275d391b3c11abf305732472c4d62e531751c3aca6669b67f11d940064161"
+      "sha256": "bf58d2b279333be5712b50bae7e0c8336fc93e5fd18db051caa0668918f858b9"
     },
     {
       "file": "feature-pitch-oled.png",
@@ -978,7 +978,7 @@
         "width": 698,
         "height": 380
       },
-      "sha256": "7c8ddb14e9f501bcdba1b58c2554fa3e46c5c88f30a00dca8b980ac59441b2da"
+      "sha256": "b4f8179de2dd58f95c11ff51528fcb5c386efcfd46cd2c2f91efdc228089123e"
     },
     {
       "file": "feature-pitch-oled-mobile.png",
@@ -994,7 +994,7 @@
         "width": 344,
         "height": 416
       },
-      "sha256": "eaa2271ff4f705b1b4af4d3bdee4419ac87859c12bd98368ab2f0e7fbb085cbd"
+      "sha256": "323af20ed1344bffbd902eb95524f3e74d56ccc2ae9529f8cebe9ac91176992e"
     },
     {
       "file": "feature-saved-oled.png",
@@ -1010,7 +1010,7 @@
         "width": 586,
         "height": 180.0
       },
-      "sha256": "12241327c0ca2154fe7811b8f30f0efa7ec4ec8c3964dcc21d04deb0c3a5c666"
+      "sha256": "61ce6968a1891d44ef62cd3ffab666c692084dbf7b899849f972db7175920432"
     },
     {
       "file": "feature-saved-oled-mobile.png",
@@ -1026,7 +1026,7 @@
         "width": 352,
         "height": 180.0
       },
-      "sha256": "540da34970804a51c7397fd67b48b799157a347b27eb1d1c598a8ced43417779"
+      "sha256": "c96a62d44614cdd1f277da8b6748b080ec07583ca06ff89068c9cc347e285ea9"
     },
     {
       "file": "feature-appearance-oled.png",
@@ -1042,7 +1042,7 @@
         "width": 586,
         "height": 282.0
       },
-      "sha256": "f79965baedf4dd23165d7a4d79d451d339066f0e1a5049c25e4c9ab704f002e5"
+      "sha256": "3d83c2d19431bb5649d9e3e29fad97bbf643ec5ebf01e275ef37ac4f48004fe2"
     },
     {
       "file": "feature-appearance-oled-mobile.png",
@@ -1058,7 +1058,7 @@
         "width": 352,
         "height": 282.0
       },
-      "sha256": "498fef6fbe35aa8bc076918a92c8403f935aa780b42406b1a05ccb27240544f3"
+      "sha256": "166dbef051319ffd67c747e52747b03f6151c085c20b4f55181a0a1ffd734c62"
     },
     {
       "file": "feature-increments-oled.png",
@@ -1074,7 +1074,7 @@
         "width": 586,
         "height": 96.0
       },
-      "sha256": "82f9453c9a8034db3161a3adb5cf2979cbcbb64fb60619bbf709097e6aa353f6"
+      "sha256": "e9c68c5364f60313904e40b536eb6e5a98609e837ba66a1357bd2ea26d55966e"
     },
     {
       "file": "feature-increments-oled-mobile.png",
@@ -1090,7 +1090,7 @@
         "width": 352,
         "height": 96.0
       },
-      "sha256": "fe3856a55a4a955317991bed63fdc8c9d509f44d42ed2af73ae33d8bc2e2ca71"
+      "sha256": "626caa3d8a8ba2fb3fc5fb29fa93d6ee820b9212900b6b86ac27df4eaee73382"
     },
     {
       "file": "feature-crossfade-oled.png",
@@ -1106,7 +1106,7 @@
         "width": 586,
         "height": 156.0
       },
-      "sha256": "655236dff85dd4cde8945fb0e36b26108b8a18690346a088a9d0e42c9d22c426"
+      "sha256": "02aaed9bbda7f18891f8810bd2a837e8b72bb56da036cc8225ea466074f915f3"
     },
     {
       "file": "feature-crossfade-oled-mobile.png",
@@ -1122,7 +1122,7 @@
         "width": 352,
         "height": 156.0
       },
-      "sha256": "f134e0251e9bc98340bc008e0669a61284836f979164134970cf6dce95ba0114"
+      "sha256": "3c797b2bd51a801a903242e627c386479273f4c9ae8c4219234e7211334b6939"
     },
     {
       "file": "feature-semitones-oled.png",
@@ -1138,7 +1138,7 @@
         "width": 586,
         "height": 184.0
       },
-      "sha256": "01b72d32f3f4864fe07274a46fa873144e1d653bb7b8e5912fc6647f2aac6f42"
+      "sha256": "610eacaf8c666fe7680607f973d7c05087feb7d6c3efb473fbcf0ddf055a6211"
     },
     {
       "file": "feature-semitones-oled-mobile.png",
@@ -1154,7 +1154,7 @@
         "width": 352,
         "height": 184.0
       },
-      "sha256": "f2a33cdb6ba52e2f8fa8b7fac87156cc641080abf18a3d6792103038187f7c21"
+      "sha256": "052e9f9c4960f63b1d2ea362f33b14af74c1bf095544e18c3b516a2abfb6c3c5"
     },
     {
       "file": "feature-output-oled.png",
@@ -1170,7 +1170,7 @@
         "width": 586,
         "height": 100.0
       },
-      "sha256": "40f28726279021b5e6d4a5a57cf6aa6420478cf087e112588abd15978206fc9b"
+      "sha256": "80faa077c7f75862cd31f236f220f3fb0cd3cda290ac8b40f861e8dd99916e2b"
     },
     {
       "file": "feature-output-oled-mobile.png",
@@ -1186,7 +1186,7 @@
         "width": 352,
         "height": 100.0
       },
-      "sha256": "84a04c6a7242377a52d0f036294fc7703521bef4c5e5ebb6e05d61e37f3fc4e2"
+      "sha256": "820854d092698432f5c0aa7ac48f33792febce62a37947a8c9bb4ff169867cc0"
     },
     {
       "file": "feature-shortcuts-oled.png",
@@ -1202,7 +1202,7 @@
         "width": 586,
         "height": 118.0
       },
-      "sha256": "d76b3f00b0a25927c73c22da001fe8a03fe16ebfc7da14511bf5d6c5ec22a663"
+      "sha256": "bfa33ef9c5771ac0041470a82dcb5873c5c0b6ac4920b260c3a1f4e094c1124b"
     },
     {
       "file": "feature-shortcuts-oled-mobile.png",
@@ -1218,7 +1218,7 @@
         "width": 352,
         "height": 118.0
       },
-      "sha256": "90b458d46d661b1afb2e2a4b47ef4ec93f5a6cd9eeb2f92e5ff357251e37672e"
+      "sha256": "cb63bf2d30ec734bc3726a3a9fff2d9f9a1b8f0564233f8f43aeaee3aae3681d"
     },
     {
       "file": "feature-backup-oled.png",
@@ -1234,7 +1234,7 @@
         "width": 586,
         "height": 78.0
       },
-      "sha256": "13c2daa4824af103fe4e5b5b7c41798f093dc4a91c4681e4a4cbedfa5713b927"
+      "sha256": "be59d5bcc11f7718f96aff4cd4640276f8fa9c9647e69bfae7756d51e90ee69a"
     },
     {
       "file": "feature-backup-oled-mobile.png",
@@ -1250,7 +1250,7 @@
         "width": 352,
         "height": 78.0
       },
-      "sha256": "01bb96140deee092149807d04babd9a6b601d91deacb1798547d0e6c40acb801"
+      "sha256": "964899576c969d523006f00fdfdd6f91c5f14197f17e27395bf649702a0cbec0"
     },
     {
       "file": "feature-shared-charcoal.png",
@@ -1258,7 +1258,7 @@
       "height": 1292,
       "cssWidth": 994.0,
       "cssHeight": 646.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "shared controls, charcoal variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 53,
@@ -1266,23 +1266,23 @@
         "width": 994,
         "height": 646.375
       },
-      "sha256": "a0de67647581f8ecd7b97ef6aa4ee8e01eae33e02eb5aabe8ebd83bc931a2a4b"
+      "sha256": "7eb2039da494f0996cd5ccc0f5778c4bb61acd79720a5b27cb8d36f924c4d5ee"
     },
     {
       "file": "feature-shared-charcoal-mobile.png",
       "width": 680,
-      "height": 1860,
+      "height": 1892,
       "cssWidth": 340.0,
-      "cssHeight": 930.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "cssHeight": 946.0,
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "shared controls, charcoal variant at 390px; playback paused or not started.",
       "clip": {
         "x": 25,
-        "y": 355.171875,
+        "y": 353.171875,
         "width": 340,
-        "height": 930.765625
+        "height": 953.15625
       },
-      "sha256": "cfa227576fd5ac5c91bdade1d8a082e2fe8a14f12c96284cfd0548aadcbf6996"
+      "sha256": "d4a485673668a39953c5f1043c013a551923a2ea6028b6f1e278514ca8aaa43c"
     },
     {
       "file": "feature-discord-charcoal.png",
@@ -1290,7 +1290,7 @@
       "height": 416,
       "cssWidth": 1048.0,
       "cssHeight": 208.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "discord controls, charcoal variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 26,
@@ -1298,7 +1298,7 @@
         "width": 1048,
         "height": 213.96875
       },
-      "sha256": "491a5aa6cd74a0f8eb4d457c8bb6389b5355b8398c14b1c33d6a4f21644aeb46"
+      "sha256": "df3c90b0d3fad4b4d95e383ea89ead12464f88d5c369f419d804e2f383be4419"
     },
     {
       "file": "feature-discord-charcoal-mobile.png",
@@ -1306,15 +1306,15 @@
       "height": 530,
       "cssWidth": 366.0,
       "cssHeight": 265.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "discord controls, charcoal variant at 390px; playback paused or not started.",
       "clip": {
         "x": 12,
-        "y": 578.109375,
+        "y": 577.5,
         "width": 366,
         "height": 265.15625
       },
-      "sha256": "50c062cf84eb372803d8dfdfdc751fe56c2481f49eb45fc65e414a6332579e4a"
+      "sha256": "29502b130e3af6f0b0a467ec79182b2b97600c7e09998efd034332e9cc3837c9"
     },
     {
       "file": "feature-shared-light.png",
@@ -1322,7 +1322,7 @@
       "height": 1292,
       "cssWidth": 994.0,
       "cssHeight": 646.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "shared controls, light variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 53,
@@ -1330,23 +1330,23 @@
         "width": 994,
         "height": 646.375
       },
-      "sha256": "57566fb43829e6e1ff0a07f9ab990e3a0736dd5ae110dca2fd813a9caa2dda62"
+      "sha256": "0262cec4aea4fb306eabec12c10a4eda78acf463111bff6c2d97875c03b21e9a"
     },
     {
       "file": "feature-shared-light-mobile.png",
       "width": 680,
-      "height": 1860,
+      "height": 1892,
       "cssWidth": 340.0,
-      "cssHeight": 930.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "cssHeight": 946.0,
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "shared controls, light variant at 390px; playback paused or not started.",
       "clip": {
         "x": 25,
-        "y": 355.171875,
+        "y": 353.171875,
         "width": 340,
-        "height": 930.765625
+        "height": 953.15625
       },
-      "sha256": "183f8099170e1bb08856400c01125b517825e81a748a0be94db4d32cfd1c65fa"
+      "sha256": "096862115e8b163c5bda9bf5f1402db9b8a2d6efd59094ad603e7613b2d4e4e5"
     },
     {
       "file": "feature-discord-light.png",
@@ -1354,7 +1354,7 @@
       "height": 416,
       "cssWidth": 1048.0,
       "cssHeight": 208.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "discord controls, light variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 26,
@@ -1362,7 +1362,7 @@
         "width": 1048,
         "height": 213.96875
       },
-      "sha256": "69f581ebeaeae4fd4cd5acd032a8620c2696d603a2e26ac62acb6772273b4f51"
+      "sha256": "5c69a469404a801e139fad5f43057182cc66c8d3e9c0d1884ecd5a56eb5988c8"
     },
     {
       "file": "feature-discord-light-mobile.png",
@@ -1370,15 +1370,15 @@
       "height": 530,
       "cssWidth": 366.0,
       "cssHeight": 265.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "discord controls, light variant at 390px; playback paused or not started.",
       "clip": {
         "x": 12,
-        "y": 578.109375,
+        "y": 577.5,
         "width": 366,
         "height": 265.15625
       },
-      "sha256": "56d916c45e41bbee03470da563d1c6d5bfbafe08b8ab365658956eb7cdfa0883"
+      "sha256": "52087dd17e67fcaff49a0c8bf167e42ac4a629778a8c2edb64944ca4bacc6ea3"
     },
     {
       "file": "feature-shared-oled.png",
@@ -1386,7 +1386,7 @@
       "height": 1292,
       "cssWidth": 994.0,
       "cssHeight": 646.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "shared controls, oled variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 53,
@@ -1394,23 +1394,23 @@
         "width": 994,
         "height": 646.375
       },
-      "sha256": "3330b616df43dc732fdb5558f32bdd95a69960c4c589138639e2ff4744597074"
+      "sha256": "7227a4ea13baceb3b4977831a0e1b06edc1550d3afddb0a1e41a89fd77528bea"
     },
     {
       "file": "feature-shared-oled-mobile.png",
       "width": 680,
-      "height": 1860,
+      "height": 1892,
       "cssWidth": 340.0,
-      "cssHeight": 930.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "cssHeight": 946.0,
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "shared controls, oled variant at 390px; playback paused or not started.",
       "clip": {
         "x": 25,
-        "y": 355.171875,
+        "y": 353.171875,
         "width": 340,
-        "height": 930.765625
+        "height": 953.15625
       },
-      "sha256": "11674ce175183bd7f5e4147d148fd58f60a2a60bf00d91ecdd64a7479900f48c"
+      "sha256": "652b9a7dcd32f700acf46a0ee1523f20b8937c41c3094a88606887d478590c59"
     },
     {
       "file": "feature-discord-oled.png",
@@ -1418,7 +1418,7 @@
       "height": 416,
       "cssWidth": 1048.0,
       "cssHeight": 208.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "discord controls, oled variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 26,
@@ -1426,7 +1426,7 @@
         "width": 1048,
         "height": 213.96875
       },
-      "sha256": "ff7d7b9a50988b38ce2b67e812b0127e318fb5e107a3bd35a2c10a4b2810ef64"
+      "sha256": "eb46806444d45f856fdf69c837dc41170d06f8aed6c2db3e4be1e3def5bebee7"
     },
     {
       "file": "feature-discord-oled-mobile.png",
@@ -1434,15 +1434,15 @@
       "height": 530,
       "cssWidth": 366.0,
       "cssHeight": 265.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
       "state": "discord controls, oled variant at 390px; playback paused or not started.",
       "clip": {
         "x": 12,
-        "y": 578.109375,
+        "y": 577.5,
         "width": 366,
         "height": 265.15625
       },
-      "sha256": "a6d60c86cfcd3a409707b8c45fd5b17d6949d03613e405eb898e80f7b79710f9"
+      "sha256": "61767618800f196367e74ad064fa38968563291601d59184be3e0e9940245883"
     },
     {
       "file": "feature-local-charcoal.png",
@@ -1450,15 +1450,15 @@
       "height": 440,
       "cssWidth": 598.0,
       "cssHeight": 220.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/",
       "state": "local controls, charcoal variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 449,
         "y": 962.9375,
         "width": 598,
-        "height": 220.984375
+        "height": 220.96875
       },
-      "sha256": "a411057110aac437e470cda5beb03cec07d1b30d5e879ea25c9058235beb9d4f"
+      "sha256": "d080097f778a390cdc31964d86818d55ff59527f6282354d84310d4c8843e67a"
     },
     {
       "file": "feature-local-charcoal-mobile.png",
@@ -1466,7 +1466,7 @@
       "height": 440,
       "cssWidth": 340.0,
       "cssHeight": 220.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/",
       "state": "local controls, charcoal variant at 390px; playback paused or not started.",
       "clip": {
         "x": 25,
@@ -1474,7 +1474,7 @@
         "width": 340,
         "height": 220.984375
       },
-      "sha256": "5c1523cf51514b2f14df83dd02bca01bbbc12155132232b70046e7c037ccdace"
+      "sha256": "963837830d13af66074c0c1362e512a889e6d0e8a1726f05400b4ac170f0f7de"
     },
     {
       "file": "feature-local-light.png",
@@ -1482,7 +1482,7 @@
       "height": 440,
       "cssWidth": 598.0,
       "cssHeight": 220.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/",
       "state": "local controls, light variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 449,
@@ -1490,7 +1490,7 @@
         "width": 598,
         "height": 220.984375
       },
-      "sha256": "81afb27a907c00098102727666b83958c3851e8ce1e3eca5d3149ed629a89eca"
+      "sha256": "1d549f11b77ab0efe332850666f317b440395fb5d4b1d084803c8e850c23199e"
     },
     {
       "file": "feature-local-light-mobile.png",
@@ -1498,7 +1498,7 @@
       "height": 440,
       "cssWidth": 340.0,
       "cssHeight": 220.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/",
       "state": "local controls, light variant at 390px; playback paused or not started.",
       "clip": {
         "x": 25,
@@ -1506,7 +1506,7 @@
         "width": 340,
         "height": 220.984375
       },
-      "sha256": "e86c764d33832c8a259aa96648abd8a2435a9892c56577f4095e80f179aeb2b1"
+      "sha256": "0f0f421db310175b8ee3bb57673f3cd2622b35afb296d0e8e711d2a291b226b3"
     },
     {
       "file": "feature-local-oled.png",
@@ -1514,7 +1514,7 @@
       "height": 440,
       "cssWidth": 598.0,
       "cssHeight": 220.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/",
       "state": "local controls, oled variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 449,
@@ -1522,7 +1522,7 @@
         "width": 598,
         "height": 220.984375
       },
-      "sha256": "0199c57f1046cdbf97c4ed78f954d6334c4ed6eda3ab502ac58687c61a1808ab"
+      "sha256": "ace5c10fa5e87a60dc9361c7039f6a18a613dd67eaa38da61e7127d4b750f85f"
     },
     {
       "file": "feature-local-oled-mobile.png",
@@ -1530,7 +1530,7 @@
       "height": 440,
       "cssWidth": 340.0,
       "cssHeight": 220.0,
-      "url": "http://127.0.0.1:58171/soundcloud-tempo-control/",
+      "url": "http://127.0.0.1:57803/soundcloud-tempo-control/",
       "state": "local controls, oled variant at 390px; playback paused or not started.",
       "clip": {
         "x": 25,
@@ -1538,7 +1538,7 @@
         "width": 340,
         "height": 220.984375
       },
-      "sha256": "0363b4cf4f3ea2ecb29ef02f026ea50af43f0898cc67f55e367ccd0de134724e"
+      "sha256": "5f3bd1ae6e08263ab0d6365e334a4d507c235d4f681337395ac2ce7f59dc3326"
     },
     {
       "file": "feature-set-charcoal.png",
@@ -1546,10 +1546,10 @@
       "height": 1446,
       "cssWidth": 1036.0,
       "cssHeight": 723.0,
-      "url": "http://127.0.0.1:51979/soundcloud-tempo-control/set/",
+      "url": "http://127.0.0.1:55662/soundcloud-tempo-control/set/",
       "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. charcoal at 1100px. No render submitted or audio played.",
       "clip": null,
-      "sha256": "ae24914f4b25a4d0c1cba8233ea8763ad3914b109ec0b8776dbfeb16f13e52de"
+      "sha256": "94b8e9b590d5707ed38fbbd51f569b2bc1e5336936d6e77dba69017f985c5cb6"
     },
     {
       "file": "feature-set-charcoal-mobile.png",
@@ -1557,10 +1557,10 @@
       "height": 2468,
       "cssWidth": 354.0,
       "cssHeight": 1234.0,
-      "url": "http://127.0.0.1:51979/soundcloud-tempo-control/set/",
+      "url": "http://127.0.0.1:55662/soundcloud-tempo-control/set/",
       "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. charcoal at 390px. No render submitted or audio played.",
       "clip": null,
-      "sha256": "30ab7a71cf9b66a5cc40f049678ea62a96236c089f5d1612026b7550b80da108"
+      "sha256": "11a4df76ecb03d360fc3d4c09e94653e568d122cfa625371282c987e2c0d4e67"
     },
     {
       "file": "feature-set-light.png",
@@ -1568,10 +1568,10 @@
       "height": 1446,
       "cssWidth": 1036.0,
       "cssHeight": 723.0,
-      "url": "http://127.0.0.1:51979/soundcloud-tempo-control/set/",
+      "url": "http://127.0.0.1:55662/soundcloud-tempo-control/set/",
       "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. light at 1100px. No render submitted or audio played.",
       "clip": null,
-      "sha256": "54b7b227bfa898953b5e38362ab448bca58ac13dc0e62778486d29241fd2d668"
+      "sha256": "079ad7c0dc46744b21872b49552632feacd01f9002f0072081e18a5baca51efc"
     },
     {
       "file": "feature-set-light-mobile.png",
@@ -1579,10 +1579,10 @@
       "height": 2468,
       "cssWidth": 354.0,
       "cssHeight": 1234.0,
-      "url": "http://127.0.0.1:51979/soundcloud-tempo-control/set/",
+      "url": "http://127.0.0.1:55662/soundcloud-tempo-control/set/",
       "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. light at 390px. No render submitted or audio played.",
       "clip": null,
-      "sha256": "cc97c5cbc47ab49fb151f471fd658afe806c059b3eb3b1d35c06f210a1a009a0"
+      "sha256": "7379be36a98ce7e25b11659278e2138de0ab2643643c1123510ad1fb682c5af5"
     },
     {
       "file": "feature-set-oled.png",
@@ -1590,10 +1590,10 @@
       "height": 1446,
       "cssWidth": 1036.0,
       "cssHeight": 723.0,
-      "url": "http://127.0.0.1:51979/soundcloud-tempo-control/set/",
+      "url": "http://127.0.0.1:55662/soundcloud-tempo-control/set/",
       "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. oled at 1100px. No render submitted or audio played.",
       "clip": null,
-      "sha256": "7a472ccfce64099faf57f56229440bf8c0c1f9ee78b0e359242de00c26631ce8"
+      "sha256": "4731be3471a617fbcd51826a587a08754dfd0ad856b6477c1738b6dab366bdb9"
     },
     {
       "file": "feature-set-oled-mobile.png",
@@ -1601,10 +1601,10 @@
       "height": 2468,
       "cssWidth": 354.0,
       "cssHeight": 1234.0,
-      "url": "http://127.0.0.1:51979/soundcloud-tempo-control/set/",
+      "url": "http://127.0.0.1:55662/soundcloud-tempo-control/set/",
       "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. oled at 390px. No render submitted or audio played.",
       "clip": null,
-      "sha256": "1812484ba0048c7123b9c870e724bc0ed7ebafc009d31a0ec93fe4be3be0e33e"
+      "sha256": "b0ded577bc215840a0dbd626907ba16fcfdecc868602c7e56c13143dd3e0fa2d"
     }
   ],
   "pageErrors": [],
@@ -1658,7 +1658,7 @@
   "audio": {
     "media": [
       {
-        "time": 0.053733,
+        "time": 0.072622,
         "readyState": 4,
         "duration": 496.5035599999998,
         "paused": true,
@@ -1677,7 +1677,7 @@
   "sharedAudio": {
     "media": [
       {
-        "time": 0.229509,
+        "time": 0.512438,
         "readyState": 4,
         "duration": 496.5035599999996,
         "paused": true,

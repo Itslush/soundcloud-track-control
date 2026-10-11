@@ -11,6 +11,7 @@ export function createCrossfade({
   readTrack,
   nextButton,
   onState,
+  onVisual,
   storage = localStorage,
   timers = globalThis,
 }) {
@@ -36,6 +37,13 @@ export function createCrossfade({
       .replace(/https?:\/\/\S+/g, '[URL omitted]')
       .slice(0, 300);
 
+  function visual(state) {
+    // Artwork must never interrupt the audio handoff.
+    try {
+      onVisual?.(state);
+    } catch {}
+  }
+
   function status(value) {
     value = clean(value);
     if (message === value) return;
@@ -48,6 +56,7 @@ export function createCrossfade({
   function cancel(reason) {
     const previous = job;
     job = null;
+    visual(null);
     previous?.controller.abort();
     try {
       previous?.next?.dispose();
@@ -230,6 +239,18 @@ export function createCrossfade({
     if (!enabled || disposed || !audio) return;
     if (job?.route) {
       const current = job;
+      visual({
+        nextTrack: current.next.trackUrl,
+        progress: Math.max(
+          0,
+          Math.min(
+            1,
+            1 -
+              (current.route.overlapEnd - current.route.context.currentTime) /
+                current.overlapSeconds,
+          ),
+        ),
+      });
       const remaining =
         current.route.endTime - current.route.context.currentTime;
       if (remaining <= 0 || current.route.context.state !== 'running') {
@@ -395,11 +416,14 @@ export function createCrossfade({
       );
       current.buffer = null;
       current.opening = null;
+      current.overlapSeconds = remaining;
+      visual({ nextTrack: current.next.trackUrl, progress: 0 });
       button.click();
       status('Crossfading buffered audio…');
     } catch (error) {
       current.route?.dispose();
       current.route = null;
+      visual(null);
       status(`Playing normally. ${error.message}`);
     }
   }

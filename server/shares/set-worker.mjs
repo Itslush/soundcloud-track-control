@@ -4,6 +4,7 @@ import { createSoundCloud } from '../soundcloud.mjs';
 import { renderPcm, SAMPLE_RATE, MAX_SOURCE_SECONDS } from './audio.mjs';
 import { downloadMedia } from './download.mjs';
 import { stitchPcm, setTimings, artworkFrames } from './set-media.mjs';
+import { formatPitchNotice } from '../../src/tempo-pitch-notice.js';
 
 const filterPath = (filename) =>
   filename.replaceAll('\\', '/').replaceAll(':', '\\:').replaceAll("'", "\\'");
@@ -85,6 +86,7 @@ export async function renderSet(
     const titleFile = file(`title-${index}.txt`);
     const artistFile = file(`artist-${index}.txt`);
     const settingsFile = file(`settings-${index}.txt`);
+    const noticeFile = file(`notice-${index}.txt`);
     const range = (values, unit) => {
       const min = Math.min(...values),
         max = Math.max(...values);
@@ -104,6 +106,10 @@ export async function renderSet(
     await writeFile(titleFile, title);
     await writeFile(artistFile, artist);
     await writeFile(settingsFile, settings);
+    const notice = formatPitchNotice(
+      profile.pitchPoints?.map((point) => point.k) || profile.keyShift || 0,
+    );
+    await writeFile(noticeFile, notice);
     const fit = (value, size) =>
       Math.floor(
         Math.min(
@@ -119,6 +125,7 @@ export async function renderSet(
       text(titleFile, fit(title, 24), 488),
       text(artistFile, fit(artist, 20), 558),
       text(settingsFile, fit(settings, 18), 602),
+      ...(notice ? [text(noticeFile, 12, 626)] : []),
     ].join(',');
     const input = track.artwork
       ? ['-protocol_whitelist', 'file,pipe', '-i', file('artwork.image')]
@@ -162,7 +169,7 @@ export async function renderSet(
       tracks[index].artist,
       tracks[index + 1].title,
       tracks[index + 1].artist,
-      `${tracks[index].tempo} / ${tracks[index].semitone}   to   ${tracks[index + 1].tempo} / ${tracks[index + 1].semitone}`,
+      `${tracks[index].tempo} to ${tracks[index + 1].tempo}   ${formatPitchNotice(set.tracks.slice(index, index + 2).flatMap((profile) => profile.pitchPoints?.map((point) => point.k) || [profile.keyShift || 0])) || 'Pitch unchanged'}`,
     ];
     const filters = [];
     for (const [row, label] of labels.entries()) {

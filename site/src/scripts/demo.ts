@@ -1,4 +1,5 @@
 import { tempoShareLink } from '../../../src/tempo-share.js';
+import { formatPitchNotice } from '../../../src/tempo-pitch-notice.js';
 import { release } from '../lib/release';
 import { createTempoEditor } from '../../../src/tempo-editor.js';
 import type { TempoProfile } from '../../../src/tempo-editor.js';
@@ -28,6 +29,7 @@ export function initDemo(sharedProfile?: TempoProfile) {
   const urlInput = get<HTMLInputElement>('preview-url');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const artwork = get<HTMLImageElement>('preview-artwork');
+  const pitchNotice = get<HTMLElement>('preview-pitch-notice');
   artwork.addEventListener('error', () => {
     artwork.hidden = true;
     artwork.removeAttribute('src');
@@ -209,6 +211,14 @@ export function initDemo(sharedProfile?: TempoProfile) {
     const time = preview.audio.currentTime;
     const rate = currentRate();
     if (labels) {
+      const shift = original
+        ? 0
+        : follow.checked
+          ? (editor.draftPlayback(time)?.keyShift ?? 0)
+          : Number(keyInput.value) || 0;
+      const notice = phase === 'ready' ? formatPitchNotice(shift) : '';
+      if (pitchNotice.textContent !== notice) pitchNotice.textContent = notice;
+      pitchNotice.hidden = !notice;
       get('preview-readout').textContent =
         `${formatTime(time)} · ${round(rate)}× ${original ? 'original' : 'now'}`;
       seek.value = String(time);
