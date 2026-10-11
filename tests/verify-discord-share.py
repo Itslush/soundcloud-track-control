@@ -45,7 +45,13 @@ try:
         assert sent == profile
         page.locator('.discord-copy').click()
         expect(page.locator('.discord-status')).to_have_text('Link copied.')
-        assert page.evaluate('navigator.clipboard.readText()') == link
+        site_url = json.loads((ROOT / 'release.config.json').read_text())['siteUrl']
+        label = site_url.removeprefix('https://').removeprefix('http://').rstrip('/') + '/'
+        assert page.evaluate('navigator.clipboard.readText()') == f'[{label}]({link})'
+        page.evaluate('() => {navigator.clipboard.writeText = async () => {throw new Error("denied")}}')
+        page.locator('.discord-copy').click()
+        expect(page.locator('.discord-status')).to_have_text('Copy the link above. Clipboard access is unavailable.')
+        expect(page.locator('.discord-link')).to_have_attribute('href', link)
         for width, label in [(1440, 'desktop'), (390, 'mobile')]:
             page.set_viewport_size({'width': width, 'height': 1000})
             for theme in ['charcoal', 'light', 'oled']:
@@ -82,6 +88,6 @@ try:
         expect(page.locator('#share-actions')).to_be_hidden()
         assert errors == [], errors
         browser.close()
-        print('Discord UI: opt-in, canonical settings, copy, 6 theme/viewport captures, busy/poll/expiry/failure/invalid-link states passed.')
+        print('Discord UI: opt-in, canonical settings, masked copy, clipboard fallback, 6 theme/viewport captures, busy/poll/expiry/failure/invalid-link states passed.')
 finally:
     server.shutdown()

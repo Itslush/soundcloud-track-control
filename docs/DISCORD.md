@@ -2,6 +2,8 @@
 
 On a shared-track page, open **Share in Discord** and choose **Create public Discord link**. This publishes the settings contained in the incoming link, not unsaved edits in the player. Publication is explicit; opening or playing a shared page never starts a render.
 
+**Copy Discord link** copies a Markdown link labelled with the website address, without `https://`. Its destination remains the rendered-track URL. This shortens the visible message text; it does not hide the server address from inspection or move the audio to GitHub Pages. If clipboard access fails, the full rendered URL remains available above the button.
+
 The renderer downloads publicly playable audio, applies the canonical tempo and pitch timeline through the pinned Signalsmith WASM library, then combines AAC audio and a still cover into an H.264 MP4. The finished URL serves Open Graph video metadata. Opening it in a browser returns to the original shared-track page.
 
 The public media hostname is `tempo.88-96-45-138.sslip.io`, a free DNS name pointing to the Oracle IP. On 2026-10-11, the captured Discord video source returned HTTP 403 with `Invalid resource` when its upstream URL used the raw IP. The same 5,298,758-byte MP4 played in the user's Discord DM after switching its URL to the hostname, without changing its encoding. This verifies that test track and client; Discord still decides whether to display a player for other links.

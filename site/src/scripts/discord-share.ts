@@ -1,3 +1,5 @@
+import { release } from '../lib/release';
+
 export function initDiscordShare(code: string) {
   const root = document.querySelector<HTMLElement>('#discord-sharing');
   if (!root) return;
@@ -108,7 +110,10 @@ export function initDiscordShare(code: string) {
   });
   copy.addEventListener('click', async () => {
     try {
-      await navigator.clipboard.writeText(link.href);
+      const label = (
+        release.siteUrl || `${location.origin}${import.meta.env.BASE_URL}`
+      ).replace(/^https?:\/\//, '');
+      await navigator.clipboard.writeText(`[${label}](${link.href})`);
       status.textContent = 'Link copied.';
     } catch {
       status.textContent =
