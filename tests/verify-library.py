@@ -158,6 +158,11 @@ def main():
             for width in [1050, 390, 320]:
                 page.set_viewport_size({'width': width, 'height': 820})
                 panel = page.locator('#tempo-settings')
+                page.wait_for_function('''() => {
+                    const panel = document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#tempo-settings');
+                    const bounds = panel.getBoundingClientRect();
+                    return bounds.x >= 0 && bounds.right <= innerWidth;
+                }''')
                 assert panel.evaluate('element => element.scrollWidth <= element.clientWidth'), width
                 box = panel.bounding_box()
                 assert box['x'] >= 0 and box['x'] + box['width'] <= width, box

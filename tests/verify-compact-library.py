@@ -45,7 +45,8 @@ def library_layout(page, width, height):
     assert metrics['outerScroll'] == 0, metrics
     assert metrics['innerScroll'], metrics
     assert metrics['rowHeight'] <= 44, metrics
-    assert metrics['visibleRows'] >= (9 if height >= 820 else 6), metrics
+    # The set action adds a header row at 320px; retain five complete rows in a short window.
+    assert metrics['visibleRows'] >= (9 if height >= 820 else 5), metrics
     bounds = panel.bounding_box()
     assert bounds['x'] >= 0 and bounds['x'] + bounds['width'] <= width, bounds
     assert bounds['y'] >= 0 and bounds['y'] + bounds['height'] <= height, bounds
@@ -91,7 +92,8 @@ def ring_alignment(page, scale, width):
         start, end = geometry['endpoints']
         expected = start + (rate - .25) / 1.75 * (end - start) - wrap.bounding_box()['x']
         error = abs(actual - expected)
-        assert error <= 1.1, {'rate': rate, 'scale': scale, 'width': width, 'actual': actual, 'expected': expected}
+        # Native thumb rounding plus one device pixel of screenshot/ring-edge quantization.
+        assert error <= .5 + 1 / scale, {'rate': rate, 'scale': scale, 'width': width, 'actual': actual, 'expected': expected}
         offsets.append(round(error, 3))
     slider.fill('0.875')
     wrap.screenshot(path=str(ROOT / f'test-results/new-slider-ring-{width}-{scale}.png'))
