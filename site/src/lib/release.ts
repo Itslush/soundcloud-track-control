@@ -8,4 +8,5 @@ export const release = {
 };
 export const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 export const route = (path = '') => `${base}${path.replace(/^\//, '')}`;
-export const installUrl = route('downloads/soundcloud-tempo-control.user.js');
+export const installUrl = route('downloads/soundcloud-track-control.user.js');
+export const rpcPluginUrl = route('downloads/soundcloud-track-control.rpc.js');

@@ -1,6 +1,6 @@
 ---
 import Page from '../layouts/Page.astro';
-import { installUrl, route } from '../lib/release';
+import { installUrl, rpcPluginUrl, route } from '../lib/release';
 ---
 
 <Page title="Setup guide">
@@ -12,7 +12,7 @@ import { installUrl, route } from '../lib/release';
           >Violentmonkey</a
         >, or a compatible userscript manager.
       </li><li>
-        Open the <a href={installUrl}>Tempo Control userscript</a> and confirm Install.
+        Open the <a href={installUrl}>Track Control userscript</a> and confirm Install.
         If you see source code instead, use your manager’s “Install from URL” option
         with the download link.
       </li><li>
@@ -21,6 +21,26 @@ import { installUrl, route } from '../lib/release';
         slider.
       </li>
     </ol>
+    <section id="desktop">
+      <h2>soundcloud-rpc desktop app</h2>
+      <p>
+        Use the <a href={rpcPluginUrl} download="soundcloud_tempo_control.js"
+          >desktop plugin</a
+        >, not the browser userscript. Press F1 in the app, open Plugins → Open
+        folder, and put <code>soundcloud_tempo_control.js</code> there. Refresh the
+        list, enable Track Control, then reload SoundCloud.
+      </p>
+      <p>
+        Keep soundcloud-rpc’s separate Playback Speed plugin disabled. Both
+        plugins would try to control the same audio element.
+      </p>
+      <p>
+        Download and replace that same file for future updates. Disabling the
+        plugin reloads SoundCloud to remove its audio hooks and interrupts
+        playback. Start a track after the controls appear; this wrapper loads
+        plugins after the page.
+      </p>
+    </section>
     <section>
       <h2>Playback speed</h2><p>
         The slider goes from 0.25× to 2× in 0.025× steps. Type an exact value
@@ -56,7 +76,7 @@ import { installUrl, route } from '../lib/release';
     <section id="limits">
       <h2>Pitch modes</h2><p>
         Natural mode changes pitch with speed. Preserve key keeps the original
-        key using Signalsmith when Tempo Control can process the player's audio.
+        key using Signalsmith when Track Control can process the player's audio.
         Otherwise, it uses the browser's pitch correction. Playback speeds start
         at 0.25×.
       </p><p>
@@ -92,7 +112,7 @@ import { installUrl, route } from '../lib/release';
     <section id="troubleshooting">
       <h2>If something isn’t working</h2>
       <p>
-        Missing controls? Check that Tempo Control is enabled in your userscript
+        Missing controls? Check that Track Control is enabled in your userscript
         manager, then reload SoundCloud. Disable older copies of the script.
       </p>
       <p>

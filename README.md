@@ -1,8 +1,8 @@
-# SoundCloud Tempo Control
+# SoundCloud Track Control
 
 Adjust playback speed, save a tempo for each track, and draw speed changes over time, right inside SoundCloud.
 
-[Install Tempo Control](https://itslush.github.io/soundcloud-tempo-control/#install) · [Visit the website](https://itslush.github.io/soundcloud-tempo-control/) · [Help](https://itslush.github.io/soundcloud-tempo-control/guide/)
+[Install Track Control](https://itslush.github.io/soundcloud-track-control/#install) · [Visit the website](https://itslush.github.io/soundcloud-track-control/) · [Help](https://itslush.github.io/soundcloud-track-control/guide/)
 
 ## Controls
 
@@ -15,11 +15,13 @@ Adjust playback speed, save a tempo for each track, and draw speed changes over 
 
 ## Install
 
-1. Follow the [installation guide](https://itslush.github.io/soundcloud-tempo-control/#install) to set up a userscript manager and install Tempo Control.
+1. Follow the [installation guide](https://itslush.github.io/soundcloud-track-control/#install) to set up a userscript manager and install Track Control.
 2. Open SoundCloud and play a track.
 3. Use the tempo controls beside the player. Open settings to save speeds or edit a timeline.
 
-A userscript manager is a browser add-on that runs Tempo Control on SoundCloud. You don't need to download this repository or run a server.
+A userscript manager is a browser add-on that runs Track Control on SoundCloud. You don't need to download this repository or run a server.
+
+For the [soundcloud-rpc desktop app](https://github.com/richardhbtz/soundcloud-rpc), use the [desktop plugin instructions](docs/SOUNDCLOUD-RPC.md).
 
 ## Two ways to listen
 
@@ -31,7 +33,7 @@ Open the timeline editor to change speed at different points in a track. Saved t
 
 ## Help and feedback
 
-See the [guide](https://itslush.github.io/soundcloud-tempo-control/guide/) for controls and settings. If something isn't working, [report an issue](https://github.com/Itslush/soundcloud-tempo-control/issues) with your browser, userscript manager and what happened.
+See the [guide](https://itslush.github.io/soundcloud-track-control/guide/) for controls and settings. If something isn't working, [report an issue](https://github.com/Itslush/soundcloud-track-control/issues) with your browser, userscript manager and what happened.
 
 ## For contributors
 

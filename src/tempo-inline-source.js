@@ -1260,9 +1260,21 @@ import { showReleaseNotice } from './tempo-updates.js';
     const style = document.createElement('style');
     style.id = 'soundcloud-tempo-footer-style';
     style.textContent = `
+      .playControls:has(.soundcloud-tempo-footer) .playControls__inner {
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+        padding-inline: 20px;
+      }
+      .playControls__elements.soundcloud-tempo-footer {
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+      }
       .playControls__elements.soundcloud-tempo-footer > .playControls__timeline {
-        flex: 1 1 300px;
+        flex: 1 1 240px;
         min-width: 90px;
+        max-width: 480px;
         margin-left: 12px !important;
         margin-right: 8px !important;
       }
@@ -1272,13 +1284,16 @@ import { showReleaseNotice } from './tempo-updates.js';
       }
 
       .playControls__elements.soundcloud-tempo-footer > .playControls__soundBadge {
-        flex: 0 1 288px;
-        width: 288px;
-        min-width: 180px;
+        flex: 1 1 320px;
+        width: auto;
+        min-width: 250px;
         margin-left: 12px !important;
       }
 
       .soundcloud-tempo-footer .playbackSoundBadge__titleContextContainer {
+        flex: 1 1 0;
+        width: auto;
+        max-width: none;
         min-width: 0;
         margin-right: 12px !important;
       }
@@ -1348,19 +1363,20 @@ import { showReleaseNotice } from './tempo-updates.js';
         }
       }
 
-      @media (max-width: 960px) {
+      @media (max-width: 1100px) {
         .playControls__elements.soundcloud-tempo-footer > .playControls__timeline {
           min-width: 54px;
         }
       }
 
-      @media (max-width: 960px) {
+      @media (max-width: 1100px) {
         .playControls:has(.soundcloud-tempo-footer) {
           height: auto;
         }
 
         .playControls:has(.soundcloud-tempo-footer) .playControls__inner {
           height: auto;
+          padding-inline: 0;
         }
 
         .playControls__elements.soundcloud-tempo-footer {
@@ -1383,14 +1399,14 @@ import { showReleaseNotice } from './tempo-updates.js';
 
         .playControls__elements.soundcloud-tempo-footer > #soundcloud-tempo-control {
           order: 10;
-          flex: 1 1 292px !important;
+          flex: 1 1 416px !important;
           min-width: 292px !important;
           margin: 0 4px 0 0;
         }
 
         .playControls__elements.soundcloud-tempo-footer > .playControls__soundBadge {
           order: 11;
-          flex: 1 1 180px;
+          flex: 1 1 250px;
           width: auto;
           margin: 0 !important;
         }

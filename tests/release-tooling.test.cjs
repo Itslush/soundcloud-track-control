@@ -24,16 +24,16 @@ test('release URLs support subdirectory hosting and retain identity', async () =
   );
   assert.match(
     result.metadata,
-    /@downloadURL\s+https:\/\/example.com\/tempo\/downloads\/soundcloud-tempo-control.user.js/,
+    /@downloadURL\s+https:\/\/example.com\/tempo\/downloads\/soundcloud-track-control.user.js/,
   );
   assert.match(
     result.metadata,
-    /@updateURL\s+https:\/\/example.com\/tempo\/downloads\/soundcloud-tempo-control.meta.js/,
+    /@updateURL\s+https:\/\/example.com\/tempo\/downloads\/soundcloud-track-control.meta.js/,
   );
   assert.match(result.metadata, /@namespace\s+soundcloud-tempo-control\n/);
   assert.match(
     result.metadata,
-    /@name\s+SoundCloud Tempo Control \(Natural Pitch\)/,
+    /@name\s+SoundCloud Track Control \(Natural Pitch\)/,
   );
   assert.deepEqual(artifactConstants(result.output, ['VERSION', 'WEBSITE']), {
     VERSION: '1.0.1',
@@ -101,6 +101,18 @@ test('website downloads and hashes exactly match the userscript artifact', () =>
     path.join(root, 'site/public/downloads/soundcloud-tempo-control.user.js'),
   );
   assert.deepEqual(script, copy);
+  assert.deepEqual(
+    script,
+    fs.readFileSync(
+      path.join(root, 'site/public/downloads/soundcloud-track-control.user.js'),
+    ),
+  );
+  assert.deepEqual(
+    fs.readFileSync(path.join(root, 'dist/soundcloud_tempo_control.js')),
+    fs.readFileSync(
+      path.join(root, 'site/public/downloads/soundcloud-track-control.rpc.js'),
+    ),
+  );
   const manifest = JSON.parse(
     fs.readFileSync(path.join(root, 'dist/release.json')),
   );

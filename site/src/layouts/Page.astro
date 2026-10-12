@@ -15,8 +15,8 @@ const {
   description = 'Change playback speed on SoundCloud. Save speeds for individual tracks and share tempo timelines.',
 } = Astro.props;
 const pageTitle = title
-  ? `${title} · SoundCloud Tempo Control`
-  : 'SoundCloud Tempo Control';
+  ? `${title} · SoundCloud Track Control`
+  : 'SoundCloud Track Control';
 const canonical = release.siteUrl
   ? new URL(Astro.url.pathname, release.siteUrl).href
   : null;
@@ -54,14 +54,14 @@ const links = [
           <meta property="og:title" content={pageTitle} />
           <meta property="og:description" content={description} />
           <meta property="og:url" content={canonical} />
-          <meta property="og:site_name" content="SoundCloud Tempo Control" />
+          <meta property="og:site_name" content="SoundCloud Track Control" />
           <meta property="og:image" content={shareIcon} />
           <meta property="og:image:type" content="image/png" />
           <meta property="og:image:width" content="512" />
           <meta property="og:image:height" content="512" />
           <meta
             property="og:image:alt"
-            content="Tempo Control waveform and slider icon"
+            content="Track Control waveform and slider icon"
           />
           <meta name="twitter:card" content="summary" />
           <meta name="twitter:title" content={pageTitle} />
@@ -69,7 +69,7 @@ const links = [
           <meta name="twitter:image" content={shareIcon} />
           <meta
             name="twitter:image:alt"
-            content="Tempo Control waveform and slider icon"
+            content="Track Control waveform and slider icon"
           />
         </>
       )
@@ -80,8 +80,8 @@ const links = [
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
       <div class="site-header-inner shell">
-        <a class="brand" href={route()} aria-label="Tempo Control home"
-          ><Logo /><strong>Tempo Control</strong></a
+        <a class="brand" href={route()} aria-label="Track Control home"
+          ><Logo /><strong>Track Control</strong></a
         >
         <nav aria-label="Main navigation">
           {

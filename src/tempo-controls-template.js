@@ -162,6 +162,7 @@ export function controlsTemplate({
           <label class="increment-label">Default tempo increment <input id="tempo-increment" type="number" min="0.001" max="1" step="0.001" value="0.025" aria-label="Default tempo increment"> ×</label>
           <fieldset class="appearance-options" aria-label="SoundCloud theme">
             <label><input type="radio" name="appearance" value="native" checked>SoundCloud</label>
+            <label><input type="radio" name="appearance" value="light">Light</label>
             <label><input type="radio" name="appearance" value="charcoal">Charcoal</label>
             <label><input type="radio" name="appearance" value="oled">OLED</label>
           </fieldset>
@@ -207,7 +208,7 @@ export function controlsTemplate({
             <button class="backup-export" type="button">Export backup</button>
             <button class="backup-import" type="button">Import backup</button>
           </div>
-          <input class="backup-file" type="file" accept=".json,application/json" aria-label="Choose a Tempo Control backup" hidden />
+          <input class="backup-file" type="file" accept=".json,application/json" aria-label="Choose a Track Control backup" hidden />
           <div class="backup-preview" hidden>
             <p class="backup-summary"></p>
             <p class="backup-preferences"></p>

@@ -6,7 +6,7 @@ import subprocess
 
 from playwright.sync_api import expect, sync_playwright
 
-from userscript_fixture import ROOT, browser_options, userscript_source
+from userscript_fixture import ROOT, browser_options, userscript_source, text_contrast
 
 ATTRIBUTE = 'data-tempo-appearance'
 KEY = 'soundcloud.tempo.appearance'
@@ -32,6 +32,14 @@ def fixture(browser):
         page.goto('https://soundcloud.com/test-artist/first-track')
         expect(page.locator('#rate-slider')).to_be_visible()
         original = page.locator('body').evaluate('el => getComputedStyle(el).backgroundColor')
+        page.locator('.settings-button').click()
+        page.locator('.appearance-settings summary').click()
+        theme(page, 'light')
+        expect(page.locator('body')).to_have_css('background-color', 'rgb(244, 244, 244)')
+        expect(page.locator('#tempo-settings')).to_have_css('background-color', 'rgb(255, 255, 255)')
+        assert text_contrast(page.locator('#tempo-settings')) >= 4.5
+        page.reload()
+        expect(page.locator('html')).to_have_attribute(ATTRIBUTE, 'light')
         page.locator('.settings-button').click()
         page.locator('.appearance-settings summary').click()
         theme(page, 'charcoal')
@@ -76,7 +84,7 @@ def fixture(browser):
         for host_theme in ['dark', 'light']:
             page.locator('body').evaluate('(el, light) => el.classList.toggle("light", light)', host_theme == 'light')
             native = page.locator('body').evaluate('el => getComputedStyle(el).backgroundColor')
-            for mode in ['charcoal', 'oled']:
+            for mode in ['light', 'charcoal', 'oled']:
                 theme(page, mode)
                 for width in [1440, 390]:
                     page.set_viewport_size({'width': width, 'height': 1000})
@@ -90,7 +98,7 @@ def fixture(browser):
                 expect(page.locator('body')).to_have_css('background-color', native)
         assert not errors, errors
         assert page.locator('audio').count() == 0
-        return {'fixture': 'passed', 'modes': 3, 'hostThemes': 2, 'widths': [1440, 390], 'crossTab': True, 'reload': True, 'embeddedLifecycle': True, 'audioLoaded': False}
+        return {'fixture': 'passed', 'modes': 4, 'hostThemes': 2, 'widths': [1440, 390], 'crossTab': True, 'reload': True, 'embeddedLifecycle': True, 'audioLoaded': False}
     finally:
         context.close()
 

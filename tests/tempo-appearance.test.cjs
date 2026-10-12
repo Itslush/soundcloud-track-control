@@ -151,6 +151,18 @@ test('native is the default and introduces no host styles or attributes', () => 
   assert.equal(f.windowListeners.size, 0);
 });
 
+test('Light appearance restores from existing storage and returns to native', () => {
+  const f = fixture({ saved: 'light' });
+  assert.equal(f.appearance.mode(), 'light');
+  assert.equal(f.attributes.get(attribute), 'light');
+  assert.equal(f.styles.length, 1);
+  assert.equal(f.writes.length, 0);
+  assert.equal(f.appearance.setMode('native'), true);
+  assert.equal(f.attributes.size, 0);
+  assert.equal(f.values.get(key), 'native');
+  f.appearance.dispose();
+});
+
 test('mode changes reuse one stylesheet and persist only actual user changes', () => {
   const f = fixture();
   assert.equal(f.appearance.setMode('charcoal'), true);
@@ -346,7 +358,7 @@ test('the scoped stylesheet covers observed interactive theme tokens without alt
   );
   assert.match(
     css,
-    /html:is\(\[data-tempo-appearance="charcoal"\],\[data-tempo-appearance="oled"\]\)/,
+    /html:is\(\[data-tempo-appearance="light"\],\[data-tempo-appearance="charcoal"\],\[data-tempo-appearance="oled"\]\)/,
   );
   f.appearance.dispose();
 });
@@ -367,7 +379,9 @@ test('stars drift without changing host geometry, pause when hidden and respect 
   for (const shape of ['#ray', '#diamond', '#pair'])
     assert.ok(svg.includes(`href="${shape}"`));
   assert.doesNotMatch(svg, /filter|blur|animate|script|image|foreignObject/);
-  assert.equal((css.match(/url\(/g) || []).length, 1);
+  assert.equal((css.match(/url\(/g) || []).length, 2);
+  assert.match(css, /--tempo-page-accent: #b23c00/);
+  assert.match(css, /color-scheme: light/);
   assert.ok(css.length < 20000);
   assert.doesNotMatch(css, /tempo-star-drift/);
   assert.equal(f.appearance.speed(), 1.5);

@@ -4,7 +4,7 @@ import Icon from '../components/Icon.astro';
 import TimelineDemo from '../components/TimelineDemo.astro';
 import Capture from '../components/Capture.astro';
 import CaptureViewer from '../components/CaptureViewer.astro';
-import { installUrl, route, release } from '../lib/release';
+import { installUrl, rpcPluginUrl, route, release } from '../lib/release';
 
 const features = [
   {
@@ -68,7 +68,7 @@ const features = [
   {
     id: 'appearance',
     title: 'Choose the appearance',
-    text: 'The website has Light, Charcoal and OLED themes. On SoundCloud, keep its own theme or use Charcoal or OLED. Turn the drifting stars on or off, adjust their speed in the plugin, and hide the player’s semitone controls without resetting the shift.',
+    text: 'Keep SoundCloud’s own theme, or choose Light, Charcoal or OLED. The website has the same three custom themes. Turn the drifting stars on or off, adjust their speed in the plugin, and hide the player’s semitone controls without resetting the shift.',
     images: ['appearance'],
     alt: 'Appearance settings with control style, semitone visibility, theme and star-motion controls.',
   },
@@ -235,7 +235,7 @@ const technical = [
     aria-labelledby="install-title"
   >
     <div>
-      <h2 id="install-title">Install Tempo Control</h2><a
+      <h2 id="install-title">Install Track Control</h2><a
         class="text-link"
         href={route('guide/')}
         >Full setup guide<Icon name="arrow" size={20} /></a
@@ -244,7 +244,7 @@ const technical = [
     <ol class="install-steps">
       <li>
         <h3>Get Violentmonkey</h3><p>
-          A userscript manager runs Tempo Control in your browser.
+          A userscript manager runs Track Control in your browser.
         </p><a
           href="https://violentmonkey.github.io/get-it/"
           target="_blank"
@@ -253,7 +253,7 @@ const technical = [
         >
       </li>
       <li>
-        <h3>Install Tempo Control</h3><p>
+        <h3>Install Track Control</h3><p>
           Open the script, then confirm the installation in your manager.
         </p><a href={installUrl}
           >Install v{release.version}<Icon name="download" size={16} /></a
@@ -271,6 +271,21 @@ const technical = [
         >
       </li>
     </ol>
+    <div class="rpc-install">
+      <h3>Using soundcloud-rpc?</h3>
+      <p>
+        Download its plugin instead. In the app, open F1 → Plugins → Open
+        folder, add the file, then refresh and enable it. Reload SoundCloud
+        before playing.
+      </p>
+      <a
+        class="button"
+        href={rpcPluginUrl}
+        download="soundcloud_tempo_control.js"
+        ><Icon name="download" />Download desktop plugin v{release.version}</a
+      >
+      <a class="text-link" href={route('guide/#desktop')}>Desktop setup</a>
+    </div>
   </section>
   <CaptureViewer />
 </Page>

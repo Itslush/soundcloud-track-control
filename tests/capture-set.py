@@ -25,7 +25,7 @@ try:
         def relay(route):
             response = page.request.get(route.request.url, headers={'Origin': f'{parts.scheme}://{parts.netloc}'}, timeout=60000)
             headers = dict(response.headers)
-            headers['access-control-allow-origin'] = base.split('/soundcloud-tempo-control/')[0]
+            headers['access-control-allow-origin'] = base.split('/soundcloud-track-control/')[0]
             route.fulfill(response=response, headers=headers)
         page.route('**/api/resolve?*', relay)
         page.goto(base + 'set/', wait_until='networkidle')

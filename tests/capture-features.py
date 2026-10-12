@@ -14,7 +14,7 @@ s.DENSITY = 2
 THEMES = ['charcoal', 'light', 'oled']
 evidence = {
     'capturedAt': datetime.now(timezone.utc).isoformat(),
-    'capture': 'Unedited screenshots of the exact built userscript on the public Drown track and the built website. Native light variants switch SoundCloud existing body theme classes in an isolated capture browser; the plugin does not add a Light theme. A test-only CORS relay loads real public metadata for the local shared player. No audio is audible. Website sharing captures are before publication, not fabricated render results.',
+    'capture': 'Unedited screenshots of the exact built userscript on the public Drown track and the built website, using the plugin’s Light, Charcoal and OLED appearances. A test-only CORS relay loads real public metadata for the local shared player. No audio is audible. Website sharing captures are before publication, not fabricated render results.',
     'artifactSha256': hashlib.sha256(userscript_bytes()).hexdigest(),
     'deviceScaleFactor': 2, 'screenshots': [], 'pageErrors': [],
 }
@@ -57,7 +57,7 @@ def disclosure(page, selector, opened=True):
 def theme(page, name):
     settings(page)
     disclosure(page, '.appearance-settings')
-    page.locator(f'[name=appearance][value={"native" if name == "light" else name}]').check()
+    page.locator(f'[name=appearance][value={name}]').check()
     page.locator('body').evaluate('(body, light) => {body.classList.toggle("theme-dark", !light); body.classList.toggle("theme-light", light)}', name == 'light')
 
 
@@ -149,7 +149,7 @@ try:
         def relay(route):
             response = website.request.get(route.request.url, headers={'Origin': f'{parts.scheme}://{parts.netloc}'}, timeout=60000)
             headers = dict(response.headers)
-            headers['access-control-allow-origin'] = base.split('/soundcloud-tempo-control/')[0]
+            headers['access-control-allow-origin'] = base.split('/soundcloud-track-control/')[0]
             route.fulfill(response=response, headers=headers)
         website.route('**/api/resolve?*', relay)
         website.goto(base + 'share/#sct=' + code)

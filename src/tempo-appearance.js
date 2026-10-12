@@ -15,7 +15,7 @@ export function createTempoAppearance({ onChange, onError } = {}) {
   const motionModes = new Set(['system', 'on', 'off']);
   let motion = 'system';
   const attribute = 'data-tempo-appearance';
-  const modes = new Set(['native', 'charcoal', 'oled']);
+  const modes = new Set(['native', 'light', 'charcoal', 'oled']);
   const primary = { document };
   const documents = new Map([[document, primary]]);
   let storage;
@@ -80,7 +80,7 @@ export function createTempoAppearance({ onChange, onError } = {}) {
       [
         'primary',
         'var(--tempo-page-ink)',
-        '#111',
+        'var(--tempo-page-ground)',
         'var(--tempo-page-raised)',
         'var(--tempo-page-ink)',
       ],
@@ -141,7 +141,7 @@ export function createTempoAppearance({ onChange, onError } = {}) {
         ].map(([state, value]) => `--link-${name}-${state}: ${value};`),
       )
       .join('\n');
-    const scope = `html:is([${attribute}="charcoal"],[${attribute}="oled"])`;
+    const scope = `html:is([${attribute}="light"],[${attribute}="charcoal"],[${attribute}="oled"])`;
     return `
       @media (forced-colors: none) {
         ${scope}[${attribute}="charcoal"] {
@@ -207,6 +207,24 @@ export function createTempoAppearance({ onChange, onError } = {}) {
           background-size: 960px 840px;
           background-repeat: repeat;
         }
+        ${scope}[${attribute}="light"], ${scope}[${attribute}="light"] body {
+          --tempo-page-ground: #f4f4f4;
+          --tempo-page-ground-rgb: 244,244,244;
+          --tempo-page-surface: #fff;
+          --tempo-page-raised: #e8e8e8;
+          --tempo-page-raised-rgb: 232,232,232;
+          --tempo-page-ink: #171717;
+          --tempo-page-muted: #555;
+          --tempo-page-accent: #b23c00;
+          --primary-rgb: 23,23,23;
+          --secondary-rgb: 85,85,85;
+          --special-rgb: 178,60,0;
+          --link-rgb: 178,60,0;
+          color-scheme: light;
+        }
+        ${scope}[${attribute}="light"] body {
+          background-image: url("data:image/svg+xml,${encodeURIComponent(stars.replaceAll('#c1ccdf', '#555').replaceAll('#ece2d1', '#666'))}");
+        }
         ${scope} .l-container {
           background-color: transparent;
         }
@@ -241,7 +259,7 @@ export function createTempoAppearance({ onChange, onError } = {}) {
           background-color: var(--tempo-page-line);
         }
         ${scope} body::selection {
-          color: #111;
+          color: var(--tempo-page-ground);
           background-color: var(--tempo-page-accent);
         }
       }

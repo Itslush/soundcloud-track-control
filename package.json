@@ -1,6 +1,6 @@
 {
-  "name": "soundcloud-tempo-control",
-  "version": "1.2.1",
+  "name": "soundcloud-track-control",
+  "version": "1.2.2",
   "private": true,
   "description": "SoundCloud tempo userscript and its download website",
   "license": "MIT",

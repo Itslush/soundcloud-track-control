@@ -1,4 +1,4 @@
-# SoundCloud Tempo Control
+# SoundCloud Track Control
 
 An unofficial SoundCloud userscript and its download website, built for listeners who want speed control, natural pitch changes, optional key preservation and per-track tempo memory.
 

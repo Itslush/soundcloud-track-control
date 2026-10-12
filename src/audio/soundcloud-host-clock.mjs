@@ -58,7 +58,7 @@ const sameDescriptor = (a, b) =>
 
 function unsupported(detail, cause) {
   const error = new Error(
-    `SoundCloud playback integration is unavailable: ${detail}. Update Tempo Control or use native playback.`,
+    `SoundCloud playback integration is unavailable: ${detail}. Update Track Control or use native playback.`,
     { cause },
   );
   error.name = 'SoundCloudHostClockError';

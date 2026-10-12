@@ -50,7 +50,7 @@ export function showReleaseNotice(ui, VERSION, WEBSITE) {
   `;
   const message = document.createElement('span');
   message.setAttribute('role', 'status');
-  message.textContent = `Tempo Control updated · v${VERSION}`;
+  message.textContent = `Track Control updated · v${VERSION}`;
   notice.append(message);
   if (WEBSITE) {
     const link = document.createElement('a');

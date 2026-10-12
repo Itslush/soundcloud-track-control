@@ -31,7 +31,7 @@ with sync_playwright() as p:
             assert response.ok
             assert page.locator('meta[property="og:title"]').get_attribute('content') == page.title()
             image_url = page.locator('meta[property="og:image"]').get_attribute('content')
-            assert image_url == 'https://itslush.github.io/soundcloud-tempo-control/share-icon.png'
+            assert image_url == json.loads((ROOT / 'release.config.json').read_text())['siteUrl'] + 'share-icon.png'
             assert page.locator('meta[property="og:image:type"]').get_attribute('content') == 'image/png'
             assert page.locator('meta[name="twitter:card"]').get_attribute('content') == 'summary'
             icon = context.request.get(BASE + 'share-icon.png')

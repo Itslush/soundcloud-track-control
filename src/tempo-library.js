@@ -176,7 +176,7 @@ export function createTempoStore(api) {
       Array.isArray(value.preferences)
     )
       throw new Error(
-        'Choose a Tempo Control backup (version 1, up to 1,000 tracks).',
+        'Choose a Track Control backup (version 1, up to 1,000 tracks).',
       );
     const seen = new Set();
     let pointCount = 0;

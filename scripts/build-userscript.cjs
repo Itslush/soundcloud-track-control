@@ -4,10 +4,11 @@ const { createHash } = require('node:crypto');
 const esbuild = require('esbuild');
 const { workletAssets, writeWorkletArtifact } = require('./worklet-assets.cjs');
 const { root, readConfig, validateConfig } = require('./config.cjs');
+const { rpcPluginSource } = require('./rpc-plugin.cjs');
 
 function userscriptMetadata(config, version) {
   const entries = [
-    ['name', 'SoundCloud Tempo Control (Natural Pitch)'],
+    ['name', 'SoundCloud Track Control (Natural Pitch)'],
     ['namespace', 'soundcloud-tempo-control'],
     ['version', version],
     [
@@ -31,12 +32,12 @@ function userscriptMetadata(config, version) {
       ],
       [
         'downloadURL',
-        new URL('downloads/soundcloud-tempo-control.user.js', config.siteUrl)
+        new URL('downloads/soundcloud-track-control.user.js', config.siteUrl)
           .href,
       ],
       [
         'updateURL',
-        new URL('downloads/soundcloud-tempo-control.meta.js', config.siteUrl)
+        new URL('downloads/soundcloud-track-control.meta.js', config.siteUrl)
           .href,
       ],
     );
@@ -120,6 +121,12 @@ async function buildScript(
 async function main() {
   const config = readConfig(process.argv.includes('--release'));
   const build = await buildScript(config);
+  const rpcPlugin = rpcPluginSource(
+    build.output,
+    build.version,
+    config.siteUrl,
+  );
+  const rpcSha256 = createHash('sha256').update(rpcPlugin).digest('hex');
   const sha256 = createHash('sha256').update(build.output).digest('hex');
   const manifest = {
     version: build.version,
@@ -136,6 +143,22 @@ async function main() {
       build.output,
     );
     fs.writeFileSync(
+      path.join(destination, 'soundcloud-track-control.user.js'),
+      build.output,
+    );
+    fs.writeFileSync(
+      path.join(destination, 'soundcloud-track-control.meta.js'),
+      build.metadata,
+    );
+    fs.writeFileSync(
+      path.join(destination, 'soundcloud-track-control.rpc.js'),
+      rpcPlugin,
+    );
+    fs.writeFileSync(
+      path.join(destination, 'soundcloud_tempo_control.js'),
+      rpcPlugin,
+    );
+    fs.writeFileSync(
       path.join(destination, 'soundcloud-tempo-control.meta.js'),
       build.metadata,
     );
@@ -149,7 +172,7 @@ async function main() {
     );
     fs.writeFileSync(
       path.join(destination, 'SHA256SUMS.txt'),
-      `${sha256}  soundcloud-tempo-control.user.js\n`,
+      `${sha256}  soundcloud-tempo-control.user.js\n${rpcSha256}  soundcloud_tempo_control.js\n${sha256}  soundcloud-track-control.user.js\n${rpcSha256}  soundcloud-track-control.rpc.js\n`,
     );
   }
   const audioDirectory = path.join(root, 'site/public/audio');

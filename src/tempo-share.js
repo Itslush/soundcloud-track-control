@@ -44,7 +44,7 @@ export function decodeTempoCode(text, validate, parseTrack, website = '') {
       url.pathname !== landing.pathname
     ) {
       throw new Error(
-        'Use a SoundCloud tempo link or the Tempo Control share page.',
+        'Use a SoundCloud tempo link or the Track Control share page.',
       );
     }
     code =
