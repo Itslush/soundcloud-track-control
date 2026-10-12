@@ -36,7 +36,18 @@ sudo /opt/tempo-certbot/bin/certbot renew --dry-run
 curl https://tempo.88-96-45-138.sslip.io/soundcloud-tempo-control/api/status
 ```
 
-For an application update, copy `server/`, `src/`, `scripts/config.cjs`, and
-`release.config.json` to `/opt/tempo-preview`, reinstall the pinned requirements
-if they changed, then restart `tempo-preview`. Never copy private SSH keys,
+For an application update, copy `server/`, `src/`, and `scripts/config.cjs`
+to `/opt/tempo-preview`, reinstall the pinned requirements if they changed,
+then restart `tempo-preview` and `tempo-shares` after checking that no render
+is running. Back up the current runtime first and verify both services and
+existing ready links after restarting.
+
+Retain the VM's existing `release.config.json`. Its `siteUrl` path is still
+`/soundcloud-tempo-control/`, which the preview router reads and nginx forwards.
+The main repository's config uses `/soundcloud-track-control/` for GitHub Pages;
+copying it over the VM config breaks existing API routes. Old website links
+redirect through the compatibility site. Change the backend prefix only as a
+separate coordinated migration, not during an ordinary code update.
+
+Never copy private SSH keys,
 GitHub credentials, or a developer's `.env` to the server.
