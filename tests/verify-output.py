@@ -121,11 +121,20 @@ with sync_playwright() as p:
         const pcm = new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(pcm);
         values.push({db, peak:Math.max(...pcm.map(Math.abs)), volume:media.volume});
       }
-      media.muted = true; await new Promise(resolve=>setTimeout(resolve, 150));
-      const pcm = new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(pcm);
-      const muted = Math.max(...pcm.map(Math.abs));
+      media.muted = true;
+      const muteTime = ctx.currentTime, deadline = performance.now() + 3000;
+      const pcm = new Float32Array(analyser.fftSize);
+      let muted;
+      // Read rendered silence after the analyser's history advances, not a fixed wall-clock sleep.
+      do {
+        await new Promise(resolve=>setTimeout(resolve, 25));
+        analyser.getFloatTimeDomainData(pcm);
+        muted = Math.max(...pcm.map(Math.abs));
+      } while (performance.now() < deadline &&
+        (ctx.currentTime - muteTime < 2 * analyser.fftSize / ctx.sampleRate || muted >= .00001));
+      const muteAudioSeconds = ctx.currentTime - muteTime;
       media.pause(); await ctx.close(); URL.revokeObjectURL(url);
-      return {values, muted};
+      return {values, muted, muteAudioSeconds};
     }''')
     for value in measured['values']:
         assert abs(value['peak'] - .04 * 10 ** (value['db']/20)) < .003, measured
