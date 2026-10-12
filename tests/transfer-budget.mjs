@@ -12,8 +12,10 @@ const budgets = {
   css: 16 * 1024,
   fonts: 112 * 1024,
   initial: 192 * 1024,
-  initialWithAllPreviewCrops: 384 * 1024,
-  resources: 32,
+  initialResources: 32,
+  // Includes the expanded feature gallery in every theme and responsive variant, not one page load.
+  allPreviewVariants: 4 * 1024 * 1024,
+  allVariantResources: 128,
 };
 
 function attributes(tag) {
@@ -201,8 +203,9 @@ async function measure(origin, basePath, encoding) {
     css: sum((resource) => resource.kind === 'css'),
     fonts: sum((resource) => resource.kind === 'fonts'),
     initial: sum((resource) => resource.initial),
-    initialWithAllPreviewCrops: sum(() => true),
-    resources: rows.length,
+    initialResources: rows.filter(({ resource }) => resource.initial).length,
+    allPreviewVariants: sum(() => true),
+    allVariantResources: rows.length,
   };
   for (const [name, limit] of Object.entries(budgets))
     assert(
@@ -225,7 +228,9 @@ const { siteUrl } = config.readConfig();
 const basePath = siteUrl ? new URL(siteUrl).pathname : '/';
 const server = createApp({
   basePath,
-  siteRoot: process.env.TEMPO_TEST_SITE_ROOT || fileURLToPath(new URL('../dist/site/', import.meta.url)),
+  siteRoot:
+    process.env.TEMPO_TEST_SITE_ROOT ||
+    fileURLToPath(new URL('../dist/site/', import.meta.url)),
   service: {
     configured: false,
     resolve: async () => {
