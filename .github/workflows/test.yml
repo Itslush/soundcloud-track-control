@@ -19,7 +19,8 @@ jobs:
       - run: npm run setup:decoder-probe
       - run: npm test
       - run: npm run typecheck
-      - run: npm run build
+      - id: build
+        run: npm run build
         env:
           ASTRO_TELEMETRY_DISABLED: '1'
       - run: npm run test:transfer
@@ -30,12 +31,14 @@ jobs:
       - run: python tests/test-baseline-diagnostics.py
       - run: npm run test:browser
       - name: Natural output candidate
+        if: ${{ !cancelled() && steps.build.conclusion == 'success' }}
         run: |
           python tests/verify-natural-chunks.py
           python tests/verify-natural-output.py
           python tests/verify-natural-truncate.py
           python tests/verify-buffered-transport.py --local-only
       - name: Website regressions
+        if: ${{ !cancelled() && steps.build.conclusion == 'success' }}
         run: |
           export SITE_URL="http://127.0.0.1:4322$(node -p "new URL(require('./release.config.json').siteUrl).pathname")"
           node server/app.mjs &

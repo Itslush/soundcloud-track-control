@@ -11,8 +11,14 @@ SUITES = [
     'verify-timeline-pan.py', 'verify-fade-start.py', 'verify-output.py', 'verify-crossfade.py', 'verify-overhead.py', 'verify-updates.py',
 ]
 
+failed = []
 for suite in SUITES:
     print(f'Running {suite}', flush=True)
-    subprocess.run([sys.executable, str(ROOT/suite)], cwd=ROOT.parent, check=True,
-                   env={**os.environ, 'PYTHONUNBUFFERED': '1'})
+    result = subprocess.run([sys.executable, str(ROOT/suite)], cwd=ROOT.parent,
+                            env={**os.environ, 'PYTHONUNBUFFERED': '1'})
+    if result.returncode:
+        failed.append(suite)
+if failed:
+    print('Failed suites: ' + ', '.join(failed), flush=True)
+    sys.exit(1)
 print(f'Passed {len(SUITES)} muted browser suites.', flush=True)

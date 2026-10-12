@@ -83,10 +83,14 @@ def main():
         page.locator('.editor-save').click()
         for width in [1050, 390]:
             page.set_viewport_size({'width': width, 'height': 844})
-            bounds = page.locator('.editor-graph').bounding_box()
-            label = handle.locator('.ramp-label').bounding_box()
-            assert label['x'] >= bounds['x']
-            assert label['x'] + label['width'] <= bounds['x'] + bounds['width']
+            page.wait_for_function('''() => {
+                const graph = document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('.editor-graph');
+                const label = graph?.querySelector('.ramp-label');
+                if (!label) return false;
+                const bounds = graph.getBoundingClientRect(), text = label.getBoundingClientRect();
+                return bounds.right <= innerWidth && text.width > 0 &&
+                    text.left >= bounds.left && text.right <= bounds.right;
+            }''')
             page.locator('.tempo-editor').screenshot(path=str(ROOT / f'test-results/fade-start-{width}.png'))
         choose_option(page.locator('.point-curve'), 'instant')
         expect(handle).to_have_count(0)
