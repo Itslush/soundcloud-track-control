@@ -83,7 +83,9 @@ class FakeSource {
     this.context.trip('stop');
     this.stops.push(args);
   }
-  end() {
+  end({ early = false } = {}) {
+    if (!early)
+      this.context.currentTime = Math.max(this.context.currentTime, this.stops.at(-1)?.[0] ?? 0);
     for (const callback of [...this.listeners]) callback();
   }
 }
@@ -444,6 +446,7 @@ test('enforces own byte and node budgets and returns capacity on ended', () => {
   assert.equal(context.sources[0].listeners.size, 0);
   assert.ok(context.sources[0].disconnected);
   assert.ok(context.gains[0].disconnected);
+  context.currentTime = 0;
   output.schedule(pcm(next(program)));
   assert.equal(output.stats().nodes, 2);
   const byteContext = new FakeContext();
@@ -464,7 +467,7 @@ test('enforces forward scheduling time, past starts and monotonic non-overlappin
   context.currentTime = 0;
   assert.throws(() => output.schedule(pcm(first)), /ordered/);
   context.sources.forEach((source) => source.end());
-  assert.throws(() => output.schedule(pcm(first)), /ordered/);
+  assert.throws(() => output.schedule(pcm(first)), /past|ordered/);
   assert.equal(output.stats().scheduledAheadSeconds, 0);
   const late = new FakeContext();
   late.afterCreateBuffer = () => {
@@ -484,6 +487,24 @@ test('enforces forward scheduling time, past starts and monotonic non-overlappin
     /preroll/,
   );
   assert.equal(atZero.buffers.length, 0);
+});
+
+test('an early ended event cannot disconnect the final render block', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const context = new FakeContext();
+  const output = renderer(context);
+  const program = clock();
+  output.schedule(pcm(program));
+  const source = context.sources[0];
+  source.end({ early: true });
+  assert.equal(output.stats().nodes, 2);
+  assert.ok(source.buffer);
+  assert.equal(source.disconnected, false);
+  context.currentTime = program.outputEndFrame / context.sampleRate;
+  t.mock.timers.tick(100);
+  assert.equal(output.stats().nodes, 0);
+  assert.equal(output.stats().bufferBytes, 0);
+  assert.equal(source.disconnected, true);
 });
 
 test('reset releases all resources and stale ended callbacks cannot affect new generations', () => {

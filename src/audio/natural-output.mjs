@@ -230,6 +230,7 @@ export function createNaturalOutput({ context, destination, limits = {} }) {
   };
   function release(entry, stop) {
     if (!entries.delete(entry)) return [];
+    clearTimeout(entry.cleanupTimer);
     bufferBytes -= entry.bufferBytes;
     const errors = [];
     const attempt = (action) => {
@@ -268,9 +269,18 @@ export function createNaturalOutput({ context, destination, limits = {} }) {
       outputEndFrame: plan.outputEndFrame,
       generation,
       started: false,
+      cleanupTimer: null,
     };
     entry.onEnded = () => {
-      if (entry.generation === generation) release(entry, false);
+      if (entry.generation !== generation || !entries.has(entry)) return;
+      const remaining = entry.outputEndFrame / outputRate - now();
+      // Offline rendering can dispatch ended before its final render quantum is copied.
+      if (context.state !== 'closed' && remaining > 0) {
+        clearTimeout(entry.cleanupTimer);
+        entry.cleanupTimer = setTimeout(entry.onEnded, Math.max(1, remaining * 1000));
+        return;
+      }
+      release(entry, false);
     };
     entries.add(entry);
     bufferBytes += entry.bufferBytes;

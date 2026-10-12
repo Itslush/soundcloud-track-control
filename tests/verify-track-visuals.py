@@ -4,7 +4,7 @@ from PIL import Image
 from playwright.sync_api import sync_playwright, expect
 from userscript_fixture import ROOT, browser_options, userscript_source, text_contrast
 
-NODE = r'C:/Users/xxlus/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe'
+NODE = 'node'
 module = subprocess.check_output([NODE, '-p', "require('./tests/module-fixture.cjs')(['tempo-track-visuals.js'])"], cwd=ROOT, text=True, encoding='utf-8')
 captures = ROOT / '.impeccable/review/artwork'
 captures.mkdir(parents=True, exist_ok=True)

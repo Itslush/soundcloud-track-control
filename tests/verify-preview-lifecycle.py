@@ -181,19 +181,19 @@ with sync_playwright() as runtime:
         ready(page, before)
         before = page.evaluate('lifecycleState().configured')
         page.locator('#preview-play').click()
-        assert page.evaluate('lifecycleState().connected') == 0
+        page.wait_for_function('lifecycleState().connected === 0')
         page.locator('#preview-play').click()
         ready(page, before)
         before = page.evaluate('lifecycleState().configured')
         pitch(page, False)
-        assert page.evaluate('lifecycleState().connected') == 0
+        page.wait_for_function('lifecycleState().connected === 0')
         pitch(page, True)
         ready(page, before)
     page.locator('#preview-play').click()
     pitch(page, False)
     page.locator('#preview-play').click()
     page.wait_for_function('!document.querySelector("audio").preservesPitch && lifecycleState().outputPeak > 0.005')
-    assert page.evaluate('lifecycleState().connected') == 0
+    page.wait_for_function('lifecycleState().connected === 0')
     before = page.evaluate('lifecycleState().configured')
     pitch(page, True)
     ready(page, before)
