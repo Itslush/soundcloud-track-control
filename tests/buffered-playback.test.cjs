@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const { test } = require('node:test');
 
-const source = require('./module-fixture.cjs')(['tempo-buffered.js']);
+const source = require('./module-fixture.cjs')(['soundcloud/tempo-buffered.js']);
 const create = vm.runInNewContext(`${source}\ncreateBufferedPlayback;`, {
   DOMException,
   WeakRef,

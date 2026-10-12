@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright, expect
 from userscript_fixture import ROOT, browser_options, userscript_source, text_contrast
 
 NODE = 'node'
-module = subprocess.check_output([NODE, '-p', "require('./tests/module-fixture.cjs')(['tempo-track-visuals.js'])"], cwd=ROOT, text=True, encoding='utf-8')
+module = subprocess.check_output([NODE, '-p', "require('./tests/module-fixture.cjs')(['soundcloud/tempo-track-visuals.js'])"], cwd=ROOT, text=True, encoding='utf-8')
 captures = ROOT / '.impeccable/review/artwork'
 captures.mkdir(parents=True, exist_ok=True)
 with sync_playwright() as p:
@@ -38,16 +38,31 @@ with sync_playwright() as p:
               window.visualTrack='/test-artist/first-track';
               window.visuals=createTrackVisuals({document,readTrack:()=>visualTrack});
               visuals.overlap({nextTrack:'/test-artist/second-track',progress:0});
+              const layer=document.querySelector('.soundcloud-tempo-crossfade-artwork');
+              getComputedStyle(layer).getPropertyValue('--tempo-artwork-start');
               window.nativeCover=color('blue');
               avatar.style.backgroundImage=nativeCover;
               window.visualTrack='/test-artist/second-track';
               visuals.overlap({nextTrack:'/test-artist/second-track',progress:.5});
             }''')
+            interpolation = page.evaluate('''() => {
+              const layer=document.querySelector('.soundcloud-tempo-crossfade-artwork');
+              const animations=layer.getAnimations();
+              for(const animation of animations){animation.pause();animation.currentTime=50;}
+              const style=getComputedStyle(layer);
+              const result={count:animations.length,start:parseFloat(style.getPropertyValue('--tempo-artwork-start')),end:parseFloat(style.getPropertyValue('--tempo-artwork-end'))};
+              for(const animation of animations)animation.finish();
+              return result;
+            }''')
+            assert interpolation['count'] == 3, interpolation
+            assert abs(interpolation['start'] - 62.5) < .1 and abs(interpolation['end'] - 112.5) < .1, interpolation
             cover = page.locator('.playbackSoundBadge__avatar')
             pixels = Image.open(io.BytesIO(cover.screenshot())).convert('RGB')
             left, right = pixels.getpixel((3, 8)), pixels.getpixel((28, 8))
             assert left[0] > 200 and left[2] < 30, left
             assert right[0] < 30 and right[2] > 200, right
+            feather = pixels.getpixel((12, 8))
+            assert 150 < feather[0] < 210 and 45 < feather[2] < 105, feather
             bar = page.locator('.playControls')
             bar_box, notice_box = bar.bounding_box(), notice.bounding_box()
             assert notice_box['y'] >= bar_box['y'] and notice_box['y'] + notice_box['height'] <= bar_box['y'] + bar_box['height'] + 1
@@ -58,6 +73,9 @@ with sync_playwright() as p:
             assert page.locator('.soundcloud-tempo-incoming-artwork').evaluate('el=>getComputedStyle(el).opacity') == '0.5'
             page.evaluate('visuals.overlap(null)')
             expect(page.locator('.soundcloud-tempo-crossfade-artwork')).to_have_count(0)
+            page.evaluate("visuals.overlap({nextTrack:'/test-artist/missing-cover',progress:.8})")
+            assert page.locator('.soundcloud-tempo-crossfade-artwork').evaluate("layer=>layer.style.getPropertyValue('--tempo-artwork-progress')") == '0'
+            page.evaluate('visuals.overlap(null)')
             page.locator('#quick-key-shift').fill('0')
             page.locator('#quick-key-shift').dispatch_event('change')
             expect(notice).to_be_hidden()

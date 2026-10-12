@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const { test } = require('node:test');
 
-const source = require('./module-fixture.cjs')(['tempo-wasm.js']);
+const source = require('./module-fixture.cjs')(['soundcloud/tempo-wasm.js']);
 const settle = async () => {
   for (let index = 0; index < 20; index++) await Promise.resolve();
   await new Promise(setImmediate);

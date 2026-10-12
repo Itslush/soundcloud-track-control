@@ -3,8 +3,8 @@ const vm = require('node:vm');
 const { test } = require('node:test');
 
 const sources = require('./module-fixture.cjs')([
-  'tempo-editor.js',
-  'tempo-library.js',
+  'timeline/tempo-editor.js',
+  'library/tempo-library.js',
 ]);
 const track = '/artist/track';
 const fixedKey = 'soundcloud.tempo.track.' + encodeURIComponent(track);

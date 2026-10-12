@@ -1,4 +1,4 @@
-import { createStarMotion } from '../../../src/star-motion.js';
+import { createStarMotion } from '../../../src/appearance/star-motion.js';
 
 const field = document.querySelector('.space-accent');
 const pattern = field?.querySelector('pattern');

@@ -10,7 +10,7 @@ The footer gives surplus width to the title after the playback timeline reaches 
 
 ## Evidence inspected
 
-- Current source diff in `src/tempo-inline-source.js`, `src/tempo-appearance.js`, `src/tempo-controls-template.js`, the release build helpers and the affected website files.
+- Current source diff in `src/userscript/tempo-inline-source.js`, `src/appearance/tempo-appearance.js`, `src/controls/tempo-controls-template.js`, the release build helpers and the affected website files.
 - `test-results/footer-width.json` records all 18 combinations of three custom themes and widths 1920, 1440, 1050, 768, 390 and 320. Title width increases to 516 px at 1920 and 220 px at 1440. The 1050 fixture retains a narrower title with truncation; transport and actions remain reachable.
 - Visually inspected the Light footer at 1920 and 320, Charcoal at 1050, OLED at 768, and the Light settings dialog over the dark host fixture. No clipped action or collision was visible in those captures.
 - Inspected fresh real player and appearance captures in Light and OLED, plus the updated landing desktop/mobile captures and focused mobile hero and desktop player row. The controls keep their authored appearance, and the page retains the existing hierarchy and responsive stacking.

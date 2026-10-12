@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
-const source = require('./module-fixture.cjs')(['tempo-crossfade.js']);
+const source = require('./module-fixture.cjs')(['soundcloud/tempo-crossfade.js']);
 const { createCrossfade } = vm.runInNewContext(source + '\nfixtureModule;', {
   AbortController,
 });
@@ -201,6 +201,10 @@ test('crossfade is opt-in, overlaps once, then restores normal playback', async 
   f.tick();
   assert.equal(f.state.clicks, 1);
   assert.ok(Math.abs(visuals.at(-1).progress - 0.2) < 1e-12);
+  assert.equal(visuals.at(-1).track, 'first');
+  assert.equal(visuals.at(-1).position, 26);
+  assert.equal(visuals.at(-1).duration, 30);
+  assert.equal(visuals.at(-1).nextPosition, 1);
   f.context.currentTime = 5;
   f.audio.currentTime = 5;
   f.tick();

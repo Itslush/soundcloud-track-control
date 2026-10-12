@@ -1,4 +1,4 @@
-import { validateProfile, evaluatePoints, round } from './tempo-profile.js';
+import { validateProfile, evaluatePoints, round } from '../timeline/tempo-profile.js';
 import { encodeTempoCode, decodeTempoCode } from './tempo-share.js';
 
 export function adjustedDuration(profile) {

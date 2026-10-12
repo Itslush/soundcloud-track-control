@@ -8,7 +8,7 @@ import { createSoundCloud } from '../soundcloud.mjs';
 import { renderPcm, SAMPLE_RATE, MAX_SOURCE_SECONDS } from './audio.mjs';
 import { downloadMedia } from './download.mjs';
 import { renderSet } from './set-worker.mjs';
-import { formatPitchNotice } from '../../src/tempo-pitch-notice.js';
+import { formatPitchNotice } from '../../src/sharing/tempo-pitch-notice.js';
 
 const ffmpeg = process.env.FFMPEG_PATH || 'ffmpeg';
 export function runFfmpeg(args, input) {

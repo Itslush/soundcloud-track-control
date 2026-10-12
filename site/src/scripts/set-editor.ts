@@ -1,14 +1,14 @@
-import { decodeTempoCode, tempoShareLink } from '../../../src/tempo-share.js';
-import { validateProfile } from '../../../src/tempo-profile.js';
+import { decodeTempoCode, tempoShareLink } from '../../../src/sharing/tempo-share.js';
+import { validateProfile } from '../../../src/timeline/tempo-profile.js';
 import {
   adjustedDuration,
   decodeTempoSet,
   encodeTempoSet,
   validateTempoSet,
-} from '../../../src/tempo-set.js';
-import type { TempoProfile } from '../../../src/tempo-editor';
-import type { TempoSet } from '../../../src/tempo-set';
-import { syncTempoRange } from '../../../src/tempo-range.js';
+} from '../../../src/sharing/tempo-set.js';
+import type { TempoProfile } from '../../../src/timeline/tempo-editor';
+import type { TempoSet } from '../../../src/sharing/tempo-set';
+import { syncTempoRange } from '../../../src/controls/tempo-range.js';
 import { initNumberFields } from './number-field';
 import { initDiscordShare } from './discord-share';
 

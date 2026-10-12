@@ -2,9 +2,9 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const vm = require('node:vm');
 const source = require('./module-fixture.cjs')([
-  'tempo-share.js',
-  'tempo-profile.js',
-  'tempo-pitch-settings.js',
+  'sharing/tempo-share.js',
+  'timeline/tempo-profile.js',
+  'controls/tempo-pitch-settings.js',
 ]);
 const api = vm.runInNewContext(source + ';fixtureModule', {
   URL,

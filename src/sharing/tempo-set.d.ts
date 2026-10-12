@@ -1,4 +1,4 @@
-import type { TempoProfile } from './tempo-editor';
+import type { TempoProfile } from '../timeline/tempo-editor';
 export interface TempoSet {
   v: 1;
   tracks: TempoProfile[];

@@ -4,7 +4,7 @@ import { createSoundCloud } from '../soundcloud.mjs';
 import { renderPcm, SAMPLE_RATE, MAX_SOURCE_SECONDS } from './audio.mjs';
 import { downloadMedia } from './download.mjs';
 import { stitchPcm, setTimings, artworkFrames } from './set-media.mjs';
-import { formatPitchNotice } from '../../src/tempo-pitch-notice.js';
+import { formatPitchNotice } from '../../src/sharing/tempo-pitch-notice.js';
 
 const filterPath = (filename) =>
   filename.replaceAll('\\', '/').replaceAll(':', '\\:').replaceAll("'", "\\'");

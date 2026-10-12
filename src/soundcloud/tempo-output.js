@@ -1,5 +1,5 @@
-import { syncTempoRange } from './tempo-range.js';
-import { validOutputDb } from './audio/output-level.mjs';
+import { syncTempoRange } from '../controls/tempo-range.js';
+import { validOutputDb } from '../audio/output-level.mjs';
 
 export function createOutputLevel({ references, readUI }) {
   const key = 'soundcloud.tempo.outputDb';

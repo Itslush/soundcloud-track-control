@@ -1,10 +1,10 @@
-import { validOutputDb } from './audio/output-level.mjs';
-import { defaultTempoIncrement, validTempoIncrement } from './tempo-increment.js';
+import { validOutputDb } from '../audio/output-level.mjs';
+import { defaultTempoIncrement, validTempoIncrement } from '../controls/tempo-increment.js';
 
 import {
   defaultPitchSettings,
   validPitchSettings,
-} from './tempo-pitch-settings.js';
+} from '../controls/tempo-pitch-settings.js';
 
 export function createTempoStore(api) {
   const speedPrefix = 'soundcloud.tempo.track.';

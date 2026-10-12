@@ -36,7 +36,7 @@ sudo /opt/tempo-certbot/bin/certbot renew --dry-run
 curl https://tempo.88-96-45-138.sslip.io/soundcloud-tempo-control/api/status
 ```
 
-For an application update, copy `server/`, `scripts/config.cjs`, and
+For an application update, copy `server/`, `src/`, `scripts/config.cjs`, and
 `release.config.json` to `/opt/tempo-preview`, reinstall the pinned requirements
 if they changed, then restart `tempo-preview`. Never copy private SSH keys,
 GitHub credentials, or a developer's `.env` to the server.

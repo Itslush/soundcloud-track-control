@@ -18,7 +18,7 @@ import {
   downloadMedia,
 } from '../server/shares/download.mjs';
 import { parseRenderCode, createShareStore } from '../server/shares/store.mjs';
-import { encodeTempoCode } from '../src/tempo-share.js';
+import { encodeTempoCode } from '../src/sharing/tempo-share.js';
 import { createSharesApp, embedHtml } from '../server/shares/app.mjs';
 
 const profile = {
@@ -382,7 +382,7 @@ test('embed adjustments describe fixed, fractional and automated settings withou
 });
 
 test('set embeds describe all tracks and redirect to the set player without changing the video endpoint', async () => {
-  const { encodeTempoSet } = await import('../src/tempo-set.js');
+  const { encodeTempoSet } = await import('../src/sharing/tempo-set.js');
   const code = encodeTempoSet({
     v: 1,
     tracks: [

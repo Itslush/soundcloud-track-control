@@ -6,7 +6,7 @@ from userscript_fixture import ROOT, browser_options, userscript_source
 
 NODE = 'node'
 modules = subprocess.check_output([
-    NODE, '-p', "require('./tests/module-fixture.cjs')(['tempo-crossfade.js','tempo-wasm.js','tempo-dependency.js'])"
+    NODE, '-p', "require('./tests/module-fixture.cjs')(['soundcloud/tempo-crossfade.js','soundcloud/tempo-wasm.js','soundcloud/tempo-dependency.js'])"
 ], cwd=ROOT, text=True, encoding='utf-8')
 
 with sync_playwright() as p:

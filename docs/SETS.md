@@ -10,7 +10,7 @@ Sets use `SCS1.` codes, separate from single-track `SCT1.` codes. The canonical 
 }
 ```
 
-Each track keeps its tempo points, pitch mode, fractional semitone shift and pitch automation. `src/tempo-set.js` validates, encodes and decodes this payload. `tempoSetLink` opens `/set/#scs=...`. Track titles and creators come from the resolved public SoundCloud tracks, not from link-provided labels.
+Each track keeps its tempo points, pitch mode, fractional semitone shift and pitch automation. `src/sharing/tempo-set.js` validates, encodes and decodes this payload. `tempoSetLink` opens `/set/#scs=...`. Track titles and creators come from the resolved public SoundCloud tracks, not from link-provided labels.
 
 The existing render endpoint accepts `{code: "SCS1...", publish: true}`. Publishing remains an explicit action. Ready jobs use the same `/listen/<id>` and `/media/<id>.mp4` routes, storage quota and seven-day expiry as single tracks. Existing SCT1 codes and cache identifiers do not change.
 

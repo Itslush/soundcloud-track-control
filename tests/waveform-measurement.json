@@ -1,0 +1,133 @@
+{
+  "browser": "144.0.7559.110",
+  "viewportCssPixels": [390, 844],
+  "deviceScaleFactor": 3,
+  "rendererDprCap": 2,
+  "cpuThrottle": 6,
+  "scope": "Owned headless Chromium, isolated production renderer with warm real SoundCloud 1800-sample envelope, no audio playback. Five alternating enabled/collapsed pairs. Whole-page task/script time includes DOM updates and instrumentation. Not a full SoundCloud or physical-device measurement. Heap endpoint deltas include garbage collection. CPU load was sampled immediately after the run, not during it.",
+  "hostLoadAfterRun": {
+    "cpu": "AMD Ryzen 9 5950X 16-Core Processor",
+    "logicalProcessors": 32,
+    "loadPercent": 68
+  },
+  "runs": [
+    {
+      "pair": 1,
+      "state": "enabled",
+      "elapsedSeconds": 3.0151,
+      "updates": 21,
+      "draws": 16,
+      "taskSeconds": 0.096667,
+      "scriptSeconds": 0.047635,
+      "heapDeltaBytes": -359960
+    },
+    {
+      "pair": 1,
+      "state": "collapsed",
+      "elapsedSeconds": 3.0193,
+      "updates": 19,
+      "draws": 0,
+      "taskSeconds": 0.024572,
+      "scriptSeconds": 0.012181,
+      "heapDeltaBytes": 18308
+    },
+    {
+      "pair": 2,
+      "state": "enabled",
+      "elapsedSeconds": 3.0074,
+      "updates": 24,
+      "draws": 18,
+      "taskSeconds": 0.109406,
+      "scriptSeconds": 0.054222,
+      "heapDeltaBytes": 204572
+    },
+    {
+      "pair": 2,
+      "state": "collapsed",
+      "elapsedSeconds": 3.0182,
+      "updates": 18,
+      "draws": 0,
+      "taskSeconds": 0.027851,
+      "scriptSeconds": 0.012814,
+      "heapDeltaBytes": 17540
+    },
+    {
+      "pair": 3,
+      "state": "enabled",
+      "elapsedSeconds": 3.0086,
+      "updates": 22,
+      "draws": 16,
+      "taskSeconds": 0.093334,
+      "scriptSeconds": 0.047044,
+      "heapDeltaBytes": 191780
+    },
+    {
+      "pair": 3,
+      "state": "collapsed",
+      "elapsedSeconds": 3.0082,
+      "updates": 17,
+      "draws": 0,
+      "taskSeconds": 0.019325,
+      "scriptSeconds": 0.010501,
+      "heapDeltaBytes": 16624
+    },
+    {
+      "pair": 4,
+      "state": "enabled",
+      "elapsedSeconds": 3.0091,
+      "updates": 22,
+      "draws": 16,
+      "taskSeconds": 0.082942,
+      "scriptSeconds": 0.040525,
+      "heapDeltaBytes": -426752
+    },
+    {
+      "pair": 4,
+      "state": "collapsed",
+      "elapsedSeconds": 3.0105,
+      "updates": 17,
+      "draws": 0,
+      "taskSeconds": 0.020745,
+      "scriptSeconds": 0.009147,
+      "heapDeltaBytes": 16260
+    },
+    {
+      "pair": 5,
+      "state": "enabled",
+      "elapsedSeconds": 3.0087,
+      "updates": 25,
+      "draws": 18,
+      "taskSeconds": 0.103478,
+      "scriptSeconds": 0.051446,
+      "heapDeltaBytes": 204284
+    },
+    {
+      "pair": 5,
+      "state": "collapsed",
+      "elapsedSeconds": 3.0075,
+      "updates": 23,
+      "draws": 0,
+      "taskSeconds": 0.021337,
+      "scriptSeconds": 0.012347,
+      "heapDeltaBytes": 21084
+    }
+  ],
+  "summary": {
+    "enabled": {
+      "medianTaskSeconds": 0.096667,
+      "taskSecondsRange": [0.082942, 0.109406],
+      "drawsRange": [16, 18],
+      "totalDraws": 84
+    },
+    "collapsed": {
+      "medianTaskSeconds": 0.021337,
+      "taskSecondsRange": [0.019325, 0.027851],
+      "drawsRange": [0, 0],
+      "totalDraws": 0
+    }
+  },
+  "pausedStopsDrawing": true,
+  "hiddenStopsDrawing": true,
+  "errors": [],
+  "limits": "This run did not reach the20Hz render cap. Concurrent machine load was uncontrolled. No speedup, physical low-end performance, or smoothness claim follows from these observations."
+}

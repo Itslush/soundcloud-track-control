@@ -1,4 +1,4 @@
-import SignalsmithStretch from '../vendor/signalsmith/SignalsmithStretch.js';
+import SignalsmithStretch from '../../vendor/signalsmith/SignalsmithStretch.js';
 
 export function createStretchNode(
   context,

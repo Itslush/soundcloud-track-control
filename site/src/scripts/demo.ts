@@ -1,8 +1,8 @@
-import { tempoShareLink } from '../../../src/tempo-share.js';
-import { formatPitchNotice } from '../../../src/tempo-pitch-notice.js';
+import { tempoShareLink } from '../../../src/sharing/tempo-share.js';
+import { formatPitchNotice } from '../../../src/sharing/tempo-pitch-notice.js';
 import { release } from '../lib/release';
-import { createTempoEditor } from '../../../src/tempo-editor.js';
-import type { TempoProfile } from '../../../src/tempo-editor.js';
+import { createTempoEditor } from '../../../src/timeline/tempo-editor.js';
+import type { TempoProfile } from '../../../src/timeline/tempo-editor.js';
 import { AudioPreview, sampleAudio } from './audio-preview';
 import { initNumberFields } from './number-field';
 import { syncRange } from './range';

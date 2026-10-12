@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.4
+
+- Android touch controls stay readable when the browser uses SoundCloud's desktop site. Open Controls for tempo, semitones, volume, saved tempo and settings. This requires a userscript-capable browser, not the native SoundCloud app.
+- Open Waveform for a scrolling view with a fixed playhead, exact seeking and an incoming-track lane during supported crossfades. It uses SoundCloud's amplitude envelope, not an analyzed beat grid.
+- Crossfade artwork has a wider feather and eased start and finish. Desktop and touch players interpolate the existing progress updates; reduced motion uses opacity. Newly rendered set videos use the same easing curve at their existing frame rate.
+- Saved-speed artwork updates touch the affected covers instead of rescanning every cover after each ordinary tempo adjustment.
+- The source is grouped by feature, and website deployment now waits for a successful test run of the same commit.
+
 ## 1.2.1
 
 - Crossfades keep the current artwork on the left and blend in the next artwork from the right, following the audio overlap. Reduced-motion users get a simple opacity blend in the plugin.

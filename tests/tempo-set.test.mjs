@@ -20,7 +20,7 @@ import {
   decodeTempoSet,
   adjustedDuration,
   tempoSetLink,
-} from '../src/tempo-set.js';
+} from '../src/sharing/tempo-set.js';
 import { parseRenderCode, createShareStore } from '../server/shares/store.mjs';
 import {
   stitchPcm,
@@ -263,6 +263,8 @@ test('artwork keeps outgoing left and incoming right on the audio join clock', a
         assert.equal(frame[0], 0);
         assert.equal(frame[639 * 3], 200);
         assert.ok(Math.abs(frame[320 * 3] - 100) < 2);
+        assert.ok(Math.abs(frame[240 * 3] - 50) < 2);
+        assert.ok(Math.abs(frame[400 * 3] - 150) < 2);
       }
       if (count === 20) assert.equal(frame[0], 200);
       count++;

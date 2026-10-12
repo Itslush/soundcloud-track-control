@@ -24,7 +24,7 @@ LEGACY = [ROOT / f'src/{name}.js' for name in ['tempo-dependency', 'tempo-output
 
 def legacy_source():
     compiled = subprocess.run(
-        [os.environ.get('NODE', 'node'), '-e', "process.stdout.write(require('./tests/module-fixture.cjs')(['tempo-dependency.js', 'tempo-output.js', 'tempo-wasm.js']))"],
+        [os.environ.get('NODE', 'node'), '-e', "process.stdout.write(require('./tests/module-fixture.cjs')(['soundcloud/tempo-dependency.js', 'soundcloud/tempo-output.js', 'soundcloud/tempo-wasm.js']))"],
         cwd=ROOT, check=True, capture_output=True, text=True, timeout=30,
     ).stdout
     start = '''globalThis.installOwnerGraphFixture = (audioModules) => {

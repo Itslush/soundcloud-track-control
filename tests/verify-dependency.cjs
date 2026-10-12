@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
-const adapter = require('./module-fixture.cjs')(['tempo-dependency.js']);
+const adapter = require('./module-fixture.cjs')(['soundcloud/tempo-dependency.js']);
 
 async function check({
   reject = false,

@@ -11,9 +11,9 @@ import {
 } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { decodeTempoCode, encodeTempoCode } from '../../src/tempo-share.js';
-import { validateProfile } from '../../src/tempo-profile.js';
-import { decodeTempoSet, encodeTempoSet } from '../../src/tempo-set.js';
+import { decodeTempoCode, encodeTempoCode } from '../../src/sharing/tempo-share.js';
+import { validateProfile } from '../../src/timeline/tempo-profile.js';
+import { decodeTempoSet, encodeTempoSet } from '../../src/sharing/tempo-set.js';
 import { ServiceError, trackUrl } from '../soundcloud.mjs';
 
 export const TTL = 7 * 86400000;

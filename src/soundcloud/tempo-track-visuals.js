@@ -1,4 +1,5 @@
-import { formatPitchNotice } from './tempo-pitch-notice.js';
+import { formatPitchNotice } from '../sharing/tempo-pitch-notice.js';
+import { artworkTransition } from '../appearance/artwork-transition.js';
 
 export function createTrackVisuals({ document, readTrack }) {
   let layer, incoming, nextTrack, notice;
@@ -57,10 +58,12 @@ export function createTrackVisuals({ document, readTrack }) {
       const background = cover(host);
       if (background !== 'none') incoming.style.backgroundImage = background;
     }
-    const progress = incoming.style.backgroundImage ? state.progress : 0;
-    layer.style.setProperty('--incoming-progress', String(progress));
-    layer.style.setProperty('--fade-start', `${110 - 140 * progress}%`);
-    layer.style.setProperty('--fade-end', `${130 - 140 * progress}%`);
+    const { progress, start, end } = artworkTransition(
+      incoming.style.backgroundImage ? state.progress : 0,
+    );
+    layer.style.setProperty('--tempo-artwork-progress', String(progress));
+    layer.style.setProperty('--tempo-artwork-start', `${start * 100}%`);
+    layer.style.setProperty('--tempo-artwork-end', `${end * 100}%`);
   }
 
   function pitch(shift) {

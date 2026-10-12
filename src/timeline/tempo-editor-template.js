@@ -1,4 +1,4 @@
-import { tempoFieldStyle } from './tempo-fields.js';
+import { tempoFieldStyle } from '../controls/tempo-fields.js';
 import { editorStyle } from './tempo-editor-style.js';
 
 export function editorTemplate(inline = false) {

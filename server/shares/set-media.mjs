@@ -1,6 +1,7 @@
 import { openSync, closeSync, readSync, writeSync, fstatSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { SAMPLE_RATE, MAX_OUTPUT_SECONDS } from './audio.mjs';
+import { artworkTransition } from '../../src/appearance/artwork-transition.js';
 
 export function stitchPcm(inputs, output, overlaps) {
   const handles = [];
@@ -116,9 +117,12 @@ export async function* artworkFrames(
         ? Math.max(0, Math.min(1, (time - timings[index + 1].start) / join))
         : 0;
     if (progress > 0) {
-      const edge = 1.2 - 1.4 * progress;
+      const { start, end } = artworkTransition(progress);
       for (let x = 0; x < 640; x++) {
-        const incoming = Math.max(0, Math.min(1, (x / 639 - edge + 0.1) / 0.2));
+        const incoming = Math.max(
+          0,
+          Math.min(1, (x / 639 - start) / (end - start)),
+        );
         for (let y = 0; y < 640; y++) {
           const offset = (y * 640 + x) * 3;
           for (let channel = 0; channel < 3; channel++) {

@@ -12,7 +12,7 @@ if source_mode:
     assert script.count(opening) == 1 and script.count(following) == 1
     start, end = script.index(opening), script.index(following)
     assert end > start
-    output_source = (ROOT/'src/tempo-output.js').read_text(encoding='utf-8')
+    output_source = (ROOT/'src/soundcloud/tempo-output.js').read_text(encoding='utf-8')
     script = script[:start] + output_source + '\nwindow.outputLevelProbe = outputLevel;\n' + script[end:]
 
 with sync_playwright() as p:
@@ -169,5 +169,5 @@ with sync_playwright() as p:
     browser.close()
 print('Global output level: persistence, native volume semantics, both pitch modes, no compounding, video isolation and ticks passed.')
 if source_mode:
-    print(f'Current output source SHA256: {hashlib.sha256((ROOT/"src/tempo-output.js").read_bytes()).hexdigest()}')
+    print(f'Current output source SHA256: {hashlib.sha256((ROOT/"src/soundcloud/tempo-output.js").read_bytes()).hexdigest()}')
     print('Current output source: synchronous mute, native validation, queued event deduplication and unsubscribe passed.')

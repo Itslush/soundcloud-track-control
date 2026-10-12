@@ -369,7 +369,6 @@ export function createWasmAudio({
       state &&
         state.source.context.state === 'running' &&
         !state.buffered &&
-        !state.gate &&
         !state.loading &&
         !state.stopping &&
         (!(shift || (preserve && rate !== 1)) || state.active),
@@ -377,6 +376,7 @@ export function createWasmAudio({
   }
 
   function fadeNode(state) {
+    if (state.gate) return state.nativeMix;
     if (!state.fade) {
       const fade = state.source.context.createGain();
       connect.call(fade, state.output);
@@ -466,7 +466,6 @@ export function createWasmAudio({
     if (
       !state ||
       state.buffered ||
-      state.gate ||
       state.loading ||
       state.stopping ||
       state.source.context.state !== 'running' ||
@@ -512,9 +511,10 @@ export function createWasmAudio({
       levelAudio = target;
     }
     function restore(target) {
-      if (!target.fade || target.source.context.state === 'closed') return;
-      target.fade.gain.cancelScheduledValues(target.source.context.currentTime);
-      target.fade.gain.setValueAtTime(1, target.source.context.currentTime);
+      const fade = target.nativeMix || target.fade;
+      if (!fade || target.source.context.state === 'closed') return;
+      fade.gain.cancelScheduledValues(target.source.context.currentTime);
+      fade.gain.setValueAtTime(1, target.source.context.currentTime);
     }
     function dispose() {
       if (closed) return;
@@ -613,9 +613,10 @@ export function createWasmAudio({
         if (!this.silence(target)) return false;
         const next = states.get(target);
         const at = next.source.context.currentTime;
-        next.fade.gain.cancelScheduledValues(at);
-        next.fade.gain.setValueAtTime(0, at);
-        next.fade.gain.linearRampToValueAtTime(1, at + duration);
+        const fade = fadeNode(next);
+        fade.gain.cancelScheduledValues(at);
+        fade.gain.setValueAtTime(0, at);
+        fade.gain.linearRampToValueAtTime(1, at + duration);
         const time = context.currentTime;
         headEnvelope.gain.cancelScheduledValues(time);
         headEnvelope.gain.setValueAtTime(1, time);

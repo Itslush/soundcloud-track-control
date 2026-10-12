@@ -1,4 +1,4 @@
-import type { TempoProfile } from './tempo-editor';
+import type { TempoProfile } from '../timeline/tempo-editor';
 export function encodeTempoCode(data: TempoProfile): string;
 export function tempoShareLink(data: TempoProfile, website?: string): string;
 export function decodeTempoCode(

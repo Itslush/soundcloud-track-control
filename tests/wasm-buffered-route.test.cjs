@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const { test } = require('node:test');
 
-const source = require('./module-fixture.cjs')(['tempo-wasm.js']);
+const source = require('./module-fixture.cjs')(['soundcloud/tempo-wasm.js']);
 const modulePromise = import('../src/audio/playback-gate.mjs');
 
 const deferred = () => {
@@ -271,6 +271,53 @@ test('crossfade keeps the outgoing processor alive and restores native gain on c
   assert.equal(gainTo(f.mediaSource, f.output), 1);
   assert.equal(f.subscribers.size, 1);
   f.context.close();
+});
+
+test('crossfade works after buffered handback without duplicating or bypassing the native gate', async () => {
+  const f = await fixture();
+  const settings = { preserve: false, shift: 0, rate: 1 };
+  f.api.beginCrossfade(f.audio, {}, 0, 1, 5, { duration: 13 }).dispose();
+  const lease = f.api.acquireBuffered(f.audio, f.hooks);
+  await lease.ready;
+  assert.equal(f.api.crossfadeReady(f.audio, settings), false);
+  assert.throws(
+    () => f.api.beginCrossfade(f.audio, {}, 0, 1, 5, { duration: 13 }),
+    /not ready/,
+  );
+  await lease.release(12);
+  f.audio.paused = false;
+  assert.equal(f.api.crossfadeReady(f.audio, settings), true);
+  const overlap = f.api.beginCrossfade(f.audio, {}, 0, 1, 5, { duration: 13 });
+  assert.equal(gainTo(f.mediaSource, f.output), 0);
+  downstreamUnchanged(f);
+  f.setLevel({ volume: 0.4, outputDb: 6 });
+  const [tail, head] = f.context.nodes
+    .filter((node) => node.kind === 'tail')
+    .slice(-2);
+  const expected = 0.4 * 10 ** (6 / 20);
+  assert.equal(gainTo(tail, f.output), 0);
+  assert.equal(gainTo(head, f.output), expected);
+  f.setLevel({ muted: true });
+  assert.equal(gainTo(head, f.output), 0);
+  f.setLevel({ muted: false });
+  overlap.dispose();
+  assert.equal(gainTo(f.mediaSource, f.output), 10 ** (6 / 20));
+  assert.equal(tail.connections.size, 0);
+  assert.equal(head.connections.size, 0);
+  const handoff = f.api.beginCrossfade(f.audio, {}, 0, 1, 5, { duration: 13 });
+  assert.equal(gainTo(f.mediaSource, f.output), 0);
+  handoff.fadeIn(f.audio);
+  assert.equal(gainTo(f.mediaSource, f.output), 10 ** (6 / 20));
+  handoff.dispose();
+  const second = f.api.acquireBuffered(f.audio, f.hooks);
+  await second.ready;
+  assert.equal(gainTo(f.mediaSource, f.output), 0);
+  assert.equal(gainTo(second.input, f.output), expected);
+  await second.release(13);
+  assert.equal(gainTo(f.mediaSource, f.output), 10 ** (6 / 20));
+  downstreamUnchanged(f);
+  f.context.close();
+  assert.equal(f.subscribers.size, 0);
 });
 
 test('positive gain applies exactly once in native and buffered playback and survives handback', async () => {

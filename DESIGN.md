@@ -52,6 +52,8 @@ SoundCloud appearance is optional: SoundCloud preserves the host theme, Light us
 
 ## Copy and motion
 
+Crossfade artwork uses the audio clock with a smoothstep entrance/exit and a feather spanning half the image width. The current cover remains on the left and the next cover enters from the right. Registered, project-prefixed CSS properties interpolate the existing 100 ms progress updates on desktop and touch players, with no extra JavaScript animation loop. Reduced motion keeps an eased opacity blend without the moving mask. Newly rendered set videos use the same curve and feather, retaining their existing frame rate and render budget; existing published media is unchanged.
+
 Track changes fade the footer artwork and artist/title together from 25% to full opacity over 240 ms. Leave transport and action buttons unchanged, cancel interrupted fades, and switch immediately with reduced motion. Audio crossfade has a collapsed diagnostics disclosure in Advanced audio: current buffer/readiness values, handoff timing error, remaining opening audio, a bounded local event history, Refresh, and Copy diagnostics. Reports exclude track URLs and account data and are never uploaded automatically. Readiness follows the next track's saved speed rather than always assuming 4×.
 
 Advanced audio pairs Output level with an editable dB field and a −24 to +12 dB slider. Typed boosts have no product ceiling; reject non-finite values and gains beyond Web Audio's numeric range. Expand the slider to include a typed boost. Keep the default −6 dB, preserve SoundCloud's own volume and mute, and warn that positive gain can clip. Boost reuses the existing player audio graph; report when that connection is unavailable.

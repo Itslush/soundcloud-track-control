@@ -1,5 +1,15 @@
 # Testing
 
+## Mobile player and waveform candidate
+
+Build with `npm run build` and run `npm test`, `npm run typecheck` and `python tests/run.py`. The browser runner now includes 27 suites. Set `FFMPEG_PATH` to the installed FFmpeg executable to run the audio-render tests without skips. For the existing public backend, build the website with `PUBLIC_API_BASE=https://tempo.88-96-45-138.sslip.io/soundcloud-tempo-control/`; the legacy backend prefix is intentional.
+
+Focused checks are `python tests/verify-mobile-player.py`, `python tests/verify-waveform.py`, `python tests/verify-editor-session.py` and `python tests/verify-artwork-overhead.py`. `python tests/measure-waveform.py` records an isolated, muted Chromium measurement with CPU throttling. Run it serially and retain its scope, host load, actual update/draw counts and raw runs; it does not certify a cheap phone's performance.
+
+After freezing the userscript artifact, run `python tests/capture-features.py`, then `python tests/capture-set.py`. Build only the website with `npx astro build --root site` before `python tests/verify-captures.py` and `npm run test:transfer`. Do not regenerate the userscript halfway through capture verification. The capture manifest must match both the actual PNGs and the shipped userscript hash.
+
+[The candidate review](MOBILE-WAVEFORM-REVIEW.md) records behavior, remaining risks and the main-agent UI delivery gate. Commands and reports below describe earlier artifacts unless explicitly updated.
+
 For raw muted editor video alongside staged screenshots, add `--record-video` to `tests/capture-showcase.py --stage-only`. The full workflow recording is evidence, not an edited promotional clip. Inspect its actual frame rate before describing it as high-frame-rate footage.
 
 `tests/verify-preserve-output.py --chirp-only --capture-pcm` optionally retains up to three seconds of mono worklet output indexed by render frame, including on assertion failure. `tests/analyze-pitch-windows.py <report>` measures those saved samples independently of browser analyser reads. These diagnostic windows do not replace or relax the original acceptance thresholds.

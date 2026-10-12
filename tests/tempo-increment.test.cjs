@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const vm = require('node:vm');
-const source = require('./module-fixture.cjs')(['tempo-increment.js', 'tempo-pitch-settings.js']);
+const source = require('./module-fixture.cjs')(['controls/tempo-increment.js', 'controls/tempo-pitch-settings.js']);
 
 test('tempo increment loads finite supported values, with a safe default for bad storage', () => {
   let stored = null;

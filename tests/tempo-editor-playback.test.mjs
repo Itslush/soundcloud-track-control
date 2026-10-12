@@ -3,7 +3,7 @@ import moduleFixture from './module-fixture.cjs';
 import test from 'node:test';
 import vm from 'node:vm';
 
-const source = moduleFixture(['tempo-editor.js']);
+const source = moduleFixture(['timeline/tempo-editor.js']);
 const track = '/artist/track';
 const storageKey = (key) =>
   'soundcloud.tempo.timeline.' + encodeURIComponent(key);
@@ -216,6 +216,32 @@ test('native pause retains the selected media schedule but another playing eleme
   second.dispatchEvent(new Event('playing'));
   assert.equal(editor.playbackSchedule(first), null);
   assert.equal(editor.playbackSchedule(second), schedule);
+});
+
+test('automation owns one timer and releases it on pause, end and suspension', () => {
+  const { editor, timers } = fixture();
+  const audio = media(false);
+  editor.changeTrack(track);
+  editor.observe(audio);
+  editor.wake();
+  editor.wake();
+  assert.equal(timers.size, 1);
+  audio.paused = true;
+  audio.dispatchEvent(new Event('pause'));
+  assert.equal(timers.size, 0);
+  audio.paused = false;
+  audio.dispatchEvent(new Event('playing'));
+  assert.equal(timers.size, 1);
+  audio.ended = true;
+  audio.dispatchEvent(new Event('ended'));
+  assert.equal(timers.size, 0);
+  audio.ended = false;
+  audio.dispatchEvent(new Event('playing'));
+  assert.equal(timers.size, 1);
+  editor.suspend();
+  editor.wake();
+  assert.equal(timers.size, 0);
+  assert.equal(editor.playbackSchedule(audio), null);
 });
 
 test('track changes clear media ownership and replace the cached profile snapshot', () => {

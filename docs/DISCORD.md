@@ -4,7 +4,7 @@ On a shared-track page, open **Share in Discord** and choose **Create public Dis
 
 **Copy Discord link** copies a Markdown link labelled with the website address, without `https://`. Its destination remains the rendered-track URL. This shortens the visible message text; it does not hide the server address from inspection or move the audio to GitHub Pages. If clipboard access fails, the full rendered URL remains available above the button.
 
-The renderer downloads publicly playable audio, applies the canonical tempo and pitch timeline through the pinned Signalsmith WASM library, then combines AAC audio and a cover into an H.264 MP4. Sets contain two to ten tracks, with a separate crossfade for each join. Their artwork blends on the same clock as the audio; titles and creators remain readable during the transition. Set video runs at four frames per second to fit the server budget. The finished URL serves Open Graph video metadata, including tempo and semitone settings. Opening it in a browser returns to the shared track or set, where an existing render can play without publishing another copy.
+The renderer downloads publicly playable audio, applies the canonical tempo and pitch timeline through the pinned Signalsmith WASM library, then combines AAC audio and a cover into an H.264 MP4. Sets contain two to ten tracks, with a separate crossfade for each join. Their artwork blends on the same clock as the audio; titles and creators remain readable during the transition. Set video runs at four frames per second to fit the server budget. The finished URL serves Open Graph video metadata, including tempo and semitone settings. Opening it in a browser returns to the shared track or set. Sets can play their existing render without publishing another copy. Single-track pages instead resolve the original SoundCloud stream and apply the settings in the browser, so they still depend on that stream being available.
 
 Use **Build a set** in the plugin or open the website's [set editor](https://itslush.github.io/soundcloud-tempo-control/set/). Add public SoundCloud links or existing shared settings, order the tracks, and adjust each join. See [Sets](SETS.md) for the link format and rendering checks.
 
@@ -30,7 +30,8 @@ Only publish audio you have permission to share. The preview resolver still retu
 Required files in `/opt/tempo-preview`:
 
 - `server/shares/`, `server/soundcloud.mjs`, `server/ytdlp.mjs`, `server/errors.mjs`
-- `src/tempo-profile.js`, `src/tempo-share.js`, `src/tempo-set.js`, `vendor/signalsmith/wasm-factory.mjs`
+- `src/timeline/tempo-profile.js`, `src/sharing/tempo-share.js`, `src/sharing/tempo-set.js`, `vendor/signalsmith/wasm-factory.mjs`
+- `src/sharing/tempo-pitch-notice.js`, `src/appearance/artwork-transition.js`
 - `scripts/config.cjs`, `release.config.json`, and the existing `.venv` extractor installation
 
 Node 24 and FFmpeg with AAC, libx264 and drawtext support, plus a readable DejaVu Sans font, are required. Set `SHARE_ORIGIN` to the public HTTPS backend origin, `SHARE_ROOT` to the state directory, and `FFMPEG_PATH` to its executable. The checked-in unit uses the existing Oracle paths. Build the website with `PUBLIC_API_BASE` pointing to the backend prefix.

@@ -73,7 +73,7 @@ async function buildScript(
   let worklet;
   const result = await esbuild.build({
     absWorkingDir: root,
-    entryPoints: ['src/tempo-inline-source.js'],
+    entryPoints: ['src/userscript/tempo-inline-source.js'],
     inject,
     plugins: [
       workletAssets((artifact) => {
@@ -202,7 +202,7 @@ async function buildWebsiteEngine() {
   verifySignalsmith();
   const result = await esbuild.build({
     absWorkingDir: root,
-    entryPoints: ['src/tempo-dependency.js'],
+    entryPoints: ['src/soundcloud/tempo-dependency.js'],
     outfile: 'engine.js',
     bundle: true,
     format: 'esm',

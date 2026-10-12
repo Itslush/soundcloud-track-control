@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const { test } = require('node:test');
 
-const source = require('./module-fixture.cjs')(['tempo-appearance.js']);
+const source = require('./module-fixture.cjs')(['appearance/tempo-appearance.js']);
 const key = 'soundcloud.tempo.appearance';
 const attribute = 'data-tempo-appearance';
 

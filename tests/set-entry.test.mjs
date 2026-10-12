@@ -31,7 +31,7 @@ test('the set entry can export current automation without enabling copy-link rew
   };
   const window = new EventTarget();
   const editor = vm.runInNewContext(
-    moduleFixture(['tempo-editor.js']) + '\ncreateTempoEditor(api)',
+    moduleFixture(['timeline/tempo-editor.js']) + '\ncreateTempoEditor(api)',
     {
       window,
       document: Object.assign(new EventTarget(), { hidden: true }),

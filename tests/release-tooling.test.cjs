@@ -9,6 +9,26 @@ const { root, validateConfig } = require('../scripts/config.cjs');
 
 const empty = { siteUrl: '', paypalUrl: '', repositoryUrl: '' };
 
+test('Pages deploys only a successful main push test run and checks out that exact commit', () => {
+  const workflow = fs.readFileSync(
+    path.join(root, '.github/workflows/pages.yml'),
+    'utf8',
+  );
+  assert.match(
+    workflow,
+    /workflow_run:\s+workflows: \[Test\]\s+types: \[completed\]\s+branches: \[main\]/,
+  );
+  assert.doesNotMatch(workflow, /workflow_dispatch:|\n  push:/);
+  assert.match(
+    workflow,
+    /if: \$\{\{ github\.event\.workflow_run\.conclusion == 'success' && github\.event\.workflow_run\.event == 'push' && github\.event\.workflow_run\.head_repository\.full_name == github\.repository && github\.event\.workflow_run\.head_sha == github\.sha \}\}/,
+  );
+  assert.match(
+    workflow,
+    /uses: actions\/checkout@v4\s+with:\s+ref: \$\{\{ github\.event\.workflow_run\.head_sha \}\}/,
+  );
+});
+
 test('local builds contain no fake deployment or payment URLs', async () => {
   const result = await buildScript(empty, '1.0.0');
   assert.match(result.metadata, /@version\s+1\.0\.0\b/);
@@ -51,7 +71,10 @@ test('build output is deterministic', async () => {
   assert.equal(map.version, 3);
   assert.equal(map.sources.length, map.sourcesContent.length);
   assert.ok(map.mappings.length > 0);
-  for (const file of ['src/tempo-inline-source.js', 'src/tempo-editor.js']) {
+  for (const file of [
+    'src/userscript/tempo-inline-source.js',
+    'src/timeline/tempo-editor.js',
+  ]) {
     const index = map.sources.indexOf(file);
     assert.ok(index >= 0, `${file} is mapped to its original module`);
     assert.equal(

@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const { test } = require('node:test');
 
-const source = require('./module-fixture.cjs')(['tempo-output.js']);
+const source = require('./module-fixture.cjs')(['soundcloud/tempo-output.js']);
 const key = 'soundcloud.tempo.outputDb';
 
 function fixture(initial) {

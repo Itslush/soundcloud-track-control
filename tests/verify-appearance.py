@@ -104,7 +104,7 @@ def fixture(browser):
 
 
 def live(browser):
-    source = subprocess.check_output([os.environ.get('NODE', 'node'), '-p', "require('./tests/module-fixture.cjs')(['tempo-appearance.js'])"], cwd=ROOT)
+    source = subprocess.check_output([os.environ.get('NODE', 'node'), '-p', "require('./tests/module-fixture.cjs')(['appearance/tempo-appearance.js'])"], cwd=ROOT)
     context = browser.new_context(viewport={'width': 1440, 'height': 1000})
     context.add_init_script('''
         window.appearanceMedia = new Set();

@@ -1,34 +1,39 @@
-import { readPitchSettings, pitchSettingsKey } from './tempo-pitch-settings.js';
-import { readTempoIncrement } from './tempo-increment.js';
+import { createTempoEditorPlayback } from './tempo-editor-playback.js';
 import {
-  encodeTempoCode,
-  decodeTempoCode,
-  tempoShareLink,
-} from './tempo-share.js';
-import { enhanceTempoFields } from './tempo-fields.js';
+  renderTempoEditorGraph,
+  round,
+  timeLabel,
+  preciseTime,
+} from './tempo-editor-graph.js';
+import {
+  readPitchSettings,
+  pitchSettingsKey,
+} from '../controls/tempo-pitch-settings.js';
+import { readTempoIncrement } from '../controls/tempo-increment.js';
+import { tempoShareLink } from '../sharing/tempo-share.js';
+import { enhanceTempoFields } from '../controls/tempo-fields.js';
 import { editorTemplate } from './tempo-editor-template.js';
-import { syncTempoRange } from './tempo-range.js';
-import {
-  validateProfile,
-  evaluatePoints,
-  profilePitchAt,
-  validKeyShift,
-} from './tempo-profile.js';
+import { syncTempoRange } from '../controls/tempo-range.js';
+import { evaluatePoints, profilePitchAt, validKeyShift } from './tempo-profile.js';
 
 export function createTempoEditor(api) {
-  const website =
-    api.website ??
-    (typeof __TEMPO_WEBSITE__ === 'string' ? __TEMPO_WEBSITE__ : '');
-  const PREFIX = 'soundcloud.tempo.timeline.';
-  let active = null;
-  let key = '';
-  let profile = null;
-  let scheduleData = null;
-  let scheduleOverride = null;
-  let schedule = null;
-  let suspended = false;
-  let keyOverride = null;
-  let lastPitch = null;
+  const playback = createTempoEditorPlayback(api, {
+    syncControls,
+    updatePlayhead,
+    openPendingLink,
+    isAnimating: () =>
+      !document.hidden && panel && !panel.hidden && draft && !imported,
+  });
+  const {
+    website,
+    storageKey,
+    validate,
+    encodeProfile,
+    decodeProfile,
+    playbackDuration,
+    running,
+    wake,
+  } = playback;
   let panel = null;
   let syncFields = () => {};
   let draft = null;
@@ -59,16 +64,7 @@ export function createTempoEditor(api) {
     lane === 'pitch'
       ? Number(el('.pitch-step').value) || 0.5
       : readTempoIncrement();
-  let timer = 0;
   let graphWidth = 660;
-
-  function running() {
-    return Boolean(profile?.enabled && !suspended);
-  }
-
-  function pitchMode() {
-    return running() ? (profile.data.pitch ?? null) : null;
-  }
 
   function draftData() {
     return validate({
@@ -80,7 +76,7 @@ export function createTempoEditor(api) {
 
   function syncControls() {
     if (!panel || panel.hidden || !draft) return;
-    const current = draft.track === key;
+    const current = draft.track === playback.track;
     const playing = current && running();
     let saved = null;
     try {
@@ -91,9 +87,10 @@ export function createTempoEditor(api) {
     } catch {
       saved = null;
     }
-    el('.editor-enable').hidden = !saved || (current && profile?.temporary);
+    el('.editor-enable').hidden =
+      !saved || (current && playback.profile?.temporary);
     el('.editor-enabled').checked = Boolean(
-      saved?.enabled && !(current && suspended),
+      saved?.enabled && !(current && playback.suspended),
     );
     el('.editor-apply-once').textContent = playing
       ? 'Stop timeline'
@@ -107,18 +104,10 @@ export function createTempoEditor(api) {
     el('.playback-state').textContent = !current
       ? 'Another track is playing'
       : playing
-        ? `${profile.temporary ? 'Session' : 'Saved'} timeline · ${api.pitchMode === 'preserve' ? 'Preserve key' : 'Natural'}`
-        : suspended && profile?.enabled
+        ? `${playback.profile.temporary ? 'Session' : 'Saved'} timeline · ${api.pitchMode === 'preserve' ? 'Preserve key' : 'Natural'}`
+        : playback.suspended && playback.profile?.enabled
           ? 'Timeline stopped'
           : 'Timeline off';
-  }
-
-  function stop() {
-    if (profile?.temporary) load();
-    suspended = true;
-    api.normal();
-    syncControls();
-    wake();
   }
 
   async function copyDraft(kind, button) {
@@ -213,189 +202,15 @@ export function createTempoEditor(api) {
     wake();
   });
 
-  const encodeProfile = (value) => encodeTempoCode(validate(value));
-  const decodeProfile = (text) =>
-    decodeTempoCode(text, validate, api.parseTrack, website);
-  const round = (n) => Math.round(n * 1000) / 1000;
-  const storageKey = (track) => PREFIX + encodeURIComponent(track);
-  const timeLabel = (n) =>
-    `${Math.floor(n / 60)}:${String(Math.floor(n % 60)).padStart(2, '0')}`;
-  const preciseTime = (n) =>
-    timeLabel(n) +
-    (Number.isInteger(round(n))
-      ? ''
-      : '.' +
-        String(Math.round(n * 1000) % 1000)
-          .padStart(3, '0')
-          .replace(/0+$/, ''));
-
-  const validate = (value) => validateProfile(value, api.parseTrack);
-
-  function displayedDuration() {
-    const element = document.querySelector('.playbackTimeline__duration');
-    const clock = element?.querySelector('span[aria-hidden="true"]') || element;
-    const text = clock?.textContent.trim() || '';
-    if (
-      text.length > 32 ||
-      !/^(?:\d+:[0-5]\d|\d+):[0-5]\d(?:\.\d+)?$/.test(text)
-    )
-      return 0;
-    const duration = text
-      .split(':')
-      .reduce((total, part) => total * 60 + Number(part), 0);
-    return duration >= 1 && duration <= 86400 ? duration : 0;
-  }
-
-  function playbackDuration() {
-    const duration = active?.duration;
-    return Number.isFinite(duration) && duration > 0
-      ? duration
-      : displayedDuration();
-  }
-
-  function shareLink(text, force = false) {
-    if (
-      (!api.copyLinks && !force) ||
-      typeof text !== 'string' ||
-      text.length > 8000
-    )
-      return text;
-    try {
-      const url = new URL(text);
-      if (
-        url.origin !== 'https://soundcloud.com' ||
-        url.username ||
-        url.password ||
-        url.hash ||
-        url.searchParams.has('sct') ||
-        api.parseTrack(url.pathname) !== key ||
-        !key
-      )
-        return text;
-      const duration = playbackDuration();
-      const data =
-        profile?.enabled && !suspended
-          ? profile.data
-          : {
-              v: 1,
-              track: key,
-              duration,
-              points: [{ t: 0, r: api.rate, d: 0, c: 'instant' }],
-            };
-      url.searchParams.set(
-        'sct',
-        encodeProfile({
-          ...data,
-          pitch: api.pitchMode,
-          keyShift: keyOverride ?? data.keyShift ?? api.keyShift ?? 0,
-          ...(keyOverride === null ? {} : { pitchPoints: undefined }),
-        }),
-      );
-      if (website) return tempoShareLink(decodeProfile(url.href), website);
-      return url.href.length <= 8000 ? url.href : text;
-    } catch {
-      return text;
-    }
-  }
-
   const evaluate = (data, time) => evaluatePoints(data.points, time);
 
-  function immutableProfile(data) {
-    for (const points of [data.points, data.pitchPoints]) {
-      if (!points) continue;
-      for (const point of points) Object.freeze(point);
-      Object.freeze(points);
-    }
-    return Object.freeze(data);
-  }
-
-  function playbackSchedule(audio) {
-    if (!key || !active || audio !== active || !running()) return null;
-    const data = profile.data;
-    if (data.track !== key) return null;
-    if (scheduleData !== data || scheduleOverride !== keyOverride) {
-      const overridden = keyOverride !== null;
-      let minimumRate = data.points[0].r;
-      for (let index = 1; index < data.points.length; index++)
-        minimumRate = Math.min(minimumRate, data.points[index].r);
-      schedule = Object.freeze({
-        isConstantFrom(time) {
-          const rate = evaluate(data, time);
-          const pitch = profilePitchAt(data, time);
-          return (
-            data.points.every((point) => point.t < time || point.r === rate) &&
-            (overridden ||
-              !data.pitchPoints ||
-              data.pitchPoints.every(
-                (point) => point.t < time || point.k === pitch,
-              ))
-          );
-        },
-        rateAt(sourceSeconds) {
-          if (!Number.isFinite(sourceSeconds))
-            throw new RangeError('Timeline source time must be finite');
-          return evaluate(data, sourceSeconds);
-        },
-        minimumRate,
-      });
-      scheduleData = data;
-      scheduleOverride = keyOverride;
-    }
-    return schedule;
-  }
-
-  function load() {
-    profile = null;
-    keyOverride = null;
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKey(key)) || 'null');
-      if (saved)
-        profile = {
-          data: immutableProfile(validate(saved.data)),
-          enabled: saved.enabled === true,
-        };
-      if (profile?.data.track !== key) profile = null;
-    } catch {
-      profile = null;
-    }
-  }
-
-  function observe(audio) {
-    if (!active || !audio.paused) active = audio;
-    if (audio.dataset.tempoTimelineObserved) return;
-    audio.dataset.tempoTimelineObserved = 'true';
-    for (const name of [
-      'playing',
-      'seeking',
-      'seeked',
-      'timeupdate',
-      'loadedmetadata',
-      'pause',
-      'ended',
-    ]) {
-      audio.addEventListener(name, () => {
-        if (!audio.paused || !active || active === audio) active = audio;
-        tick();
-      });
-    }
-  }
-
-  function value() {
-    if (!key || !active || !profile?.enabled || suspended) return null;
-    return round(evaluate(profile.data, active.currentTime || 0));
-  }
-
   function changeTrack(next) {
-    if (key === next) return;
-    key = next;
-    keyOverride = null;
-    active = null;
-    suspended = api.applySaved === false;
-    load();
+    if (playback.track === next) return;
+    playback.changeTrack(next);
     syncControls();
     if (panel && !panel.hidden)
       status(
-        draft?.track === key
+        draft?.track === playback.track
           ? ''
           : 'Playing track changed. This draft still belongs to the track shown above.',
       );
@@ -564,9 +379,8 @@ export function createTempoEditor(api) {
           storageKey(draft.track),
           JSON.stringify({ data: stored.data, enabled }),
         );
-        if (draft.track === key) {
-          load();
-          suspended = false;
+        if (draft.track === playback.track) {
+          playback.activateSaved();
           if (!enabled) api.normal();
           api.refresh();
         }
@@ -585,7 +399,9 @@ export function createTempoEditor(api) {
       el('.point-' + name).onchange = updatePoint;
     el('.point-add').onclick = () =>
       addPoint(
-        draft.track === key && active ? active.currentTime : draft.duration / 2,
+        draft.track === playback.track && playback.media
+          ? playback.media.currentTime
+          : draft.duration / 2,
         lane === 'pitch' ? (draft.keyShift ?? 0) : 1,
       );
     el('.point-remove').onclick = () => {
@@ -608,9 +424,8 @@ export function createTempoEditor(api) {
           storageKey(data.track),
           JSON.stringify({ data, enabled: true }),
         );
-        if (data.track === key) {
-          load();
-          suspended = false;
+        if (data.track === playback.track) {
+          playback.activateSaved();
           api.refresh();
         }
         draft = data;
@@ -622,22 +437,14 @@ export function createTempoEditor(api) {
       }
     };
     el('.editor-apply-once').onclick = () => {
-      if (draft.track !== key) return;
+      if (draft.track !== playback.track) return;
       if (running()) {
-        stop();
+        playback.stop();
         status('Timeline stopped · 1×');
         return;
       }
       try {
-        profile = {
-          data: immutableProfile(draftData()),
-          enabled: true,
-          temporary: true,
-        };
-        keyOverride = null;
-        suspended = false;
-        api.refresh();
-        syncControls();
+        playback.applyOnce(draftData());
         status('Applied for this session.');
       } catch (error) {
         status(error.message);
@@ -844,66 +651,6 @@ export function createTempoEditor(api) {
     return true;
   }
 
-  function drawFadeStart(svg, point, previous, position) {
-    const labelX =
-      position + 100 <= graphWidth - 12 ? position + 8 : position - 100;
-    const labelLeft = Math.max(44, Math.min(graphWidth - 104, labelX));
-    const handle = svg('g', {
-      class: 'ramp',
-      'data-index': selected,
-      'data-kind': 'ramp',
-      tabindex: 0,
-      role: 'slider',
-      'aria-label': 'Fade start',
-      'aria-orientation': 'horizontal',
-      'aria-valuemin': previous.t,
-      'aria-valuemax': point.t,
-      'aria-valuenow': round(point.t - point.d),
-      'aria-valuetext': `${preciseTime(round(point.t - point.d))}, ${point.d} seconds fade`,
-    });
-    svg('title', {}, 'Drag to change fade duration', handle);
-    svg(
-      'rect',
-      { x: position - 12, y: 12, width: 24, height: 176, fill: 'transparent' },
-      null,
-      handle,
-    );
-    svg(
-      'line',
-      { x1: position, x2: position, y1: 12, y2: 188, class: 'ramp-line' },
-      null,
-      handle,
-    );
-    svg(
-      'rect',
-      { x: labelLeft, y: 4, width: 92, height: 44, fill: 'transparent' },
-      null,
-      handle,
-    );
-    svg(
-      'rect',
-      {
-        x: labelLeft,
-        y: 14,
-        width: 92,
-        height: 24,
-        rx: 3,
-        class: 'ramp-label',
-      },
-      null,
-      handle,
-    );
-    svg(
-      'path',
-      {
-        d: `M${labelLeft + 8} 26h12m-9 -3-3 3 3 3m6 -6 3 3-3 3`,
-        class: 'ramp-arrow',
-      },
-      null,
-      handle,
-    );
-    svg('text', { x: labelLeft + 26, y: 30 }, 'Fade start', handle);
-  }
   function changed() {
     dirty = true;
     imported = null;
@@ -1031,174 +778,20 @@ export function createTempoEditor(api) {
     picker.value = String(Math.min(selected, lanePoints(data).length - 1));
     picker.disabled = Boolean(imported);
     syncFields();
-    graph.replaceChildren();
-    const svg = (name, attrs, label, parent = graph) => {
-      const node = document.createElementNS('http://www.w3.org/2000/svg', name);
-      for (const [k, v] of Object.entries(attrs))
-        node.setAttribute(k, String(v));
-      if (label) node.textContent = label;
-      parent.append(node);
-      return node;
-    };
-    const x = (t) => 44 + ((t - viewStart) / span) * plotWidth,
-      y = (r) => 12 + ((speedTop - r) / (speedTop - speedBottom)) * 176;
-    const defs = svg('defs', {});
-    const clip = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'clipPath',
-    );
-    clip.id = 'tempo-plot-clip';
-    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    for (const [k, v] of Object.entries({
-      x: 44,
-      y: 12,
-      width: plotWidth,
-      height: 176,
-    }))
-      rect.setAttribute(k, v);
-    clip.append(rect);
-    defs.append(clip);
-    const step =
-      speedMode === 'custom'
-        ? [0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 3, 6].find(
-            (value) => value >= (speedTop - speedBottom) / 8,
-          )
-        : speedMode === 'fine'
-          ? 0.1
-          : 0.05;
-    const first = Math.ceil(speedBottom / step - 1e-9);
-    const last = Math.floor(speedTop / step + 1e-9);
-    const ticks = ['fine', 'close', 'custom'].includes(speedMode)
-      ? Array.from({ length: last - first + 1 }, (_, i) =>
-          round((first + i) * step),
-        )
-      : speedTop <= 2
-        ? Array.from({ length: speedTop * 4 }, (_, i) => (i + 1) / 4)
-        : [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4];
-    if (!ticks.includes(speedBottom)) ticks.unshift(speedBottom);
-    if (speedMode === 'custom' && !ticks.includes(speedTop))
-      ticks.push(speedTop);
-    for (const r of ticks) {
-      svg('line', {
-        x1: 44,
-        x2: graphWidth - 12,
-        y1: y(r),
-        y2: y(r),
-        class: 'grid',
-        ...(r === (lane === 'pitch' ? 0 : 1)
-          ? {
-              style:
-                'stroke:var(--tempo-fg);stroke-width:1;stroke-dasharray:3 4',
-            }
-          : {}),
-      });
-      if (
-        r === speedBottom ||
-        (y(speedBottom) - y(r) >= 14 &&
-          (r === speedTop || y(r) - y(speedTop) >= 14))
-      )
-        svg('text', { x: 2, y: y(r) + 4 }, `${r}${laneUnit()}`);
-    }
-    for (let i = 0; i <= 8; i++) {
-      const time = viewStart + (span * i) / 8;
-      svg('line', { x1: x(time), x2: x(time), y1: 12, y2: 188, class: 'grid' });
-      if (i % (graphWidth < 480 ? 4 : 2)) continue;
-      svg(
-        'text',
-        {
-          x: x(time),
-          y: 212,
-          'text-anchor': i === 8 ? 'end' : 'start',
-        },
-        span < 10 ? preciseTime(round(time)) : timeLabel(time),
-      );
-    }
-    let path = `M${x(0)},${y(lanePoints(data)[0][laneField()])}`;
-    let previous = lanePoints(data)[0];
-    for (const point of lanePoints(data).slice(1)) {
-      const start = point.c === 'instant' ? point.t : point.t - point.d;
-      path += ` L${x(start)},${y(previous[laneField()])}`;
-      for (let i = 1; i <= 24; i++) {
-        const t = start + ((point.t - start) * i) / 24;
-        path += ` L${x(t)},${y(evaluatePoints(lanePoints(data), t, laneField()))}`;
-      }
-      previous = point;
-    }
-    path += ` L${x(data.duration)},${y(previous[laneField()])}`;
-    svg('path', {
-      d: path,
-      class: 'curve',
-      'clip-path': 'url(#tempo-plot-clip)',
-    });
-    lanePoints(data).forEach((p, i) => {
-      if (i === selected && i && p.d && p.c !== 'instant')
-        svg('rect', {
-          x: x(p.t - p.d),
-          y: 12,
-          width: x(p.t) - x(p.t - p.d),
-          height: 176,
-          fill: 'var(--tempo-accent)',
-          opacity: 0.08,
-          'clip-path': 'url(#tempo-plot-clip)',
-          'pointer-events': 'none',
-        });
-      if (
-        i === selected &&
-        i &&
-        !imported &&
-        p.c !== 'instant' &&
-        p.t - p.d >= viewStart &&
-        p.t - p.d <= viewStart + span
-      ) {
-        drawFadeStart(svg, p, lanePoints(data)[i - 1], x(p.t - p.d));
-      }
-      if (
-        p.t < viewStart ||
-        p.t > viewStart + span ||
-        p[laneField()] > speedTop ||
-        p[laneField()] < speedBottom
-      )
-        return;
-      if (!imported)
-        svg('ellipse', {
-          cx: x(p.t),
-          cy: y(p[laneField()]),
-          rx: 12,
-          ry: 12,
-          fill: 'transparent',
-          'data-index': i,
-          'data-kind': 'point',
-          'aria-hidden': 'true',
-          class: 'point-hit',
-          style: 'cursor:grab',
-        });
-      const dot = svg('circle', {
-        cx: x(p.t),
-        cy: y(p[laneField()]),
-        r: 7,
-        class: `point ${i === selected ? 'selected' : ''}`,
-        'data-index': i,
-        'data-kind': 'point',
-        tabindex: imported ? -1 : 0,
-        role: 'button',
-        'aria-label': `Point ${i + 1}: ${p.t} seconds, ${p[laneField()]}${laneUnit()}. Enter to edit.`,
-      });
-      const title = document.createElementNS(
-        'http://www.w3.org/2000/svg',
-        'title',
-      );
-      title.textContent = `${preciseTime(p.t)} · ${p[laneField()]}${laneUnit()}`;
-      dot.append(title);
-    });
-    svg('line', {
-      class: 'playhead',
-      x1: 44,
-      x2: 44,
-      y1: 12,
-      y2: 188,
-      stroke: 'var(--tempo-fg)',
-      'stroke-dasharray': '3 3',
-      'pointer-events': 'none',
+    renderTempoEditorGraph(graph, {
+      data,
+      points: lanePoints(data),
+      field: laneField(),
+      unit: laneUnit(),
+      selected,
+      imported,
+      graphWidth,
+      viewStart,
+      span,
+      speedTop,
+      speedBottom,
+      speedMode,
+      lane,
     });
   }
   function refresh() {
@@ -1241,7 +834,7 @@ export function createTempoEditor(api) {
     draw();
   }
   function open(requested) {
-    const target = requested || (dirty && draft ? draft.track : key);
+    const target = requested || (dirty && draft ? draft.track : playback.track);
     if (requested && dirty && draft?.track !== requested) {
       api.message(
         'An unsaved timeline is open. Finish or discard it before editing another track.',
@@ -1266,7 +859,7 @@ export function createTempoEditor(api) {
         api.message('Play a track before opening its tempo editor.');
         return;
       }
-      if (!stored && (target !== key || duration <= 0)) {
+      if (!stored && (target !== playback.track || duration <= 0)) {
         api.message(
           'Track duration is not available yet. Load a track and retry.',
         );
@@ -1280,8 +873,8 @@ export function createTempoEditor(api) {
         pitch: api.pitchMode,
         keyShift: api.keyShift ?? 0,
       };
-      if (target === key && keyOverride !== null) {
-        draft.keyShift = keyOverride;
+      if (target === playback.track && playback.keyOverride !== null) {
+        draft.keyShift = playback.keyOverride;
         delete draft.pitchPoints;
       }
       lane = 'tempo';
@@ -1328,85 +921,29 @@ export function createTempoEditor(api) {
     const line = el('.playhead');
     if (!line) return;
     const visible =
-      active &&
-      draft.track === key &&
-      active.currentTime >= viewStart &&
-      active.currentTime <= viewStart + draft.duration / zoom;
+      playback.media &&
+      draft.track === playback.track &&
+      playback.media.currentTime >= viewStart &&
+      playback.media.currentTime <= viewStart + draft.duration / zoom;
     line.style.display = visible ? '' : 'none';
     if (!visible) return;
     const x =
       44 +
-      ((Math.min(draft.duration, active.currentTime) - viewStart) /
+      ((Math.min(draft.duration, playback.media.currentTime) - viewStart) /
         (draft.duration / zoom)) *
         (graphWidth - 56);
     line.setAttribute('x1', x);
     line.setAttribute('x2', x);
   }
 
-  function tick() {
-    const nextRate = value();
-    const nextPitch = effectivePitch();
-    const pitchChanged = nextPitch !== lastPitch;
-    lastPitch = nextPitch;
-    if ((nextRate !== null && nextRate !== api.rate) || pitchChanged)
-      api.refresh();
-    updatePlayhead();
-    wake();
-  }
-
-  function wake() {
-    openPendingLink();
-    const automate =
-      running() &&
-      (profile.data.points.length > 1 ||
-        (keyOverride === null && profile.data.pitchPoints?.length > 1));
-    const animate =
-      !document.hidden && panel && !panel.hidden && draft && !imported;
-    if (!active || active.paused || active.ended || (!automate && !animate)) {
-      clearTimeout(timer);
-      timer = 0;
-      return;
-    }
-    if (timer) return;
-    timer = setTimeout(() => {
-      timer = 0;
-      tick();
-    }, 50);
-  }
-  document.addEventListener('visibilitychange', wake);
-  function refreshSaved(track) {
-    if (track === key && !profile?.temporary) {
-      const wasRunning = running();
-      load();
-      suspended = api.applySaved === false;
-      if (wasRunning && !profile?.enabled) api.normal();
-      else api.refresh();
-    }
-    syncControls();
-    wake();
-  }
-  window.addEventListener('storage', (e) => {
-    if (e.key === null || e.key === storageKey(key)) {
-      refreshSaved(key);
-    }
-  });
-  function effectivePitch() {
-    return (
-      keyOverride ??
-      (running()
-        ? profilePitchAt(profile.data, active?.currentTime || 0)
-        : null)
-    );
-  }
   return {
     wake,
-    pitchMode,
-    shareLink,
-    keyShift: effectivePitch,
+    pitchMode: playback.pitchMode,
+    shareLink: playback.shareLink,
+    keyShift: playback.keyShift,
     setKeyShift(value) {
-      if (!validKeyShift(value)) throw new RangeError('Invalid key shift');
-      keyOverride = value;
-      if (draft?.track === key) {
+      playback.setKeyShift(value);
+      if (draft?.track === playback.track) {
         draft.keyShift = value;
         delete draft.pitchPoints;
         selected = 0;
@@ -1417,9 +954,9 @@ export function createTempoEditor(api) {
         }
       }
     },
-    observe,
-    value,
-    playbackSchedule,
+    observe: playback.observe,
+    value: playback.value,
+    playbackSchedule: playback.playbackSchedule,
     changeTrack,
     open,
     validate,
@@ -1441,12 +978,8 @@ export function createTempoEditor(api) {
       dirty = true;
       open();
     },
-    refreshSaved,
-    suspend() {
-      suspended = true;
-      syncControls();
-      wake();
-    },
+    refreshSaved: playback.refreshSaved,
+    suspend: playback.suspend,
     contains(target) {
       return panel?.contains(target);
     },

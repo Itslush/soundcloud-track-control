@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatPitchNotice } from '../src/tempo-pitch-notice.js';
+import { formatPitchNotice } from '../src/sharing/tempo-pitch-notice.js';
 
 test('pitch notice handles zero, fractional shifts and automation ranges', () => {
   assert.equal(formatPitchNotice(0), '');

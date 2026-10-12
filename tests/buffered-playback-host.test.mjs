@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { createBufferedPlayback as createBridge } from '../src/tempo-buffered.js';
+import { createBufferedPlayback as createBridge } from '../src/soundcloud/tempo-buffered.js';
 import test from 'node:test';
 import {
   deferred,

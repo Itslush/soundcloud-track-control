@@ -6,7 +6,7 @@ The source build imports this pinned file through esbuild. Both the userscript a
 
 Bundling does not remove the engine's parsing, compilation, memory or processing costs. The library and its embedded WASM bytes remain pinned and unmodified.
 
-`src/tempo-dependency.js` adapts the upstream factory to release internally created worklet blob URLs after loading. It restores the original `addModule` method immediately and never releases a caller-supplied module URL. Native-rate preservation uses live input. Buffered playback below 0.25× uses the separate transport and processor under `src/audio`.
+`src/soundcloud/tempo-dependency.js` adapts the upstream factory to release internally created worklet blob URLs after loading. It restores the original `addModule` method immediately and never releases a caller-supplied module URL. Native-rate preservation uses live input. Buffered playback below 0.25× uses the separate transport and processor under `src/audio`.
 
 The buffered processor is compiled separately by esbuild and loaded as a local blob asset. `wasm-factory.mjs` contains the unchanged first top-level factory declaration from the pinned upstream release, followed by a default export. `wasm-factory.json` records both checksums and the derivation. This vendored module boundary avoids extracting upstream source during production playback; it does not change the Emscripten factory or WASM binary. The MIT license applies to this excerpt as well.
 

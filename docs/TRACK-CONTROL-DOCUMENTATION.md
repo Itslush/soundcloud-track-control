@@ -5,8 +5,8 @@ Reviewed on 2026-10-12. The scoped release documentation agrees with the current
 ## Release consistency
 
 - `release.config.json` uses `https://itslush.github.io/soundcloud-track-control/` and `https://github.com/Itslush/soundcloud-track-control`. README and website installation copy use Track Control.
-- `src/tempo-appearance.js` offers native SoundCloud, Light, Charcoal and OLED through the existing appearance module. Light uses `#f4f4f4` ground, `#fff` panels, `#171717` text and `#b23c00` accent. The current landing copy and desktop instructions name these choices.
-- `src/tempo-inline-source.js` removes the footer's width cap, caps the timeline at 480 px and lets the native title container use available width. QA and finish review explain that titles can still truncate in narrow windows.
+- `src/appearance/tempo-appearance.js` offers native SoundCloud, Light, Charcoal and OLED through the existing appearance module. Light uses `#f4f4f4` ground, `#fff` panels, `#171717` text and `#b23c00` accent. The current landing copy and desktop instructions name these choices.
+- `src/userscript/tempo-inline-source.js` removes the footer's width cap, caps the timeline at 480 px and lets the native title container use available width. QA and finish review explain that titles can still truncate in narrow windows.
 - The landing page has distinct browser userscript and soundcloud-rpc plugin downloads. The guide names `soundcloud_tempo_control.js`, the F1 plugin-folder workflow, reload behavior, manual replacement for updates and the need to disable the wrapper's separate Playback Speed plugin.
 - The rename preserves compatibility identifiers. The userscript namespace and backup format remain `soundcloud-tempo-control`; storage retains `soundcloud.tempo.*`; links retain SCT1 and SCS1. The desktop filename also matches its cleanup hook. These names are deliberate compatibility contracts.
 

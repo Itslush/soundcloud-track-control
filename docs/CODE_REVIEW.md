@@ -1,5 +1,7 @@
 # Code review
 
+The current local mobile/waveform implementation, repository audit, runnable checks and release limits are in [the mobile and waveform review](MOBILE-WAVEFORM-REVIEW.md). The dated review below remains historical evidence, not the current candidate's test count.
+
 Updated 2026-09-07. This review covers source organization and the local build. It is not a new live-playback certification.
 
 ## Changes
@@ -10,10 +12,10 @@ The extracted templates were compared against the previous packaged source map b
 
 ## Structure
 
-- `src/tempo-inline-source.js`: startup, SoundCloud hooks and component wiring.
-- `src/tempo-editor.js`: timeline editing and playback coordination.
-- `src/tempo-{controls,editor}-template.js`: markup.
-- `src/tempo-{controls,editor}-style.js`: shadow-root styles.
+- `src/userscript/tempo-inline-source.js`: startup, SoundCloud hooks and component wiring.
+- `src/timeline/tempo-editor.js`: timeline editing and playback coordination.
+- `src/controls/tempo-controls-template.js` and `src/timeline/tempo-editor-template.js`: markup.
+- `src/controls/tempo-controls-style.js` and `src/timeline/tempo-editor-style.js`: shadow-root styles.
 - `src/audio/`: decoding, scheduling, transport and host-clock integration.
 - `server/`: request handling, resolution, yt-dlp and static delivery.
 - `scripts/`: esbuild packaging and dependency setup.

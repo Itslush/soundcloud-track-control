@@ -240,7 +240,12 @@ export function createCrossfade({
     if (job?.route) {
       const current = job;
       visual({
+        track: current.track,
+        position: current.position + current.route.position() * current.outgoingRate,
+        duration: current.duration,
+        paused: current.route.context.state !== 'running',
         nextTrack: current.next.trackUrl,
+        nextPosition: current.route.position() * current.nextSettings.rate,
         progress: Math.max(
           0,
           Math.min(
@@ -406,6 +411,8 @@ export function createCrossfade({
     }
     try {
       current.position = audio.currentTime;
+      current.duration = audio.duration;
+      current.outgoingRate = settings.rate;
       current.route = graph.beginCrossfade(
         audio,
         current.buffer,
@@ -417,7 +424,10 @@ export function createCrossfade({
       current.buffer = null;
       current.opening = null;
       current.overlapSeconds = remaining;
-      visual({ nextTrack: current.next.trackUrl, progress: 0 });
+      visual({
+        track: current.track, position: current.position, duration: current.duration,
+        paused: false, nextTrack: current.next.trackUrl, nextPosition: 0, progress: 0,
+      });
       button.click();
       status('Crossfading buffered audio…');
     } catch (error) {
