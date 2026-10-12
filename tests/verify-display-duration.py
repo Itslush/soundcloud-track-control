@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 
 from playwright.sync_api import expect, sync_playwright
 
-from userscript_fixture import ROOT, browser_options, userscript_source, userscript_bytes
+from userscript_fixture import ROOT, SITE_URL, browser_options, userscript_source, userscript_bytes
 
 spec = importlib.util.spec_from_file_location('embedded_fixture', ROOT / 'tests/verify-embedded-track.py')
 embedded = importlib.util.module_from_spec(spec)
@@ -16,7 +16,7 @@ NESTED = '<div class="playbackTimeline__duration sc-text-primary sc-text-h5"><sp
 
 
 def shared(link, duration):
-    prefix = 'https://itslush.github.io/soundcloud-tempo-control/share/#sct=SCT1.'
+    prefix = SITE_URL + 'share/#sct=SCT1.'
     assert link.startswith(prefix), link
     encoded = link[len(prefix):]
     value = json.loads(base64.urlsafe_b64decode(encoded + '=' * (-len(encoded) % 4)))

@@ -49,14 +49,16 @@ with sync_playwright() as p:
     expect(page.locator('#preview-play')).to_be_disabled()
     assert len(requests) == 1
     assert parse_qs(urlparse(requests[0].request.url).query)['url'] == [TRACK]
-    page.locator('#preview-reset').click()
+    page.locator('#preview-file').set_input_files({'name': 'initial.wav', 'mimeType': 'audio/wav', 'buffer': sample.getvalue()})
     requests.pop().fulfill(json=metadata)
+    expect(page.locator('#preview-title')).to_have_text('initial.wav')
     expect(page.locator('#preview-play')).to_be_enabled()
     page.wait_for_function('document.querySelector("audio").readyState >= 1')
     assert page.locator('audio').evaluate('(audio) => audio.paused')
     page.locator('#preview-play').click()
     page.wait_for_function('document.querySelector("audio").currentTime > 0.2')
     page.locator('#preview-play').click()
+    page.locator('#preview-loader').evaluate('element => element.open = true')
     page.locator('#preview-url').fill('https://soundcloud.com/other/track')
     page.locator('#preview-link-form button').click()
     expect(page.locator('#preview-link-form')).to_have_attribute('aria-busy', 'true')
@@ -87,4 +89,4 @@ with sync_playwright() as p:
         route.abort()
     assert errors == [], errors
     browser.close()
-print('Stable expanded hero, responsive star accent, concise copy, click-only default loading, reset cancellation, local-file request replacement and MSE-first HLS loading passed.')
+print('Stable expanded hero, responsive star accent, concise copy, click-only default loading, local-file cancellation of pending play/load requests and MSE-first HLS loading passed.')

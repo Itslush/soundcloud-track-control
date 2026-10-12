@@ -306,6 +306,8 @@ export function initDemo(sharedProfile?: TempoProfile) {
   }
 
   function finalizeTrack(next: number) {
+    if (next < 1 || next > 86400)
+      throw new Error('Use audio between one second and 24 hours long.');
     const data = editor.draftProfile();
     const scale = sharedProfile ? 1 : next / duration;
     duration = next;

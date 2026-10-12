@@ -9,7 +9,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from playwright.sync_api import sync_playwright, expect
-from userscript_fixture import ROOT, browser_options, serve_site, text_contrast
+from userscript_fixture import ROOT, SITE_URL, browser_options, serve_site, text_contrast
 
 
 def code(value, prefix='SCT1.'):
@@ -130,7 +130,7 @@ try:
         page.locator('.discord-copy').click()
         expect(page.locator('.discord-status')).to_have_text('Link copied.')
         discord_copy = page.evaluate('navigator.clipboard.readText()')
-        assert discord_copy == '[itslush.github.io/soundcloud-tempo-control/](' + response['url'] + ')'
+        assert discord_copy == '[' + SITE_URL.removeprefix('https://') + '](' + response['url'] + ')'
         page.locator('#set-play').click()
         expect(page.locator('#set-play')).to_have_text('Pause')
         page.wait_for_function('document.querySelector("#set-video").readyState === 4')

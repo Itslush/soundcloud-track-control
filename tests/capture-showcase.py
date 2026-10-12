@@ -12,7 +12,7 @@ from urllib.parse import quote, urlparse
 
 from playwright.sync_api import sync_playwright, expect, TimeoutError
 
-from userscript_fixture import choose_option, ROOT, userscript_bytes, userscript_source, browser_options
+from userscript_fixture import choose_option, ROOT, SITE_URL, userscript_bytes, userscript_source, browser_options
 
 DESTINATION = ROOT / 'site/public/screenshots'
 STAGING = ROOT / 'test-results' / ('showcase-' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
@@ -375,7 +375,7 @@ def main():
             page.set_viewport_size({'width': 1440, 'height': 1080})
             page.locator('.editor-link').click()
             link = page.evaluate('navigator.clipboard.readText()')
-            assert link.startswith('https://itslush.github.io/soundcloud-tempo-control/share/#sct=SCT1.'), link
+            assert link.startswith(SITE_URL + 'share/#sct=SCT1.'), link
             payload = link.split('#sct=SCT1.', 1)[1]
             shared = json.loads(base64.urlsafe_b64decode(payload + '=' * (-len(payload) % 4)))
             assert shared['track'] == TRACK_PATH and [point['r'] for point in shared['points']] == [1, .75, .9], shared

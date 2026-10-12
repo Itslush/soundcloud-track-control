@@ -74,7 +74,7 @@ def snapshot(page):
                 source: audio.currentSrc, rate: audio.playbackRate
             };
         })(),
-        point: document.querySelector('#demo-point-rate')?.value,
+        point: document.querySelector('.point-rate')?.value,
         pitch: document.querySelector('#demo-pitch')?.value,
         playLabel: document.querySelector('#preview-play')?.textContent.trim()
     })''')
@@ -144,8 +144,13 @@ with sync_playwright() as runtime:
                 resumed(page, mode.startswith('preserve'))
                 if mode.endswith('paused'):
                     page.locator('#preview-play').click()
-            page.locator('#demo-point-rate').fill('0.85')
-            page.locator('#demo-point-rate').press('Enter')
+            if mode == 'idle':
+                page.locator('.editor-advanced summary').click()
+                page.locator('.point-rate').fill('0.85')
+                page.locator('.point-rate').press('Tab')
+            else:
+                page.locator('#demo-key-shift').fill('-0.5')
+                page.locator('#demo-key-shift').press('Enter')
             before = snapshot(page)
             page.locator('.site-header').get_by_role('link', name='Help', exact=True).click()
             page.wait_for_url(BASE + 'guide/', wait_until='commit')

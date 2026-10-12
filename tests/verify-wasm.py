@@ -184,7 +184,9 @@ def main():
                 source.connect(mute).connect(ctx.destination);
                 await ctx.resume();await audio.play();
             }''', CONTEXT_RATE)
-            page.locator('.settings-button').click()
+            settings = page.locator('.settings-button')
+            if settings.get_attribute('aria-expanded') != 'true':
+                settings.click()
             page.locator('#preserve-key').check()
             page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('WASM unavailable')")
             assert page.evaluate('audio.preservesPitch') is True

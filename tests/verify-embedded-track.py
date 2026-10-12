@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 from playwright.sync_api import expect, sync_playwright
 
-from userscript_fixture import ROOT, browser_options, userscript_source, userscript_bytes
+from userscript_fixture import ROOT, SITE_URL, browser_options, userscript_source, userscript_bytes
 
 TRACK = '/test-artist/first-track'
 CANONICAL = 'https://soundcloud.com' + TRACK
@@ -33,7 +33,7 @@ window.fixtureCopy=()=>navigator.clipboard.writeText(fixtureNext);
 
 
 def payload(link):
-    assert link.startswith('https://itslush.github.io/soundcloud-tempo-control/share/#sct=SCT1.'), link
+    assert link.startswith(SITE_URL + 'share/#sct=SCT1.'), link
     encoded = link.split('SCT1.', 1)[1]
     result = json.loads(base64.urlsafe_b64decode(encoded + '=' * (-len(encoded) % 4)))
     assert result['track'] == TRACK and result['points'][0]['r'] == 0.85, result

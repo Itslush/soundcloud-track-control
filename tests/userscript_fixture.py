@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+SITE_URL = json.loads((ROOT / 'release.config.json').read_text())['siteUrl']
 (ROOT/'test-results').mkdir(exist_ok=True)
 
 

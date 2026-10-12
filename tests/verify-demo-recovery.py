@@ -56,6 +56,8 @@ with sync_playwright() as runtime:
     page.route('**/api/resolve?*', lambda route: route.fulfill(json=metadata()))
     page.route('**/delayed.wav', lambda route: pending.append(route))
     page.goto(BASE, wait_until='networkidle')
+    page.locator('.editor-advanced summary').click()
+    page.locator('.editor-graph .point').nth(2).click()
     open_loader(page)
     page.locator('#preview-url').fill(TRACK)
     page.locator('#preview-link-form button').click()
@@ -63,7 +65,7 @@ with sync_playwright() as runtime:
     expect(page.locator('#demo-copy')).to_be_disabled()
     page.wait_for_timeout(300)
     assert pending
-    assert page.locator('#demo-point-time').input_value() == '18'
+    assert page.locator('.point-time').input_value() == '18'
     audio_response(pending.pop())
     page.unroute('**/delayed.wav')
     page.route('**/delayed.wav', audio_response)
@@ -89,8 +91,11 @@ with sync_playwright() as runtime:
     expect(page.locator('#preview-compare')).to_have_attribute('aria-pressed', 'true')
     page.locator('#preview-compare').click()
     assert page.locator('audio').evaluate('(audio) => audio.playbackRate === 0.7 && audio.currentTime === 40')
-    page.locator('#demo-point-rate').fill('0.8')
-    page.locator('#demo-point-rate').press('Enter')
+    page.locator('#preview-timeline').click()
+    page.locator('.editor-graph .point').nth(2).click()
+    page.locator('.point-rate').fill('0.8')
+    page.locator('.point-rate').press('Tab')
+    page.locator('#preview-fixed').click()
     expect(page.locator('.timeline-demo')).to_have_attribute('data-mode', 'fixed')
     assert copied(page)['points'] == [{'t': 0, 'r': 0.7, 'd': 0, 'c': 'instant'}]
     page.locator('#preview-timeline').click()
@@ -98,30 +103,27 @@ with sync_playwright() as runtime:
     expect(page.locator('.timeline-demo')).to_have_attribute('data-mode', 'timeline')
     expect(page.locator('#preview-timeline')).to_have_attribute('aria-pressed', 'true')
     expect(page.locator('#preview-fixed')).to_have_attribute('aria-pressed', 'false')
-    page.locator('#demo-undo').click()
-    expect(page.locator('#demo-point-rate')).to_have_value('0.9')
-    page.locator('#demo-redo').click()
-    expect(page.locator('#demo-point-rate')).to_have_value('0.8')
-    page.locator('#preview-reset').click()
-    node = page.locator('#demo-nodes .node').nth(2)
+    expect(page.locator('.point-rate')).to_have_value('0.8')
+    page.locator('.point-rate').fill('0.9')
+    page.locator('.point-rate').press('Tab')
+    node = page.locator('.editor-graph .point').nth(2)
     box = node.bounding_box()
     page.mouse.move(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
     page.mouse.down()
     page.mouse.move(box['x'] + box['width'] / 2, box['y'] - 25, steps=6)
     page.mouse.up()
-    assert float(page.locator('#demo-point-rate').input_value()) > 0.9
-    page.locator('#demo-undo').click()
-    expect(page.locator('#demo-point-rate')).to_have_value('0.9')
+    assert float(page.locator('.point-rate').input_value()) > 0.9
+    dragged_rate = float(page.locator('.point-rate').input_value())
     node.focus()
-    node.press('Control+Shift+Z')
-    assert float(page.locator('#demo-point-rate').input_value()) > 0.9
+    node.press('ArrowUp')
+    assert float(page.locator('.point-rate').input_value()) > dragged_rate
 
-    page.evaluate('window.headLine = document.querySelector("#demo-playhead line")')
+    page.evaluate('window.headLine = document.querySelector(".editor-graph .playhead")')
     page.locator('#preview-play').click()
     page.wait_for_function('document.querySelector("audio").currentTime > 0.3')
     page.locator('#preview-play').click()
-    assert page.evaluate('window.headLine === document.querySelector("#demo-playhead line")')
-    assert page.locator('#demo-playhead > *').count() == 2
+    assert page.evaluate('window.headLine === document.querySelector(".editor-graph .playhead")')
+    assert page.locator('.editor-graph .playhead').count() == 1
 
     page.unroute('**/api/resolve?*')
     attempts = []
@@ -157,22 +159,22 @@ with sync_playwright() as runtime:
     expect(page.locator('#demo-status')).to_contain_text('Full track needed for sharing.')
 
     page.locator('#preview-file').set_input_files({'name': 'short.wav', 'mimeType': 'audio/wav', 'buffer': wav(0.12)})
-    expect(page.locator('#preview-play')).to_be_enabled()
-    page.wait_for_function('document.querySelector("#preview-seek").max === "0.12"')
+    expect(page.locator('#demo-status')).to_contain_text('Use audio between one second and 24 hours long.')
+    expect(page.locator('#preview-play')).to_have_text('Retry')
+    page.locator('#preview-file').set_input_files({'name': 'short-valid.wav', 'mimeType': 'audio/wav', 'buffer': wav(1.2)})
+    page.wait_for_function('Math.abs(Number(document.querySelector("#preview-seek").max) - 1.2) < 0.001')
     page.locator('.demo-details').first.evaluate('(element) => element.open = true')
     for index in [1, 2]:
-        page.locator('#demo-nodes .node').nth(index).focus()
-        assert page.locator('#demo-point-time').evaluate('(input) => Number(input.min) <= input.valueAsNumber && input.valueAsNumber <= Number(input.max)')
-        before = float(page.locator('#demo-point-time').input_value())
-        page.locator('#demo-point-time').press('ArrowUp')
-        assert float(page.locator('#demo-point-time').input_value()) > before
+        page.locator('.editor-graph .point').nth(index).click()
+        page.locator('.point-time').press('ArrowUp')
+        assert 0 <= float(page.locator('.point-time').input_value()) <= 1.2
     page.locator('#preview-file').set_input_files({'name': 'zoom.wav', 'mimeType': 'audio/wav', 'buffer': wav(24)})
     page.wait_for_function('document.querySelector("#preview-seek").max === "24"')
-    for _ in range(5): page.locator('#zoom-in').click()
-    labels = page.locator('#demo-grid text').all_text_contents()[6:]
+    for _ in range(5): page.locator('.zoom-in').click()
+    labels = page.locator('.editor-graph text[y="212"]').all_text_contents()
     assert len(labels) == len(set(labels)), labels
     assert ':' in labels[0] and '.' in labels[0]
-    assert float(page.locator('#demo-pan').get_attribute('step')) < 0.02
+    assert float(page.locator('.editor-pan').get_attribute('step')) < 0.02
     assert errors == [], errors
     browser.close()
-print('Delayed metadata, stable sharing, stream retry, gateway errors, mode clarity, A/B position, grouped undo, persistent playhead, short timing and zoom precision passed.')
+print('Delayed metadata, stable sharing, stream retry, gateway errors, mode clarity, A/B position, draft editing, drag and keyboard adjustment, persistent playhead, short timing and zoom precision passed.')

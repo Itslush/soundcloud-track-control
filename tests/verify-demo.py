@@ -1,6 +1,6 @@
 import os
 from playwright.sync_api import sync_playwright, expect
-from userscript_fixture import ROOT, browser_options, tempo_tick_geometry
+from userscript_fixture import ROOT, browser_options
 
 BASE = os.environ.get('SITE_URL', 'http://127.0.0.1:4322/')
 with sync_playwright() as p:
@@ -10,13 +10,17 @@ with sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(BASE, wait_until='networkidle')
     page.locator('#preview-fixed').click()
-    tempo_tick_geometry(page.locator('.speed-ticks'), page.locator('#demo-speed'), 12)
+    for control in ['#demo-speed', '#demo-key-slider']:
+        slider = page.locator(control)
+        expect(slider).to_be_visible()
+        assert slider.evaluate('el=>getComputedStyle(el).backgroundImage') != 'none'
     page.locator('#preview-timeline').click()
     assert page.locator('audio').evaluate('(audio) => audio.paused && audio.volume === 0.15')
     page.route('**/api/resolve?*', lambda route: route.fulfill(status=502, json={'error': 'Track could not be loaded.'}))
     page.locator('#preview-play').click()
     expect(page.locator('#preview-sample')).to_be_visible()
     page.locator('#preview-sample').click()
+    page.locator('#preview-fixed').click()
     trigger = page.locator('.select-trigger')
     expect(trigger).to_have_accessible_name('Demo pitch mode Natural')
     trigger.click()
@@ -48,7 +52,7 @@ with sync_playwright() as p:
     assert page.locator('audio').evaluate('(audio) => audio.paused')
     page.locator('#preview-seek').fill('12')
     page.wait_for_function('Math.abs(document.querySelector("audio").currentTime - 12) < 0.2')
-    page.locator('#preview-reset').click()
+    page.reload(wait_until='networkidle')
     assert page.locator('audio').evaluate('(audio) => audio.paused && audio.currentTime < 0.2')
     expect(trigger).to_contain_text('Natural')
     expect(page.locator('#preview-follow')).to_be_checked()
@@ -62,23 +66,27 @@ with sync_playwright() as p:
     expect(page.locator('#demo-status')).to_contain_text('could not be loaded')
     page.reload(wait_until='networkidle')
     for width in [320, 360, 390, 768, 1440]:
+        print(f'Checking demo and capture layout at {width}px', flush=True)
         page.set_viewport_size({'width': width, 'height': 1100})
         page.locator('#preview-loader').evaluate('(el) => el.open = true')
         page.locator('.demo-details').first.evaluate('(el) => el.open = true')
         assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), width
         page.locator('#preview-loader').evaluate('(el) => el.open = false')
         page.locator('.demo-details').first.evaluate('(el) => el.open = false')
+        page.locator('.feature-details').evaluate('element => element.open = true')
         for image in page.locator('.capture-surface img').all():
             image.scroll_into_view_if_needed()
             image.evaluate('(image) => image.decode()')
         page.evaluate('scrollTo(0,0)')
         if width in [390, 1440]: page.screenshot(path=str(ROOT/'test-results'/f'release-site-{width}.png'), full_page=True)
+    page.locator('#preview-fixed').click()
     trigger.click()
     page.wait_for_timeout(200)
     page.screenshot(path=str(ROOT/'test-results'/'release-menu.png'))
     page.get_by_role('option', name='Natural', exact=True).press('Escape')
     pending = []
-    page.route('**/screenshots/player-controls.png', lambda route: pending.append(route))
+    capture_url = page.locator('.capture-player img').evaluate('image => image.currentSrc')
+    page.route(capture_url, lambda route: pending.append(route))
     page.reload(wait_until='domcontentloaded')
     page.locator('.capture-player img').scroll_into_view_if_needed()
     expect(page.locator('.capture-player picture')).to_have_attribute('data-loading', '')
@@ -89,4 +97,4 @@ with sync_playwright() as p:
     expect(page.locator('.capture-player picture')).not_to_have_attribute('data-loading', '')
     assert errors == [], errors
     browser.close()
-print('Live sample, WASM, pitch menu, tempo, seek, reset, file errors, resolver failure, skeleton failure and responsive layouts passed.')
+print('Live sample, WASM, pitch menu, tempo, seek, reload reset, file errors, resolver failure, skeleton failure and responsive layouts passed.')

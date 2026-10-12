@@ -37,11 +37,12 @@ jobs:
           python tests/verify-buffered-transport.py --local-only
       - name: Website regressions
         run: |
+          export SITE_URL="http://127.0.0.1:4322$(node -p "new URL(require('./release.config.json').siteUrl).pathname")"
           node server/app.mjs &
           preview_pid=$!
           trap 'kill "$preview_pid"' EXIT
           for attempt in $(seq 1 20); do
-            curl --silent --fail http://127.0.0.1:4322/api/status && break
+            curl --silent --fail "${SITE_URL}api/status" && break
             sleep 0.25
           done
           python tests/verify-demo.py

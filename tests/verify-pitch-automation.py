@@ -4,7 +4,7 @@ import mimetypes
 from pathlib import Path
 from urllib.parse import urlparse, unquote
 from playwright.sync_api import sync_playwright, expect
-from userscript_fixture import userscript_source, browser_options, text_contrast, choose_option
+from userscript_fixture import SITE_URL, userscript_source, browser_options, text_contrast, choose_option
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -91,14 +91,15 @@ def main():
         site_errors = []
         site.on('pageerror', lambda e: site_errors.append(str(e)))
         def asset(route):
-            raw = urlparse(route.request.url).path.removeprefix('/soundcloud-tempo-control/')
+            raw = urlparse(route.request.url).path.removeprefix(urlparse(SITE_URL).path)
             target = (ROOT/'dist/site'/unquote(raw)).resolve()
             assert target.is_relative_to((ROOT/'dist/site').resolve())
             if target.is_dir(): target = target/'index.html'
             if not target.is_file(): return route.fulfill(status=404, body='not found')
             route.fulfill(path=str(target), content_type=mimetypes.guess_type(str(target))[0] or 'application/octet-stream')
         site.route('http://127.0.0.1:4323/**', asset)
-        site.goto('http://127.0.0.1:4323/soundcloud-tempo-control/')
+        site_base = 'http://127.0.0.1:4323' + urlparse(SITE_URL).path
+        site.goto(site_base)
         expect(site.locator('.tempo-editor-inline')).to_be_visible()
         site.locator('[data-lane=pitch]').click()
         graph = site.locator('.editor-graph')
@@ -117,13 +118,17 @@ def main():
             site.locator('.tempo-editor-inline').screenshot(path=str(ROOT/f'test-results/site-pitch-{width}.png'))
         expect(site.locator('#site-stars, #site-star-speed, .star-settings')).to_have_count(0)
         site.emulate_media(reduced_motion='reduce')
+        expect(site.locator('.space-accent')).to_have_attribute('data-visible', '')
+        site.locator('.site-appearance summary').click()
+        site.locator('#site-star-motion').click()
         expect(site.locator('.space-accent')).not_to_have_attribute('data-visible', '')
         code = 'SCT1.' + base64.urlsafe_b64encode(json.dumps(saved).encode()).decode().rstrip('=')
-        site.goto('http://127.0.0.1:4323/soundcloud-tempo-control/share/#sct=' + code)
+        site.goto(site_base + 'share/#sct=' + code)
         expect(site.locator('#share-summary')).to_contain_text('Pitch timeline')
         expect(site.locator('#share-actions')).to_be_visible()
         assert site.locator('#share-adjusted').get_attribute('href').startswith('https://soundcloud.com/test-artist/first-track?sct=SCT1.')
-        site.goto('http://127.0.0.1:4323/soundcloud-tempo-control/share/#sct=invalid')
+        site.goto(site_base + 'share/#sct=invalid')
+        expect(site.locator('#share-summary')).to_contain_text('missing or invalid')
         site.reload()
         expect(site.locator('#share-actions')).to_be_hidden()
         expect(site.locator('#share-summary')).to_contain_text('missing or invalid')

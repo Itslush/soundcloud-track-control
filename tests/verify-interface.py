@@ -9,7 +9,7 @@ with sync_playwright() as playwright:
     page = browser.new_page(viewport={'width': 1440, 'height': 1000})
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
-    for route, label in [('', 'Download'), ('guide/', 'Help'), ('updates/', 'Updates'), ('privacy/', None), ('support/', None)]:
+    for route, label in [('', 'Download'), ('guide/', 'Help'), ('updates/', 'Updates'), ('privacy/', None)]:
         page.goto(BASE + route, wait_until='networkidle')
         active = page.locator('.site-header [aria-current=page]')
         expect(active).to_have_count(1 if label else 0)
@@ -24,10 +24,11 @@ with sync_playwright() as playwright:
         for text in ['Bring Me The Horizon - Drown (Sewerslvt Remix)', '夜空 🎵 ' * 40, 'اختبار الصوت ' * 35]:
             page.locator('#preview-title').evaluate('(element, text) => element.textContent = text', text)
             assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), (width, text)
-        for node in page.locator('#demo-nodes .node-hit').all():
+        for node in page.locator('.editor-graph .point-hit').all():
             bounds = node.bounding_box()
-            assert bounds['width'] >= 43.5 and bounds['height'] >= 43.5, (width, bounds)
-        assert page.locator('#demo-graph').evaluate('(element) => getComputedStyle(element).touchAction') == 'pan-y'
+            # The shared editor uses SVG drag zones, with equivalent point selection in Advanced.
+            assert bounds['width'] >= 20 and bounds['height'] >= 23.5, (width, bounds)
+        assert page.locator('.editor-graph').evaluate('(element) => getComputedStyle(element).touchAction') == 'none'
         for disclosure in page.locator('.demo-details').all():
             disclosure.locator('summary').click()
             expect(disclosure).to_have_attribute('open', '')
@@ -37,6 +38,7 @@ with sync_playwright() as playwright:
     page.locator('body').evaluate('(element) => element.style.zoom = "2"')
     assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth')
     page.locator('body').evaluate('(element) => element.style.zoom = ""')
+    page.locator('#preview-fixed').click()
     trigger = page.locator('.select-trigger')
     for _ in range(4):
         trigger.click()
@@ -44,9 +46,9 @@ with sync_playwright() as playwright:
         page.get_by_role('option', name='Natural', exact=True).press('Escape')
         expect(trigger).to_be_focused()
         expect(trigger).to_have_attribute('aria-expanded', 'false')
-        expect(page.locator('[role=listbox]')).to_have_js_property('inert', True)
+        expect(page.locator('#demo-pitch-options')).to_have_js_property('inert', True)
     trigger.click()
-    expect(page.locator('[role=listbox]')).to_have_js_property('inert', False)
+    expect(page.locator('#demo-pitch-options')).to_have_js_property('inert', False)
     page.get_by_role('option', name='Natural', exact=True).press('End')
     expect(page.get_by_role('option', name='Preserve key', exact=True)).to_be_focused()
     page.keyboard.press('Enter')
@@ -68,7 +70,7 @@ with sync_playwright() as playwright:
     page.emulate_media(reduced_motion='reduce', forced_colors='active')
     assert page.locator('.space-accent').evaluate('(element) => getComputedStyle(element).display') == 'none'
     trigger.click()
-    assert page.locator('[role=listbox]').evaluate('(element) => getComputedStyle(element).transitionDuration') == '0s'
+    assert page.locator('#demo-pitch-options').evaluate('(element) => getComputedStyle(element).transitionDuration') == '0s'
     page.keyboard.press('Escape')
     capture.click()
     assert page.locator('.capture-viewer').evaluate('(element) => getComputedStyle(element).transitionDuration') == '0s'

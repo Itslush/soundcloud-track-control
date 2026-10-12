@@ -4,7 +4,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright, expect
 
-from userscript_fixture import soundcloud_share_url, userscript_source, browser_options
+from userscript_fixture import SITE_URL, soundcloud_share_url, userscript_source, browser_options
 
 ROOT = Path(__file__).resolve().parent.parent
 TRACK = '/test-artist/first-track'
@@ -31,7 +31,7 @@ def main():
         page.locator('.tempo-editor summary').click()
         page.locator('.editor-link').click()
         link = page.evaluate('copied')
-        assert link.startswith('https://itslush.github.io/soundcloud-tempo-control/share/#sct=SCT1.'), link
+        assert link.startswith(SITE_URL + 'share/#sct=SCT1.'), link
         payload = link.split('SCT1.')[1]
         data = json.loads(base64.urlsafe_b64decode(payload+'='*(-len(payload)%4)))
         assert data['points'][0]['r'] == .9

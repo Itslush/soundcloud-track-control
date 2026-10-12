@@ -89,3 +89,13 @@ Mode: DURING, explicitly chosen by the user. Direction: preserve the charcoal/or
 - R-31 PASS: width serves title readability, token colors serve theme contrast, stable IDs preserve installed data and updates.
 
 No new live Widevine or Discord-client playback test ran. The native app archive remains unmodified. Existing legacy DESIGN.md format and absent Impeccable sidecar are retained documentation drift, not silently repaired.
+
+## CI repair, October 12
+
+The failing runs exposed outdated transfer accounting, a resize measurement race, and tests still using the old website path and replaced demo controls. The startup transfer limit remains unchanged; the all-theme screenshot inventory has a separate budget. Website tests now derive the release base path, and the workflow uses that path for its local health check and website URL.
+
+The current demo has shared-editor fields and SVG drag zones rather than the former standalone graph, reset button and Undo/Redo buttons. Tests now exercise the actual fixed controls and shared editor, including draft edits, dragging, keyboard adjustment, disabled first-point timing, copy payloads and navigation restoration. The reduced-motion check now follows the explicitly requested default-on star override. The worklet test only opens settings when closed, avoiding a click intercepted by its already-open dialog.
+
+A real recovery bug was reproduced: a subsecond file failed timeline validation after changing the demo's duration, then prevented a valid replacement from loading. The demo now rejects unsupported durations before changing timeline state. The browser regression checks rejection followed by a valid short replacement, timing edits and zoom.
+
+Local checks passed across all 23 plugin browser suites (in batches), the workflow's 16 website suites, the additional set editor, and TypeScript checking. These are local results, not a claim that the complete hosted Actions run has passed. GitHub Actions is the final CI gate.
