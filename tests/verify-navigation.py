@@ -110,7 +110,7 @@ def assert_restored(before, after):
 
 with sync_playwright() as runtime:
     browser = runtime.chromium.launch(
-        **browser_options(), headless=True, args=['--mute-audio'],
+        **browser_options(), channel='chromium', headless=True, args=['--mute-audio'],
         ignore_default_args=['--disable-back-forward-cache'],
     )
     page = browser.new_page(viewport={'width': 1440, 'height': 1000})
@@ -205,6 +205,10 @@ with sync_playwright() as runtime:
         (ROOT / 'test-results/navigation-report.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
         print(json.dumps({key: result[key] for key in ['browser', 'status', 'cachedReturns', 'totalReturns']}, indent=2))
         if not coverage_complete:
+            print('Cache-miss reasons:', sorted({
+                explanation['reason'] for miss in misses
+                for explanation in miss.get('notRestoredExplanations', [])
+            }))
             raise SystemExit(2)
     finally:
         browser.close()
