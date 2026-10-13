@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.6
+
+- The phone player stays above SoundCloud's footer, with Settings available without expanding Controls.
+- Mobile library cards have room for their titles, and Discover's sidebar sits below the main content.
+- The website's timeline scroll slider has its visible track back in every theme.
+
 ## 1.2.5
 
 - Phone-layout candidate for Firefox Android in desktop-site mode. The library uses larger tiles and readable titles, navigation and search fit the phone, and playback controls stay within reach. Testing on a physical phone is still pending.

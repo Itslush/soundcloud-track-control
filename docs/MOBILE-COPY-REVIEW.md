@@ -1,5 +1,29 @@
 # Phone layout and copy review
 
+## v1.2.6 follow-up
+
+The mobile player now uses a manual popover so SoundCloud's transformed footer cannot move it below the viewport. Settings is on the collapsed transport and opens the existing customization panel. Native footer descendants are hidden only while the mobile adapter is active. Teardown restores the desktop player and the original root styles.
+
+Live anonymous inspection found a transformed `.playControls__inner`, a 360px main-column margin, and an absolutely positioned `.l-sidebar-right` whose child becomes fixed on scroll. The adapter resets those desktop layout constraints. Track-list selectors match direct card children, so Discover's outer list of sections does not accidentally become a card grid. The nested `soundBadgeList > ul > li` shape comes from SoundCloud's public list implementation; signed-in Likes remains unverified.
+
+Discover's native carousel lazily creates cards and calculates translation from a fixed panel count. Overriding card widths and adding horizontal scrolling left empty slots. The mobile version instead uses a two-column grid, hides unrendered slots, and keeps the native forward button to reveal the next group. Live Chromium at 393px and desktop Firefox with simulated 980px Android geometry both loaded every item in the tested eight- and ten-item galleries without removing earlier cards. The forward button disappeared when complete. No private view APIs or scroll-triggered synthetic clicks are used. Idle native buffering controls remain hidden instead of being exposed as spinners on every cover.
+
+The website's black timeline control came from a text-input selector overriding the range background and border. Excluding range inputs restores the existing rail without changing timeline behavior. A regression checks keyboard adjustment and rendered styles on the website and userscript in Chromium and Firefox, in Light, Charcoal and OLED.
+
+Verification includes 600 passing unit tests, 29 muted browser suites, typecheck, builds, website themes and capture checks. The final spinner rule has a focused phone-layout regression in both engines. Settings opens from the collapsed player, Escape restores focus, native playback controls remain hidden, cards wrap, the sidebar follows content, and page zoom and teardown retain their checks. The screenshots in `test-results/mobile-gallery-reveal-*` are real anonymous SoundCloud pages. Library test cards are clearly labelled fixtures.
+
+Main-agent Anti Slop recheck for this follow-up: the existing design read and delivery gate below still govern the changed controls. R-03 and C-4 PASS for the tested fixtures and anonymous pages, with no horizontal page overflow or sidebar overlap. R-26 and R-32 PASS for native gallery activation, collapsed Settings, keyboard pan and focus return. R-25 and R-34 PASS for the existing three-theme contrast checks and restored range styling. R-35 and R-38 PASS for built-code tests and explicitly distinguished live, simulated and unverified contexts. R-19 PASS because the change adds no animation or polling loop. R-31 PASS because the top layer prevents displacement, direct Settings removes the hidden entry point, and progressive card reveal preserves the host's lazy loading. The unchanged purpose, identity, copy and evidence items below retain their evidence and scope.
+
+The strict code review kept the existing settings implementation and removed inline footer-visibility bookkeeping in favor of the scoped adapter stylesheet. No storage keys, share formats, audio routes, server code or installed desktop files changed. Real Firefox Android touch gestures, its keyboard viewport behavior, signed-in Likes and physical low-end performance still need a phone check. Browser fixtures are not proof of those results.
+
+## Phone feedback after v1.2.5
+
+The user found an older duplicate userscript overriding v1.2.5. After disabling it, the mobile layout activated, but newer screenshots exposed separate failures: the touch player was missing, six-column tiles had oversized clipped text, and Discover's sidebar overlaid the main content. Detection is no longer the unresolved issue. The original fixtures did not model these host constraints.
+
+The download-page heading also displayed "pitchon" on mobile. Its hidden line break had no adjacent whitespace. The source now includes a word separator, and the three-theme browser test checks the rendered heading text at 320, 390 and 1440 pixels. Build, contrast, theme, keyboard and interaction checks pass. This correction changes no plugin code, stored settings, audio or desktop installation. The delivery gate below continues to describe the original candidate's scoped checks, not a successful phone result.
+
+## Original candidate review
+
 v1.2.5 is a phone-testing candidate, not a certification of Firefox Android playback. The user reported the latest script still showing SoundCloud's tiny desktop footer and six-column library in Firefox. Earlier mobile checks covered Chromium and the player fixture, not the whole library page.
 
 ## Change and evidence

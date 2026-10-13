@@ -1160,7 +1160,7 @@ h3 {
 #demo-shared-editor .editor-advanced[open] summary svg {
   transform: rotate(180deg);
 }
-#demo-shared-editor input,
+#demo-shared-editor input:not([type='range']),
 #demo-shared-editor textarea {
   color: inherit;
   background: var(--ground);

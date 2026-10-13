@@ -35,8 +35,9 @@ const style = `
 .waveform-panel[open] > summary::after { content:' −'; }
 .waveform-panel[open] { padding:12px; background:var(--tempo-surface); border:1px solid var(--tempo-track); border-radius:4px; }
 .waveform-panel:not([open]) .waveform-content { display:none; }
-:host([data-touch-player]) { position:fixed !important; display:block !important; left:var(--touch-left) !important; top:var(--touch-dock-top) !important; bottom:auto !important; width:var(--touch-width) !important; max-height:var(--touch-panel-height); overflow:auto; overscroll-behavior:contain; min-width:0 !important; margin:0 !important; padding:8px 12px max(8px,env(safe-area-inset-bottom)); transform:scale(var(--touch-inverse)); transform-origin:0 0; z-index:2147483646; font:16px/1.4 Arial,sans-serif; color:var(--tempo-fg); background:var(--tempo-surface); border-top:1px solid var(--tempo-track); visibility:visible !important; box-sizing:border-box; }
+:host([data-touch-player]) { position:fixed !important; display:block !important; left:var(--touch-left) !important; top:var(--touch-dock-top) !important; bottom:auto !important; right:auto; width:var(--touch-width) !important; max-height:var(--touch-panel-height); overflow:auto; overscroll-behavior:contain; min-width:0 !important; margin:0 !important; padding:8px 12px max(8px,env(safe-area-inset-bottom)); transform:scale(var(--touch-inverse)); transform-origin:0 0; z-index:2147483646; font:16px/1.4 Arial,sans-serif; color:var(--tempo-fg); background:var(--tempo-surface); border:0; border-top:1px solid var(--tempo-track); visibility:visible !important; box-sizing:border-box; }
 :host([data-touch-player]) .controls { display:none; }
+:host([data-touch-player])::backdrop { display:none; }
 :host([data-touch-player]) .touch-transport { display:grid; grid-template-columns:44px minmax(0,1fr) 44px 44px 64px; align-items:center; gap:6px; }
 .touch-transport button,.touch-adjustments button { display:flex; align-items:center; justify-content:center; min-height:44px; min-width:44px; border:1px solid var(--tempo-track); border-radius:4px; padding:6px; background:var(--tempo-surface); color:var(--tempo-fg); font:inherit; }
 .touch-transport button:disabled { opacity:.5; }
@@ -58,6 +59,7 @@ const style = `
 :host([data-touch-player]) .touch-play { grid-column:3; grid-row:2; }
 :host([data-touch-player]) .touch-next { grid-column:4; grid-row:2; }
 :host([data-touch-player]) .touch-expand { grid-column:5; grid-row:2; font-size:14px; }
+:host([data-touch-player]) .touch-settings { grid-column:1 / 3; grid-row:2; font-size:14px; justify-self:start; padding-inline:12px; }
 :host([data-touch-player][data-touch-expanded]) .touch-adjustments { display:grid; gap:12px; padding-top:12px; }
 .touch-adjustments label { display:grid; grid-template-columns:68px minmax(0,1fr); gap:8px; align-items:center; }
 .touch-adjustments .touch-number-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; align-items:center; }
@@ -130,13 +132,20 @@ export function createMobilePlayer({
   transport.className = 'touch-transport';
   transport.innerHTML = `<div class="touch-art" aria-hidden="true"></div><div class="touch-caption"><strong></strong><span></span></div><button type="button" class="touch-play" aria-label="Play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4l12 8-12 8Z"/></svg></button><button type="button" class="touch-next" aria-label="Next track"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l12 8-12 8ZM20 4v16"/></svg></button><button type="button" class="touch-expand" aria-expanded="false" aria-controls="touch-adjustments">Controls</button>`;
   const pitchNotice = document.createElement('span');
+  const settingsButton = document.createElement('button');
+  settingsButton.type = 'button';
+  settingsButton.className = 'touch-settings';
+  settingsButton.dataset.action = 'settings';
+  settingsButton.textContent = 'Settings';
+  on(settingsButton, 'click', () => openSettings(settingsButton));
+  transport.append(settingsButton);
   pitchNotice.className = 'touch-pitch-notice';
   pitchNotice.hidden = true;
   transport.querySelector('.touch-caption').append(pitchNotice);
   const adjustments = document.createElement('div');
   adjustments.className = 'touch-adjustments';
   adjustments.id = 'touch-adjustments';
-  adjustments.innerHTML = `<label>Tempo <span class="touch-number-row"><input id="touch-rate" type="number" min="0.25" max="4" step="0.025" value="1" aria-label="Exact playback speed on mobile"><span>×</span></span></label><input id="touch-rate-slider" type="range" min="0.25" max="4" step="0.001" value="1" aria-label="Playback speed on mobile"><label class="touch-pitch">Pitch <span class="touch-number-row"><input id="touch-pitch" type="number" min="-12" max="12" step="0.5" value="0" aria-label="Key shift in semitones on mobile"><span>st</span></span></label><input id="touch-pitch-slider" type="range" min="-12" max="12" step="0.001" value="0" aria-label="Key shift on mobile"><label>Volume <input id="touch-volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume on mobile"></label><div class="touch-tools"><button type="button" data-action="previous">Previous</button><button type="button" data-action="reset">Reset tempo</button><button type="button" data-action="pitch-reset">Reset pitch</button><button type="button" data-action="save">Save tempo</button><button type="button" data-action="settings">Settings</button></div>`;
+  adjustments.innerHTML = `<label>Tempo <span class="touch-number-row"><input id="touch-rate" type="number" min="0.25" max="4" step="0.025" value="1" aria-label="Exact playback speed on mobile"><span>×</span></span></label><input id="touch-rate-slider" type="range" min="0.25" max="4" step="0.001" value="1" aria-label="Playback speed on mobile"><label class="touch-pitch">Pitch <span class="touch-number-row"><input id="touch-pitch" type="number" min="-12" max="12" step="0.5" value="0" aria-label="Key shift in semitones on mobile"><span>st</span></span></label><input id="touch-pitch-slider" type="range" min="-12" max="12" step="0.001" value="0" aria-label="Key shift on mobile"><label>Volume <input id="touch-volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume on mobile"></label><div class="touch-tools"><button type="button" data-action="previous">Previous</button><button type="button" data-action="reset">Reset tempo</button><button type="button" data-action="pitch-reset">Reset pitch</button><button type="button" data-action="save">Save tempo</button></div>`;
   const details = document.createElement('details');
   details.className = 'waveform-panel';
   details.innerHTML =
@@ -164,11 +173,6 @@ export function createMobilePlayer({
     frame,
     disposed = false,
     touch = false;
-  let hiddenBar, originalVisibility;
-  function restoreBar() {
-    if (hiddenBar) hiddenBar.style.visibility = originalVisibility;
-    hiddenBar = undefined;
-  }
   const coarse = window.matchMedia('(any-pointer: coarse)');
   function forward(input, selector) {
     const original = root.querySelector(selector);
@@ -249,9 +253,6 @@ export function createMobilePlayer({
         break;
       case 'save':
         root.querySelector('.memory').click();
-        break;
-      case 'settings':
-        openSettings(event.target.closest('[data-action]'));
         break;
     }
   });
@@ -366,13 +367,13 @@ export function createMobilePlayer({
     pageLayout.update(geometry, touch ? host.offsetHeight : 0);
     host.toggleAttribute('data-touch-player', touch);
     const bar = host.closest('.playControls');
-    if (hiddenBar && (!touch || hiddenBar !== bar)) restoreBar();
-    if (touch && bar && hiddenBar !== bar) {
-      hiddenBar = bar;
-      originalVisibility = bar.style.visibility;
-      bar.style.visibility = 'hidden';
+    if (touch && !host.matches(':popover-open')) {
+      host.setAttribute('popover', 'manual');
+      host.showPopover();
     }
     if (!touch) {
+      if (host.matches(':popover-open')) host.hidePopover();
+      host.removeAttribute('popover');
       const bottom = `${Math.max(8, window.innerHeight - (bar?.getBoundingClientRect().top ?? window.innerHeight - 50) + 8)}px`;
       if (host.style.getPropertyValue('--waveform-bottom') !== bottom)
         host.style.setProperty('--waveform-bottom', bottom);
@@ -473,7 +474,8 @@ export function createMobilePlayer({
       window.cancelAnimationFrame(frame);
       waveform.dispose();
       pageLayout.dispose();
-      restoreBar();
+      if (host.matches(':popover-open')) host.hidePopover();
+      host.removeAttribute('popover');
       host.removeAttribute('data-touch-player');
       host.removeAttribute('data-touch-expanded');
       sheet.remove();

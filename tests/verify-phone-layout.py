@@ -1,9 +1,6 @@
 import json
-import hashlib
 import subprocess
-import sys
 import threading
-from urllib.request import urlopen
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
@@ -12,10 +9,6 @@ from userscript_fixture import ROOT, userscript_source
 
 
 source = userscript_source()
-if '--baseline' in sys.argv:
-    published = urlopen('https://itslush.github.io/soundcloud-track-control/downloads/soundcloud-track-control.user.js', timeout=20).read()
-    assert hashlib.sha256(published).hexdigest() == '8731f7ba640f0c637e20cc3ce80692adec85c30ffc833df88ca5d164371ff018'
-    source = published.decode('utf-8')
 server = ThreadingHTTPServer(('127.0.0.1', 0), partial(SimpleHTTPRequestHandler, directory=str(ROOT)))
 threading.Thread(target=server.serve_forever, daemon=True).start()
 evidence = []
@@ -52,32 +45,58 @@ try:
                 host = page.locator('#soundcloud-tempo-control')
                 print(json.dumps({'engine': engine, 'signals': page.evaluate('({points:navigator.maxTouchPoints,width:visualViewport.width,scale:visualViewport.scale,screen:screen.width,coarse:matchMedia("(any-pointer:coarse)").matches})'), 'errors': errors}), flush=True)
                 expect(host).to_have_attribute('data-touch-player', '')
-                page.evaluate('''() => {
-                    const style = document.createElement('style');
-                    style.textContent = '.l-container{width:960px}.header{position:fixed;height:46px}.header__inner{display:flex;height:46px}.header__left,.header__middle,.header__right{width:33%}.header__navMenu{display:flex}.header__navMenuItem{list-style:none}.headerSearch__input{width:180px}.g-tabs{display:flex;list-style:none}.g-tabs a{display:block;height:32px}.soundBadgeList{display:grid;grid-template-columns:repeat(6,1fr);padding:0;list-style:none}.soundBadge__artwork{width:130px;height:130px;background:#50565a}.soundBadge__playButton{visibility:hidden}.soundTitle__title{height:20px;white-space:nowrap;font-size:12px}.l-main{width:700px;float:left}.l-sidebar{width:240px;float:right}';
-                    document.head.prepend(style);
-                    const header = document.createElement('header');
-                    header.className = 'header';
-                    header.innerHTML = '<div class="header__inner l-container"><div class="header__left"><div class="header__logo"><a class="header__logoLink-iconOnly" href="/">Home</a></div><nav class="header__navWrapper"><ul class="header__navMenu">'+['Home','Feed','Library'].map(name=>'<li class="header__navMenuItem"><a href="/'+name.toLowerCase()+'">'+name+'</a></li>').join('')+'</ul></nav></div><div class="header__middle"><form class="header__search headerSearch"><input class="headerSearch__input" aria-label="Search tracks"></form></div><div class="header__right"><button>Account</button><a href="/upload">Upload</a><button>More</button></div></div>';
-                    document.body.prepend(header);
-                    const main = document.querySelector('main');
-                    main.className = 'l-container l-content';
-                    main.innerHTML = '<div class="l-main"><ul class="g-tabs">'+['Overview','Likes','Playlists','Albums','Stations','Following','History'].map(name=>'<li><a href="/you/'+name.toLowerCase()+'">'+name+'</a></li>').join('')+'</ul><h1>Phone library fixture</h1><p>Illustrative cards, not an account capture.</p><ul class="soundBadgeList">'+Array.from({length:14},(_,index)=>'<li class="soundBadgeList__item"><article class="soundBadge"><div class="soundBadge__artwork"><button class="soundBadge__playButton sc-button-play" aria-label="Play fixture track '+index+'">Play</button></div><div class="soundBadge__content"><a class="soundTitle__title" href="/fixture/track-'+index+'">Fixture track '+index+' with a long readable title</a><span class="soundTitle__username">Fixture artist</span></div></article></li>').join('')+'</ul></div><aside class="l-sidebar">Sidebar content</aside>';
+                page.evaluate('''fragment => {
+                    const shell = document.createElement('template');
+                    shell.innerHTML = fragment;
+                    document.querySelector('main').replaceWith(shell.content);
+                    const inner = document.createElement('div');
+                    inner.className = 'playControls__inner';
+                    const elements = document.querySelector('.playControls__elements');
+                    elements.before(inner);
+                    inner.append(elements);
+                    const tile = index => '<article class="playableTile"><div class="playableTile__artwork"><div class="playableTile__image"></div><div class="playableTile__playButton"><button class="playButton" aria-label="Play fixture track '+index+'">Play</button></div></div><div class="playableTile__description"><a class="playableTile__heading playableTile__mainHeading sc-truncate" href="/fixture/track-'+index+'">Fixture track '+index+' with a long readable title</a><span class="playableTile__heading sc-truncate">Fixture artist</span></div></article>';
+                    document.querySelector('.lazyLoadingList__list').innerHTML = Array.from({length:14},(_,i)=>'<li>'+tile(i)+'</li>').join('');
+                    document.querySelector('.tileGallery__sliderPanel').innerHTML = Array.from({length:6},(_,i)=>'<div class="tileGallery__sliderPanelSlide m-sixPanels">'+(i < 4 ? tile(i+14) : '')+'</div>').join('');
+                    document.querySelector('.tileGallery__slideForwardButton').onclick = () => {
+                        document.querySelectorAll('.tileGallery__sliderPanelSlide:empty').forEach((slide,i)=>slide.innerHTML=tile(i+18));
+                        document.querySelector('.tileGallery').classList.remove('m-hasItemsForward');
+                    };
                     window.phoneActions = [];
-                    main.addEventListener('click',event=>{
-                        const target = event.target.closest('a,button');
+                    document.querySelector('main').addEventListener('click', event => {
+                        const target=event.target.closest('a,button');
                         if(target){event.preventDefault();phoneActions.push(target.getAttribute('href')||target.getAttribute('aria-label'));}
                     });
-                }''')
+                }''', (ROOT / 'tests/fixtures/mobile-host-fragment.html').read_text(encoding='utf-8'))
+                page.wait_for_timeout(100)
+                dock = host.bounding_box()
+                assert dock['y'] >= 0 and dock['y'] + dock['height'] <= 844 / scale + 2, dock
+                expect(page.locator('.playControls__play')).to_be_hidden()
+                page.locator('.touch-settings').click()
+                expect(page.locator('.settings')).to_be_visible()
+                page.keyboard.press('Escape')
+                expect(page.locator('.touch-settings')).to_be_focused()
+                first_play = page.get_by_role('button', name='Play fixture track 0', exact=True, include_hidden=True)
+                first_play.evaluate("el => el.classList.add('sc-button-buffering')")
+                expect(first_play).to_be_hidden()
+                first_play.evaluate("el => el.classList.remove('sc-button-buffering')")
+                expect(first_play).to_be_visible()
                 expect(page.locator('html')).to_have_attribute('data-track-control-mobile-layout', '')
                 page.wait_for_timeout(120)
                 measured = page.evaluate('''() => {
                     const scale=visualViewport.scale, header=document.querySelector('.header');
-                    const items=[...document.querySelectorAll('.soundBadgeList__item')].map(item=>item.getBoundingClientRect());
+                    const items=[...document.querySelectorAll('.fixture-library > li')].map(item=>item.getBoundingClientRect());
                     const search=document.querySelector('.headerSearch__input').getBoundingClientRect();
-                    const title=document.querySelector('.soundTitle__title');
-                    return {columns:getComputedStyle(document.querySelector('.soundBadgeList')).gridTemplateColumns.split(' ').length,
+                    const title=document.querySelector('.playableTile__mainHeading');
+                    const main=document.querySelector('.l-main').getBoundingClientRect(), sidebar=document.querySelector('.l-sidebar-right').getBoundingClientRect();
+                    const gallery=document.querySelector('.tileGallery__slider'), panel=gallery.firstElementChild;
+                    return {columns:getComputedStyle(document.querySelector('.lazyLoadingList__list')).gridTemplateColumns.split(' ').length,
                         titleSize:parseFloat(getComputedStyle(title).fontSize)*scale,
+                        wrappedTitle:title.getBoundingClientRect().height*scale > 40,
+                        sidebarAfterMain:sidebar.top >= main.bottom - 1,
+                        sidebarPosition:getComputedStyle(document.querySelector('.streamSidebar')).position,
+                        galleryColumns:getComputedStyle(panel).gridTemplateColumns.split(' ').length,
+                        galleryUnclipped:panel.scrollHeight <= panel.clientHeight + 1,
+                        galleryWidth:gallery.clientWidth * scale,
                         tabHeight:document.querySelector('.g-tabs a').getBoundingClientRect().height*scale,
                         searchHeight:search.height*scale,searchRight:search.right,
                         headerPosition:getComputedStyle(header).position,
@@ -86,6 +105,9 @@ try:
                         dockPadding:parseFloat(getComputedStyle(document.body).paddingBottom)*scale};
                 }''')
                 assert measured['columns'] == (3 if width == 844 else 2), measured
+                assert measured['wrappedTitle'] and measured['sidebarAfterMain'] and measured['sidebarPosition'] == 'static', measured
+                assert measured['galleryColumns'] == measured['columns'] and measured['galleryUnclipped'], measured
+                assert measured['galleryWidth'] >= width - 26, measured
                 assert measured['titleSize'] >= 15.9 and measured['tabHeight'] >= 43.9, measured
                 assert measured['searchHeight'] >= 43.9 and measured['searchRight'] <= 980, measured
                 assert measured['headerPosition'] == 'relative' and measured['cardSpacing'] >= 11.9, measured
@@ -93,7 +115,23 @@ try:
                 page.get_by_role('button', name='Play fixture track 0', exact=True).click()
                 page.locator('.g-tabs a').nth(1).click()
                 assert page.evaluate('phoneActions') == ['Play fixture track 0', '/you/likes']
+                expect(page.locator('.tileGallery__sliderPanelSlide:empty')).to_have_count(2)
+                page.get_by_role('button', name='Next tracks', exact=True).click()
+                expect(page.locator('.tileGallery__sliderPanelSlide:empty')).to_have_count(0)
+                expect(page.get_by_role('button', name='Next tracks', exact=True)).to_be_hidden()
+                expect(page.get_by_role('button', name='Play fixture track 14', exact=True)).to_be_visible()
+                page.get_by_role('button', name='Play fixture track 19', exact=True).click()
+                assert page.evaluate('phoneActions.at(-1)') == 'Play fixture track 19'
+                page.evaluate('window.scrollTo(0,0)')
                 page.screenshot(path=str(ROOT / f'test-results/phone-page-{engine}-{width}.png'))
+                page.evaluate('''() => {
+                    const list=document.querySelector('.fixture-library'), wrapper=document.createElement('div');
+                    wrapper.className='soundBadgeList';
+                    list.before(wrapper); wrapper.append(list);
+                    list.className='fixture-library sc-list-nostyle sc-clearfix';
+                    for(const item of list.children)item.className='soundBadgeList__item';
+                }''')
+                assert page.locator('.fixture-library').evaluate('el => getComputedStyle(el).gridTemplateColumns.split(" ").length') == measured['columns']
                 page.evaluate('''() => {
                     visualViewport.scale *= 2;
                     visualViewport.width /= 2;
@@ -101,7 +139,7 @@ try:
                     visualViewport.dispatchEvent(new Event('resize'));
                 }''')
                 page.wait_for_timeout(80)
-                zoomed = page.locator('.soundTitle__title').first.evaluate('element => parseFloat(getComputedStyle(element).fontSize) * visualViewport.scale')
+                zoomed = page.locator('.playableTile__mainHeading').first.evaluate('element => parseFloat(getComputedStyle(element).fontSize) * visualViewport.scale')
                 assert zoomed >= 31.9, zoomed
                 measured['zoomedTitleSize'] = zoomed
                 assert not errors, errors

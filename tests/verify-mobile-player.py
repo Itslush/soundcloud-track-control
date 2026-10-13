@@ -28,7 +28,7 @@ def verify_mobile_mirroring(browser, base):
       window.mobileController = createMobilePlayer({host,root,document,media:[],readTrack:()=>'/artist/track',canSeek:()=>true,changeRate:()=>{},cancelTransition:()=>mobileCalls.push('cancel')});
       mobileController.overlap({nextTrack:'/artist/next'});
       const copy = root.querySelector('.touch-cover'), incoming = copy.lastElementChild;
-      return {hidden:bar.style.visibility, backgrounds:[...copy.children].map(child=>child.style.backgroundImage), variables:['--tempo-artwork-start','--tempo-artwork-end','--tempo-artwork-progress'].map(name=>copy.style.getPropertyValue(name)), opacity:getComputedStyle(incoming).opacity, mask:getComputedStyle(incoming).maskImage, notice:root.querySelector('.touch-pitch-notice').textContent, noticeHidden:root.querySelector('.touch-pitch-notice').hidden};
+      return {hidden:getComputedStyle(bar).visibility, backgrounds:[...copy.children].map(child=>child.style.backgroundImage), variables:['--tempo-artwork-start','--tempo-artwork-end','--tempo-artwork-progress'].map(name=>copy.style.getPropertyValue(name)), opacity:getComputedStyle(incoming).opacity, mask:getComputedStyle(incoming).maskImage, notice:root.querySelector('.touch-pitch-notice').textContent, noticeHidden:root.querySelector('.touch-pitch-notice').hidden};
     }''')
     assert result == {'hidden':'hidden','backgrounds':['url("outgoing.png")','url("incoming.png")'],'variables':['25%','75%','0.4'],'opacity':'0.4','mask':'none','notice':'Pitch processing unavailable','noticeHidden':False}, result
     page.emulate_media(reduced_motion='no-preference')
@@ -167,7 +167,7 @@ try:
             page.locator('[data-action=settings]').tap()
             expect(page.locator('.settings')).to_be_visible()
             page.keyboard.press('Escape')
-            expect(page.locator('.touch-adjustments [data-action=settings]')).to_be_focused()
+            expect(page.locator('.touch-settings')).to_be_focused()
             page.locator('[data-action=settings]').tap()
             page.locator('.appearance-settings summary').tap()
             page.locator('#show-key').uncheck()

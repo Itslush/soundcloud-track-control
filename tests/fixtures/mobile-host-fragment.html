@@ -1,0 +1,43 @@
+<!-- Discover/footer constraints observed on anonymous SoundCloud /discover, 2026-10-13.
+     Library list is an illustrative composition, not an authenticated Likes capture. -->
+<style>
+.l-container{width:960px}.l-fluid-fixed{position:relative}.l-fluid-fixed .l-main{margin-right:360px}
+.l-fluid-fixed .l-sidebar-right{position:absolute;top:12px;bottom:0;right:0;width:360px}.l-fixed{position:fixed;width:360px}
+.header{position:fixed;height:46px}.header__inner{display:flex;height:46px}.header__left,.header__middle,.header__right{width:33%}
+.header__navMenu{display:flex}.header__navMenuItem{list-style:none}.headerSearch__input{width:180px}
+.header__logo:not(.m-loggedIn) .header__logoLink-iconOnly{display:none}.header__logoLink svg{width:48px;height:24px}
+.g-tabs{display:flex;list-style:none}.g-tabs a{display:block;height:32px}
+.sc-truncate{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lazyLoadingList__list{margin:0;padding:0;list-style:none}.fixture-library{display:grid;grid-template-columns:repeat(6,1fr)}
+.playableTile{width:100%}.playableTile__artwork{padding-top:100%;height:0;position:relative}
+.playableTile__image{position:absolute;inset:0;background:#50565a}.playableTile__description{display:flex;flex-direction:column;width:100%}
+.playableTile__heading{display:block;width:100%;font-size:12px;height:20px}
+.playableTile__playButton{visibility:hidden;position:absolute;inset:0;display:grid;place-content:center}
+.tileGallery__slider{overflow:hidden}.tileGallery__sliderPanel{display:flex;transform:translateZ(0);max-height:208px}
+.tileGallery__sliderPanelSlide{flex:0 0 15.3333%;width:15.3333%;margin-right:1%;padding-right:32px}
+.playControls__inner{height:50px;visibility:visible;transform:translateY(0)}.playControls__elements{visibility:visible}
+</style>
+<header class="header">
+  <div class="header__inner l-container">
+    <div class="header__left">
+      <div class="header__logo"><a class="header__logoLink header__logoLink-iconOnly" aria-label="SoundCloud" href="/"><div><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 12h20v8H2z"/></svg></div>SoundCloud</a><a class="header__logoLink-wordmark" href="/">SoundCloud</a></div>
+      <nav class="header__navWrapper"><ul class="header__navMenu">
+        <li class="header__navMenuItem"><a href="/discover">Home</a></li><li class="header__navMenuItem"><a href="/feed">Feed</a></li><li class="header__navMenuItem"><a href="/you/library">Library</a></li>
+      </ul></nav>
+    </div>
+    <div class="header__middle"><form class="header__search headerSearch"><input class="headerSearch__input" aria-label="Search tracks"></form></div>
+    <div class="header__right"><button>Account</button><a href="/upload">Upload</a><button>More</button></div>
+  </div>
+</header>
+<main class="l-container l-content l-fluid-fixed">
+  <div class="l-main">
+    <ul class="g-tabs"><li><a href="/you/library">Overview</a></li><li><a href="/you/likes">Likes</a></li><li><a href="/you/sets">Playlists</a></li><li><a href="/you/albums">Albums</a></li><li><a href="/you/stations">Stations</a></li><li><a href="/you/following">Following</a></li><li><a href="/you/history">History</a></li></ul>
+    <h1>Phone library fixture</h1><p>Illustrative cards, not an account capture.</p>
+    <ul class="lazyLoadingList__list fixture-library"></ul>
+    <ul class="lazyLoadingList__list fixture-discover"><li>
+      <h2>Discover gallery fixture</h2>
+      <div class="tileGallery m-hasItemsForward"><div class="tileGallery__slider"><div class="tileGallery__sliderPanel"></div></div><div class="tileGallery__sliderPeek tileGallery__sliderPeekForward"><button class="tileGallery__slideForwardButton">Next tracks</button></div></div>
+    </li></ul>
+  </div>
+  <aside class="l-sidebar-right"><div class="streamSidebar l-fixed" style="top:70px">Sidebar fixture</div></aside>
+</main>
