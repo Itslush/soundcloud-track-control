@@ -1,12 +1,21 @@
 import { enhanceTempoFields } from './tempo-fields.js';
 import { syncTempoRange } from './tempo-range.js';
 import { createTrackWaveform } from './tempo-waveform.js';
+import { createMobileLayout } from '../soundcloud/mobile-layout.js';
 
-export function touchViewport(viewport, screenWidth, coarse) {
+export function touchViewport(
+  viewport,
+  screenWidth,
+  coarse,
+  touchPoints = 0,
+  screenHeight = screenWidth,
+) {
   const scale = Math.max(0.01, viewport?.scale || 1);
   const width = (viewport?.width || screenWidth) * scale;
   return {
-    touch: coarse && Math.min(screenWidth || width, width) <= 600,
+    touch:
+      (coarse || touchPoints > 0) &&
+      Math.min(screenWidth || width, screenHeight || width, width) <= 600,
     scale,
     width,
     height: (viewport?.height || 0) * scale,
@@ -91,6 +100,7 @@ export function createMobilePlayer({
   openSettings,
 }) {
   const window = document.defaultView;
+  const pageLayout = createMobileLayout(document);
   const events = new AbortController();
   const on = (target, name, listener) =>
     target?.addEventListener(name, listener, { signal: events.signal });
@@ -349,8 +359,11 @@ export function createMobilePlayer({
       window.visualViewport,
       window.screen.width,
       coarse.matches,
+      window.navigator.maxTouchPoints,
+      window.screen.height,
     );
     touch = geometry.touch;
+    pageLayout.update(geometry, touch ? host.offsetHeight : 0);
     host.toggleAttribute('data-touch-player', touch);
     const bar = host.closest('.playControls');
     if (hiddenBar && (!touch || hiddenBar !== bar)) restoreBar();
@@ -459,6 +472,7 @@ export function createMobilePlayer({
       window.clearTimeout(timer);
       window.cancelAnimationFrame(frame);
       waveform.dispose();
+      pageLayout.dispose();
       restoreBar();
       host.removeAttribute('data-touch-player');
       host.removeAttribute('data-touch-expanded');

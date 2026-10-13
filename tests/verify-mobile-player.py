@@ -179,7 +179,7 @@ try:
             page.locator('.close-settings').tap()
             expect(pitch).to_be_visible()
             page.locator('.waveform-panel summary').tap()
-            expect(page.locator('.tempo-waveform [role=status]')).to_contain_text('Audio envelope')
+            expect(page.locator('.tempo-waveform [role=status]')).to_be_hidden()
             page.locator('.tempo-waveform canvas').focus()
             page.keyboard.press('ArrowRight')
             assert page.evaluate('mobileAudio.currentTime') == 45
@@ -205,7 +205,7 @@ try:
             page.goto(f'http://127.0.0.1:{server.server_port}/tests/fixtures/inline-fixture.html')
             expect(page.locator('.touch-transport')).to_be_hidden()
             page.locator('.waveform-panel summary').click()
-            expect(page.locator('.tempo-waveform [role=status]')).to_contain_text('Audio envelope')
+            expect(page.locator('.tempo-waveform [role=status]')).to_be_hidden()
             bounds = page.locator('.waveform-panel').bounding_box()
             assert bounds['x'] >= 0 and bounds['x']+bounds['width'] <= width and bounds['y'] >= 0, bounds
             for theme in ['light','charcoal','oled']:

@@ -10,6 +10,8 @@ export function createMobileAvailability({ document, website }) {
       window.visualViewport,
       window.screen.width,
       window.matchMedia('(any-pointer:coarse)').matches,
+      window.navigator.maxTouchPoints,
+      window.screen.height,
     );
     if (!geometry.touch || document.querySelector('.playControls__elements')) {
       notice?.remove();

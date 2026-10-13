@@ -1,5 +1,6 @@
 ---
 import Page from '../layouts/Page.astro';
+import Icon from '../components/Icon.astro';
 import { installUrl, rpcPluginUrl, route } from '../lib/release';
 ---
 
@@ -75,10 +76,8 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
     </section>
     <section id="limits">
       <h2>Pitch modes</h2><p>
-        Natural mode changes pitch with speed. Preserve key keeps the original
-        key using Signalsmith when Track Control can process the player's audio.
-        Otherwise, it uses the browser's pitch correction. Playback speeds start
-        at 0.25×.
+        Natural lets pitch follow speed. Preserve key keeps the original pitch
+        as you speed up or slow down a track.
       </p><p>
         Key shift moves the song up or down by up to 12 semitones. Set it in the
         Pitch control beside the tempo slider, Advanced audio or the tempo
@@ -97,10 +96,22 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
         Changing the player’s Pitch control overrides the pitch curve until you
         reapply the timeline.
       </p><p>
-        Time-stretching can introduce artifacts, especially at extreme speeds.
-        Processing adds some latency. The Output level setting applies to both
-        pitch modes across SoundCloud.
+        Extreme changes can affect sound quality. Start with small adjustments.
       </p>
+      <details class="feature-details">
+        <summary
+          >Audio processing details<Icon name="chevron" size={18} /></summary
+        >
+        <p>
+          Preserve key uses Signalsmith when Track Control can process the
+          player's audio, otherwise it uses the browser's pitch correction.
+          Processing adds latency. Output level applies to both pitch modes.
+        </p>
+        <p>
+          Waveform uses SoundCloud's volume envelope. Its time marks show
+          minutes and seconds, not detected beats.
+        </p>
+      </details>
     </section>
     <section>
       <h2>Where things are stored</h2><p>

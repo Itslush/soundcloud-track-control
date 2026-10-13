@@ -30,6 +30,7 @@ export const waveformStyle = `
 .tempo-waveform canvas { display:block; width:100%; height:160px; touch-action:pan-y; cursor:pointer; }
 .tempo-waveform canvas:focus-visible, .tempo-waveform input:focus-visible, .tempo-waveform button:focus-visible { outline:2px solid var(--tempo-accent); outline-offset:2px; }
 .tempo-waveform p { margin:.4rem 0; font:inherit; font-size:.85em; }
+.tempo-waveform p[hidden] { display:none; }
 .tempo-waveform form { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
 .tempo-waveform form[hidden] { display:none; }
 .tempo-waveform label { display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; }
@@ -268,9 +269,10 @@ export function createTrackWaveform({ container, seek, loadWaveform }) {
           : lanes.some((lane) => lane.track && lane.status === 'unavailable')
             ? 'Waveform unavailable for this track. Playback controls still work.'
             : state.nextTrack
-              ? 'Current and incoming audio envelopes. Time marks are seconds, not detected beats.'
-              : 'Audio envelope. Time marks are seconds, not detected beats.');
+              ? 'Crossfading to the next track.'
+              : '');
     if (status.textContent !== value) status.textContent = value;
+    if (status.hidden !== !value) status.hidden = !value;
   }
   function seekTo(value) {
     if (

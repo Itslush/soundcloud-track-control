@@ -25,7 +25,8 @@ with sync_playwright() as p:
         page.wait_for_timeout(50)
         page.evaluate('''() => { pending[0].resolve({samples:new Float32Array([1,1]),duration:100}); pending[1].resolve({samples:new Float32Array([0,.5,1,.5]),duration:100}); }''')
         page.wait_for_timeout(100)
-        assert 'Audio envelope.' in page.locator('[role=status]').inner_text()
+        assert page.locator('[role=status]').is_hidden()
+        assert page.locator('[role=status]').text_content() == ''
         # Allow the load/resize paint to settle before measuring paused idle work.
         page.wait_for_function('performance.now()-lastDrawTime>=250',timeout=5000)
         count=page.evaluate('draws')
@@ -76,7 +77,7 @@ with sync_playwright() as p:
         page.evaluate('pending.at(-1).resolve({samples:new Float32Array([1,.5]),duration:100})')
         page.wait_for_timeout(100)
         assert page.locator('button').is_disabled()
-        assert 'incoming' in page.locator('[role=status]').inner_text()
+        assert page.locator('[role=status]').inner_text() == 'Crossfading to the next track.'
         page.evaluate('''() => { Object.defineProperty(document,'hidden',{configurable:true,value:true}); document.dispatchEvent(new Event('visibilitychange')); }''')
         count=page.evaluate('draws')
         page.evaluate("wave.update({track:'/a/second',position:60,duration:100,paused:false})")

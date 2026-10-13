@@ -25,7 +25,7 @@ with sync_playwright() as p:
       window.state={track:'https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix',position:120,duration:496.503,paused:true,metadata:{permalink_url:'https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix',duration:496503,waveform_url:'https://wave.sndcdn.com/i8iGCAxlflnc_m.json'}};
       wave.update(state);
     }''')
-    page.wait_for_function("document.querySelector('[role=status]').textContent.startsWith('Audio envelope.')",timeout=15000)
+    page.wait_for_function("document.querySelector('[role=status]').hidden",timeout=15000)
     page.wait_for_timeout(200)
     session=page.context.new_cdp_session(page)
     session.send('Performance.enable')

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.5
+
+- Phone-layout candidate for Firefox Android in desktop-site mode. The library uses larger tiles and readable titles, navigation and search fit the phone, and playback controls stay within reach. Testing on a physical phone is still pending.
+- Shorter feature descriptions on the download page. Detailed ranges and limits remain under More details.
+- The waveform stays optional. Loading and error messages remain, without an explanation repeated during normal playback.
+
 ## 1.2.4
 
 - Android touch controls stay readable when the browser uses SoundCloud's desktop site. Open Controls for tempo, semitones, volume, saved tempo and settings. This requires a userscript-capable browser, not the native SoundCloud app.
