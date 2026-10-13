@@ -574,16 +574,21 @@ input[type='range']::-moz-range-thumb {
   color: var(--muted);
   margin-block: 22px;
 }
-.install-section .rpc-install {
-  grid-column: 1 / -1;
+.rpc-install {
+  margin-top: 28px;
   border-top: 1px solid var(--line);
-  padding-top: 28px;
+  padding-top: 24px;
+}
+.rpc-install h2 {
+  font-size: 20px;
+}
+.rpc-install .hero-actions {
+  margin-top: 16px;
+  gap: 8px 20px;
 }
 .rpc-install p {
-  max-width: 70ch;
-}
-.rpc-install .text-link {
-  margin-left: 16px;
+  margin-top: 12px;
+  color: var(--muted);
 }
 .install-steps {
   list-style: none;

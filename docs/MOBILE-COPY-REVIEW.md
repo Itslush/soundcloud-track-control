@@ -121,3 +121,9 @@ Main-agent report, limited to the changed copy and isolated layout fixtures. Des
 Copy audit PASS: action descriptions come from existing features. Permissions, expiry, pitch limitations and retained ranges remain available. No fabricated claim or forced casual voice is added.
 
 The old editor surface brief still names `src/tempo-editor.js`. Its source moved during the earlier module split. That unrelated design-context path remains unchanged and can be repointed separately.
+
+## Homepage desktop download placement
+
+Moved the existing soundcloud-rpc download into the hero, directly below the userscript actions. Its versioned download, filename and desktop guide destination are unchanged. Setup instructions sit below its button. The former bottom-of-page block is removed, not duplicated. This changes no plugin code, stored settings or shared links.
+
+Verification: the built-site browser suite passes at 320, 360, 390, 768 and 1440 pixels, including local destinations, keyboard focus, a minimum 44px download target and a placement assertion. Inspected hero captures at 320, 390 and 1440 pixels. All three theme checks and both desktop plugin unit tests pass. The existing delivery gate remains applicable: specific action labels, original orange primary action, secondary outlined download, readable inherited theme colours, natural wrapping and no new script or animation. No new product claim was added. Physical-phone rendering has not been checked.

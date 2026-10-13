@@ -47,6 +47,19 @@ with sync_playwright() as p:
                 target = href.split('#')[0]
                 assert context.request.get(target).ok, target
             if not route:
+                install = page.get_by_role('link', name='Install userscript', exact=True)
+                desktop = page.locator('.hero-copy .rpc-install')
+                download = desktop.get_by_role('link', name='Download desktop plugin', exact=False)
+                expect(download).to_have_attribute('download', 'soundcloud_tempo_control.js')
+                expect(desktop.get_by_role('link', name='Desktop setup')).to_have_attribute('href', '/soundcloud-track-control/guide/#desktop')
+                assert page.locator('.rpc-install').count() == 1
+                assert desktop.bounding_box()['y'] >= install.bounding_box()['y'] + install.bounding_box()['height']
+                assert desktop.bounding_box()['y'] - (install.bounding_box()['y'] + install.bounding_box()['height']) < 100
+                download.focus()
+                assert download.evaluate('el=>getComputedStyle(el).outlineStyle') != 'none'
+                assert download.bounding_box()['height'] >= 44
+                if width in [320, 390, 1440]:
+                    page.locator('.hero-copy').screenshot(path=str(ROOT / f'test-results/install-options-{width}.png'))
                 page.locator('.feature-details summary').click()
             for image in page.locator('img[src]').all():
                 if image.get_attribute('hidden') is not None:
