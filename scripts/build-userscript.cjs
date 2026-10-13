@@ -66,8 +66,10 @@ async function buildScript(
   { inject = [] } = {},
 ) {
   config = validateConfig(config);
-  if (!/^\d+\.\d+\.\d+$/.test(version))
-    throw new Error('Use a numeric major.minor.patch release version');
+  if (!/^\d+\.\d+\.\d+(?:\.\d+)?$/.test(version))
+    throw new Error(
+      'Use a numeric major.minor.patch[.revision] release version',
+    );
   verifySignalsmith();
   const metadata = userscriptMetadata(config, version);
   let worklet;

@@ -6,8 +6,9 @@ from playwright.sync_api import sync_playwright, expect
 from userscript_fixture import ROOT, userscript_source, browser_options, text_contrast
 
 def verify_mobile_mirroring(browser, base):
-    context = browser.new_context(viewport={'width':393,'height':844}, screen={'width':393,'height':844}, is_mobile=True, has_touch=True, reduced_motion='reduce')
+    context = browser.new_context(viewport={'width':393,'height':844}, screen={'width':393,'height':844}, has_touch=True, reduced_motion='reduce', **({'is_mobile':True} if browser.browser_type.name == 'chromium' else {}))
     page = context.new_page()
+    page.route('**/track-*.png', lambda route: route.fulfill(content_type='image/svg+xml', body='<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44"><rect width="44" height="44" fill="orange"/></svg>'))
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(base + '/tests/fixtures/inline-fixture.html')
@@ -25,7 +26,7 @@ def verify_mobile_mirroring(browser, base):
       root.innerHTML = `<input id="rate-number" min="0.25" max="4" value="1"><input id="quick-key-shift" min="-12" max="12" step="0.5" value="0"><input id="tempo-increment" value="0.025"><span class="quick-key"></span><span class="error" hidden></span><span class="status"></span><button class="memory"></button><button class="settings-button"></button>`;
       window.mobileCalls = [];
       for (const name of ['play','next','prev']) bar.querySelector('.playControls__'+name).onclick = () => mobileCalls.push(name);
-      window.mobileController = createMobilePlayer({host,root,document,media:[],readTrack:()=>'/artist/track',canSeek:()=>true,changeRate:()=>{},cancelTransition:()=>mobileCalls.push('cancel')});
+      window.mobileController = createMobilePlayer({host,root,document,media:[],readTrack:()=>'/artist/track',changeRate:()=>{},cancelTransition:()=>mobileCalls.push('cancel')});
       mobileController.overlap({nextTrack:'/artist/next'});
       const copy = root.querySelector('.touch-cover'), incoming = copy.lastElementChild;
       return {hidden:getComputedStyle(bar).visibility, backgrounds:[...copy.children].map(child=>child.style.backgroundImage), variables:['--tempo-artwork-start','--tempo-artwork-end','--tempo-artwork-progress'].map(name=>copy.style.getPropertyValue(name)), opacity:getComputedStyle(incoming).opacity, mask:getComputedStyle(incoming).maskImage, notice:root.querySelector('.touch-pitch-notice').textContent, noticeHidden:root.querySelector('.touch-pitch-notice').hidden};
@@ -79,6 +80,43 @@ def verify_mobile_mirroring(browser, base):
     expect(page.locator('.touch-pitch-notice')).to_be_hidden()
     page.evaluate('mobileController.overlap(null)')
     expect(page.locator('.touch-cover')).to_have_count(0)
+    artwork = page.evaluate('''() => {
+      const avatar = document.createElement('a');
+      avatar.className = 'playbackSoundBadge__avatar';
+      document.querySelector('.playControls').prepend(avatar);
+      const read = markup => {
+        avatar.innerHTML = markup;
+        mobileController.refresh();
+        return document.querySelector('.playControls').lastElementChild.shadowRoot.querySelector('.touch-art').style.backgroundImage;
+      };
+      return [
+        read('<img src="/track-one.png">'),
+        read('<span class="image"><span class="image__full" style="background-image:url(/track-two.png)"></span></span>'),
+        read('<span class="sc-artwork" style="background-image:url(/track-three.png)"></span>'),
+        read('<img>'),
+      ];
+    }''')
+    assert artwork == [f'url("{base}/track-one.png")', f'url("{base}/track-two.png")', f'url("{base}/track-three.png")', 'none'], artwork
+    page.locator('.playbackSoundBadge__avatar img').evaluate("image => image.srcset='/track-late.png 1x'")
+    expect(page.locator('.touch-art')).to_have_css('background-image', f'url("{base}/track-late.png")')
+    assert page.locator('.playbackSoundBadge__avatar img').evaluate('image=>image.complete && image.naturalWidth === 44')
+    page.locator('.playbackSoundBadge__avatar').evaluate('''avatar => {
+      avatar.innerHTML='<span class="image"><span class="image__full"></span></span>';
+    }''')
+    expect(page.locator('.touch-art')).to_have_css('background-image', 'none')
+    page.locator('.image__full').evaluate("image => image.style.backgroundImage='url(/track-late-background.png)'")
+    expect(page.locator('.touch-art')).to_have_css('background-image', f'url("{base}/track-late-background.png")')
+    page.evaluate('''() => {
+      const previous = document.querySelector('.playbackSoundBadge__avatar');
+      const replacement = previous.cloneNode(false);
+      replacement.innerHTML='<img src="/track-replacement.png">';
+      previous.replaceWith(replacement);
+      mobileController.refresh();
+      previous.style.backgroundImage='url(/track-detached.png)';
+    }''')
+    expect(page.locator('.touch-art')).to_have_css('background-image', f'url("{base}/track-replacement.png")')
+    assert page.locator('.waveform-panel,.tempo-waveform').count() == 0
+    page.locator('.touch-art').screenshot(path=str(ROOT/'test-results'/f'thumbnail-{browser.browser_type.name}.png'))
     page.evaluate('mobileController.dispose()')
     assert page.locator('.playControls').evaluate('bar=>bar.style.visibility') == 'collapse'
     expect(page.locator('.touch-transport')).to_have_count(0)
@@ -95,14 +133,17 @@ try:
         for width in [320, 393]:
             context = browser.new_context(viewport={'width':width,'height':844}, screen={'width':width,'height':844}, is_mobile=True, has_touch=True, device_scale_factor=3)
             page = context.new_page()
+            page.route('**/track-fixture.svg', lambda route: route.fulfill(content_type='image/svg+xml', body='<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44"><rect width="44" height="44" fill="orange"/></svg>'))
             errors = []
             page.on('pageerror', lambda error: errors.append(str(error)))
             page.add_init_script(script=userscript_source())
-            page.add_init_script("window.__sc_hydration=[{hydratable:'sound',data:{permalink_url:'https://soundcloud.com/test-artist/first-track',duration:201000,waveform_url:'https://wave.sndcdn.com/mobile-test.json'}}]")
-            page.route('https://wave.sndcdn.com/mobile-test.json', lambda route:route.fulfill(json={'width':1800,'height':140,'samples':[20+(i%120) for i in range(1800)]}, headers={'access-control-allow-origin':'*'}))
+            waveform_requests = []
+            page.on('request', lambda request: waveform_requests.append(request.url) if 'wave.sndcdn.com' in request.url else None)
             page.goto(f'http://127.0.0.1:{server.server_port}/tests/fixtures/inline-fixture.html')
             host = page.locator('#soundcloud-tempo-control')
             expect(host).to_have_attribute('data-touch-player','')
+            page.locator('.playbackSoundBadge__avatar').evaluate("avatar=>avatar.innerHTML='<img src=\"/track-fixture.svg\">'")
+            expect(page.locator('.touch-art')).to_have_css('background-image', f'url("http://127.0.0.1:{server.server_port}/track-fixture.svg")')
             page.wait_for_timeout(120)
             geometry = page.evaluate('''() => {
               const host=document.querySelector('#soundcloud-tempo-control'), button=host.shadowRoot.querySelector('.touch-expand'), vv=visualViewport;
@@ -178,11 +219,7 @@ try:
             page.locator('#show-key').check()
             page.locator('.close-settings').tap()
             expect(pitch).to_be_visible()
-            page.locator('.waveform-panel summary').tap()
-            expect(page.locator('.tempo-waveform [role=status]')).to_be_hidden()
-            page.locator('.tempo-waveform canvas').focus()
-            page.keyboard.press('ArrowRight')
-            assert page.evaluate('mobileAudio.currentTime') == 45
+            expect(page.locator('.waveform-panel,.tempo-waveform')).to_have_count(0)
             for theme in ['light','charcoal','oled']:
                 page.locator('[data-action=settings]').tap()
                 page.locator(f'input[name=appearance][value={theme}]').check()
@@ -194,27 +231,23 @@ try:
             bounds = page.evaluate('''() => {const r=document.querySelector('#soundcloud-tempo-control').getBoundingClientRect(),v=visualViewport;return {top:r.top,bottom:r.bottom,visibleTop:v.offsetTop,visibleBottom:v.offsetTop+v.height};}''')
             assert bounds['top'] >= bounds['visibleTop']-1 and bounds['bottom'] <= bounds['visibleBottom']+1, bounds
             assert not errors, errors
+            assert not waveform_requests, waveform_requests
             evidence.append(geometry)
             context.close()
         for width in [768, 1440]:
             context = browser.new_context(viewport={'width':width,'height':844})
             page = context.new_page()
             page.add_init_script(script=userscript_source())
-            page.add_init_script("window.__sc_hydration=[{hydratable:'sound',data:{permalink_url:'https://soundcloud.com/test-artist/first-track',duration:201000,waveform_url:'https://wave.sndcdn.com/mobile-test.json'}}]")
-            page.route('https://wave.sndcdn.com/mobile-test.json', lambda route:route.fulfill(json={'width':1800,'height':140,'samples':[20+(i%120) for i in range(1800)]}, headers={'access-control-allow-origin':'*'}))
             page.goto(f'http://127.0.0.1:{server.server_port}/tests/fixtures/inline-fixture.html')
             expect(page.locator('.touch-transport')).to_be_hidden()
-            page.locator('.waveform-panel summary').click()
-            expect(page.locator('.tempo-waveform [role=status]')).to_be_hidden()
-            bounds = page.locator('.waveform-panel').bounding_box()
-            assert bounds['x'] >= 0 and bounds['x']+bounds['width'] <= width and bounds['y'] >= 0, bounds
+            expect(page.locator('.waveform-panel,.tempo-waveform')).to_have_count(0)
             for theme in ['light','charcoal','oled']:
                 page.locator('.settings-button').click()
                 page.locator('.appearance-settings summary').click()
                 page.locator(f'input[name=appearance][value={theme}]').check()
                 page.locator('.close-settings').click()
                 page.wait_for_timeout(100)
-                page.screenshot(path=str(ROOT/'test-results'/f'desktop-waveform-{width}-{theme}.png'))
+                page.screenshot(path=str(ROOT/'test-results'/f'desktop-player-{width}-{theme}.png'))
                 # Leave Appearance closed so the next iteration tests opening it too.
                 page.locator('.settings-button').click()
                 page.locator('.appearance-settings summary').click()
@@ -230,6 +263,9 @@ try:
         page.get_by_role('button',name='Dismiss').tap()
         expect(page.locator('#soundcloud-track-mobile-availability')).to_have_count(0)
         context.close()
+        browser.close()
+        browser = p.firefox.launch(headless=True)
+        verify_mobile_mirroring(browser, f'http://127.0.0.1:{server.server_port}')
         browser.close()
         print(json.dumps({'desktop_view_phone_geometry':evidence,'errors':0}))
 finally:

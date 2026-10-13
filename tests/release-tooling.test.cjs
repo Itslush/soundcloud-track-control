@@ -9,6 +9,17 @@ const { root, validateConfig } = require('../scripts/config.cjs');
 
 const empty = { siteUrl: '', paypalUrl: '', repositoryUrl: '' };
 
+test('four-part maintenance versions reach the metadata and running script', async () => {
+  const result = await buildScript(empty, '1.2.7.1');
+  assert.match(result.metadata, /@version\s+1\.2\.7\.1\n/);
+  assert.equal(
+    artifactConstants(result.output, ['VERSION']).VERSION,
+    '1.2.7.1',
+  );
+  for (const version of ['1.2', '1.2.3.4.5', '1.2.3.beta', '1.2.3.'])
+    await assert.rejects(buildScript(empty, version), /numeric/);
+});
+
 test('Pages deploys only a successful main push test run and checks out that exact commit', () => {
   const workflow = fs.readFileSync(
     path.join(root, '.github/workflows/pages.yml'),

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createFooterVisuals } from '../src/soundcloud/footer-visuals.js';
 
-test('footer themes refresh the waveform after colors change, without repeating unchanged refreshes', (t) => {
+test('footer themes refresh the player after colors change, without repeating unchanged refreshes', (t) => {
   const previous = {
     document: Object.getOwnPropertyDescriptor(globalThis, 'document'),
     getComputedStyle: Object.getOwnPropertyDescriptor(

@@ -1,5 +1,7 @@
 # Project workflow
 
+Use a fourth numeric version component for maintenance releases, starting with 1.2.7.1. The user has requested publishing completed fixes to GitHub and the website; retain the compatibility downloads. This does not authorize changing the installed desktop plugin.
+
 For work on this project, use the installed `tempo-quality` skill. It combines Ponytail, Anti Slop, pstack behavior verification, and Thermo-Nuclear code-quality review. Resolve it from the skill catalog or the `skills/tempo-quality/SKILL.md` folder under the user's Codex home.
 
 Read the constituent skills when that workflow calls for them. Do not claim QA passed merely because the skills are installed. Keep existing uncommitted work and leave the TCD backend untouched.

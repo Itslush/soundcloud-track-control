@@ -1,5 +1,7 @@
 # Mobile player and waveform review
 
+The waveform described here has since been removed at the user's request. Its renderer, loader and waveform-only verification files are no longer part of the current source. See `WAVEFORM-REMOVAL-REVIEW.md` for the removal and footer-thumbnail checks. This report remains historical evidence, not current feature documentation.
+
 Historical candidate evidence: the later motion-only refinement in `ARTWORK-SMOOTHING-REVIEW.md` supersedes the userscript artifact below. The tests here describe this report's recorded SHA, not that later build.
 
 Local candidate reviewed on 2026-10-12, with the final serial browser gate completed on 2026-10-13 local time. This work is not published, installed in soundcloud-rpc, or certified on a physical Android phone. The version remains 1.2.3; it is not a new released version.

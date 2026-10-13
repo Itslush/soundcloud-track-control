@@ -584,10 +584,6 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
         openSettings,
         cancelTransition: () => crossfade?.cancel('manual transport'),
         readTrack: currentTrackKey,
-        canSeek: () =>
-          !['buffered-overlap', 'handing-off'].includes(
-            crossfade?.diagnostics().stage,
-          ),
       });
     }
     bar.classList.add('soundcloud-tempo-footer');

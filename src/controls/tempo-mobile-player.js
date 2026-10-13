@@ -1,6 +1,6 @@
 import { enhanceTempoFields } from './tempo-fields.js';
 import { syncTempoRange } from './tempo-range.js';
-import { createTrackWaveform } from './tempo-waveform.js';
+import { readTrackArtwork } from '../soundcloud/tempo-track-visuals.js';
 import { createMobileLayout } from '../soundcloud/mobile-layout.js';
 
 export function touchViewport(
@@ -28,13 +28,6 @@ const style = `
 :host { position:relative; }
 .touch-adjustments [hidden] { display:none !important; }
 .touch-transport,.touch-adjustments { display:none; }
-.waveform-panel { position:fixed; right:12px; bottom:var(--waveform-bottom,58px); width:min(680px,calc(100vw - 24px)); max-height:calc(100dvh - 120px); overflow:auto; font-size:14px; }
-.waveform-panel > summary { margin-left:auto; width:max-content; min-height:36px; padding:6px 12px; border:1px solid var(--tempo-track); border-radius:4px; color:var(--tempo-fg); background:var(--tempo-surface); cursor:pointer; list-style:none; }
-.waveform-panel > summary::-webkit-details-marker { display:none; }
-.waveform-panel > summary::after { content:' +'; }
-.waveform-panel[open] > summary::after { content:' −'; }
-.waveform-panel[open] { padding:12px; background:var(--tempo-surface); border:1px solid var(--tempo-track); border-radius:4px; }
-.waveform-panel:not([open]) .waveform-content { display:none; }
 :host([data-touch-player]) { position:fixed !important; display:block !important; left:var(--touch-left) !important; top:var(--touch-dock-top) !important; bottom:auto !important; right:auto; width:var(--touch-width) !important; max-height:var(--touch-panel-height); overflow:auto; overscroll-behavior:contain; min-width:0 !important; margin:0 !important; padding:8px 12px max(8px,env(safe-area-inset-bottom)); transform:scale(var(--touch-inverse)); transform-origin:0 0; z-index:2147483646; font:16px/1.4 Arial,sans-serif; color:var(--tempo-fg); background:var(--tempo-surface); border:0; border-top:1px solid var(--tempo-track); visibility:visible !important; box-sizing:border-box; }
 :host([data-touch-player]) .controls { display:none; }
 :host([data-touch-player])::backdrop { display:none; }
@@ -71,9 +64,6 @@ const style = `
 .touch-adjustments input[type=range]::-webkit-slider-thumb { width:20px; height:20px; margin-top:-9px; }
 .touch-adjustments input[type=range]::-moz-range-thumb { width:20px; height:20px; }
 .touch-tools { display:flex; flex-wrap:wrap; gap:8px; }
-:host([data-touch-player]) .waveform-panel { position:static; width:100%; margin-top:12px; font-size:14px; }
-:host([data-touch-player]:not([data-touch-expanded])) .waveform-panel { display:none; }
-:host([data-touch-player]) .waveform-panel > summary { margin:0; min-height:44px; display:flex; align-items:center; }
 :host([data-touch-player]) .settings,:host([data-touch-player]) .tempo-editor,:host([data-touch-player]) #tempo-fader[popover] { left:var(--touch-left) !important; top:var(--touch-top) !important; bottom:auto !important; width:var(--touch-width) !important; max-width:none !important; max-height:var(--touch-panel-height) !important; transform:scale(var(--touch-inverse)) !important; transform-origin:0 0 !important; font-size:16px !important; margin:0 !important; }
 :host([data-touch-player]) .settings button,:host([data-touch-player]) .settings input:not([type=checkbox],[type=radio]),:host([data-touch-player]) .tempo-editor button,:host([data-touch-player]) .tempo-editor input:not([type=checkbox],[type=radio]) { min-height:44px; }
 :host([data-touch-player]) .settings header,:host([data-touch-player]) .settings-actions { flex-wrap:wrap; }
@@ -96,7 +86,6 @@ export function createMobilePlayer({
   document,
   media,
   readTrack,
-  canSeek,
   changeRate,
   cancelTransition,
   openSettings,
@@ -115,16 +104,8 @@ export function createMobilePlayer({
     return {
       audio,
       track: readTrack(),
-      position: audio?.currentTime || 0,
-      duration: Number.isFinite(audio?.duration) ? audio.duration : 0,
       paused: !audio || audio.paused,
     };
-  }
-  function onSeek(position) {
-    if (!canSeek() || !Number.isFinite(position)) return;
-    const state = readPlayback();
-    if (state.audio && state.duration > 0)
-      state.audio.currentTime = Math.max(0, Math.min(state.duration, position));
   }
   const sheet = document.createElement('style');
   sheet.textContent = style;
@@ -146,18 +127,10 @@ export function createMobilePlayer({
   adjustments.className = 'touch-adjustments';
   adjustments.id = 'touch-adjustments';
   adjustments.innerHTML = `<label>Tempo <span class="touch-number-row"><input id="touch-rate" type="number" min="0.25" max="4" step="0.025" value="1" aria-label="Exact playback speed on mobile"><span>×</span></span></label><input id="touch-rate-slider" type="range" min="0.25" max="4" step="0.001" value="1" aria-label="Playback speed on mobile"><label class="touch-pitch">Pitch <span class="touch-number-row"><input id="touch-pitch" type="number" min="-12" max="12" step="0.5" value="0" aria-label="Key shift in semitones on mobile"><span>st</span></span></label><input id="touch-pitch-slider" type="range" min="-12" max="12" step="0.001" value="0" aria-label="Key shift on mobile"><label>Volume <input id="touch-volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume on mobile"></label><div class="touch-tools"><button type="button" data-action="previous">Previous</button><button type="button" data-action="reset">Reset tempo</button><button type="button" data-action="pitch-reset">Reset pitch</button><button type="button" data-action="save">Save tempo</button></div>`;
-  const details = document.createElement('details');
-  details.className = 'waveform-panel';
-  details.innerHTML =
-    '<summary>Waveform</summary><div class="waveform-content"></div>';
-  root.append(sheet, transport, adjustments, details);
+  root.append(sheet, transport, adjustments);
   const feedback = document.createElement('p');
   feedback.className = 'touch-feedback';
   adjustments.append(feedback);
-  const waveform = createTrackWaveform({
-    container: details.lastElementChild,
-    seek: onSeek,
-  });
   const syncFields = enhanceTempoFields(adjustments);
   const native = (selector) =>
     document.querySelector(`.playControls ${selector}`);
@@ -168,12 +141,36 @@ export function createMobilePlayer({
   const volume = adjustments.querySelector('#touch-volume');
   const play = transport.querySelector('.touch-play'),
     expand = transport.querySelector('.touch-expand');
-  let overlap,
-    timer,
-    frame,
+  let frame,
     disposed = false,
     touch = false;
   const coarse = window.matchMedia('(any-pointer: coarse)');
+  let artworkSource;
+  const artworkObserver = new window.MutationObserver(refreshArtwork);
+  function refreshArtwork() {
+    const source = native('.playbackSoundBadge__avatar');
+    if (source !== artworkSource) {
+      artworkObserver.disconnect();
+      artworkSource = source;
+      if (source)
+        artworkObserver.observe(source, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['src', 'srcset', 'style', 'class'],
+        });
+    }
+    const background = readTrackArtwork(source);
+    if (transport.firstElementChild.style.backgroundImage !== background)
+      transport.firstElementChild.style.backgroundImage = background;
+  }
+  document.addEventListener(
+    'load',
+    (event) => {
+      if (artworkSource?.contains(event.target)) refreshArtwork();
+    },
+    { capture: true, signal: events.signal },
+  );
   function forward(input, selector) {
     const original = root.querySelector(selector);
     original.value = input.value;
@@ -233,7 +230,6 @@ export function createMobilePlayer({
     const expanded = host.toggleAttribute('data-touch-expanded');
     expand.setAttribute('aria-expanded', String(expanded));
     expand.textContent = expanded ? 'Close' : 'Controls';
-    if (!expanded) details.open = false;
     refresh();
     layout();
   });
@@ -320,39 +316,12 @@ export function createMobilePlayer({
     const save = adjustments.querySelector('[data-action=save]');
     save.textContent = root.querySelector('.memory').title || 'Save tempo';
     save.disabled = !state.track;
-    const image =
-      native(
-        '.playbackSoundBadge__avatar .sc-artwork,.playbackSoundBadge__avatar .image',
-      ) || native('.playbackSoundBadge__avatar');
-    const background = image
-      ? window.getComputedStyle(image).backgroundImage
-      : 'none';
-    if (transport.firstElementChild.style.backgroundImage !== background)
-      transport.firstElementChild.style.backgroundImage = background;
+    refreshArtwork();
     if (state.audio && root.activeElement !== volume)
       volume.value = String(state.audio.muted ? 0 : state.audio.volume);
     volume.disabled = !state.audio;
     syncTempoRange(volume);
     syncFields();
-    tickWaveform();
-  }
-  function tickWaveform() {
-    window.clearTimeout(timer);
-    timer = undefined;
-    if (
-      !details.open ||
-      document.hidden ||
-      !host.isConnected ||
-      (touch && !host.hasAttribute('data-touch-expanded')) ||
-      !(
-        details.checkVisibility?.({ checkVisibilityCSS: true }) ??
-        details.getClientRects().length > 0
-      )
-    )
-      return;
-    const state = readPlayback();
-    waveform.update(overlap ? { ...state, ...overlap } : state);
-    if (!state.paused) timer = window.setTimeout(tickWaveform, 50);
   }
   function layout() {
     if (disposed || !host.isConnected) return;
@@ -366,7 +335,6 @@ export function createMobilePlayer({
     touch = geometry.touch;
     pageLayout.update(geometry, touch ? host.offsetHeight : 0);
     host.toggleAttribute('data-touch-player', touch);
-    const bar = host.closest('.playControls');
     if (touch && !host.matches(':popover-open')) {
       host.setAttribute('popover', 'manual');
       host.showPopover();
@@ -374,9 +342,6 @@ export function createMobilePlayer({
     if (!touch) {
       if (host.matches(':popover-open')) host.hidePopover();
       host.removeAttribute('popover');
-      const bottom = `${Math.max(8, window.innerHeight - (bar?.getBoundingClientRect().top ?? window.innerHeight - 50) + 8)}px`;
-      if (host.style.getPropertyValue('--waveform-bottom') !== bottom)
-        host.style.setProperty('--waveform-bottom', bottom);
       return;
     }
     for (const [name, value] of Object.entries({
@@ -401,10 +366,6 @@ export function createMobilePlayer({
       layout();
     });
   }
-  on(details, 'toggle', () => {
-    refresh();
-    scheduleLayout();
-  });
   on(window.visualViewport, 'resize', scheduleLayout);
   on(window.visualViewport, 'scroll', scheduleLayout);
   on(window, 'resize', scheduleLayout);
@@ -423,21 +384,16 @@ export function createMobilePlayer({
       signal: events.signal,
     });
   }
-  const observer = new window.ResizeObserver(() => {
-    scheduleLayout();
-    tickWaveform();
-  });
+  const observer = new window.ResizeObserver(scheduleLayout);
   observer.observe(host);
   refresh();
   layout();
   return {
     refresh() {
       refresh();
-      waveform.refresh();
       scheduleLayout();
     },
     overlap(state) {
-      overlap = state?.nextTrack ? state : undefined;
       const source = native('.soundcloud-tempo-crossfade-artwork');
       const artwork = transport.firstElementChild;
       let copy = artwork.firstElementChild;
@@ -470,9 +426,8 @@ export function createMobilePlayer({
       disposed = true;
       events.abort();
       observer.disconnect();
-      window.clearTimeout(timer);
+      artworkObserver.disconnect();
       window.cancelAnimationFrame(frame);
-      waveform.dispose();
       pageLayout.dispose();
       if (host.matches(':popover-open')) host.hidePopover();
       host.removeAttribute('popover');
@@ -481,7 +436,6 @@ export function createMobilePlayer({
       sheet.remove();
       transport.remove();
       adjustments.remove();
-      details.remove();
     },
   };
 }

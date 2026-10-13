@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.7.1
+
+- Removed the optional waveform view. Tempo and pitch timelines are still available.
+- Fixed missing track thumbnails in the phone player, including artwork that loads after the controls appear.
+
 ## 1.2.7
 
 - Larger footer links, account icons and secondary controls on phones, including Firefox's desktop-site view.

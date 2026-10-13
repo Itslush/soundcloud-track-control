@@ -1,20 +1,31 @@
 import { formatPitchNotice } from '../sharing/tempo-pitch-notice.js';
 import { artworkTransition } from '../appearance/artwork-transition.js';
 
+export function readTrackArtwork(element) {
+  if (!element) return 'none';
+  const image = element.matches('img') ? element : element.querySelector('img');
+  const source =
+    image?.currentSrc || (image?.getAttribute('src') ? image.src : '');
+  if (source) return `url(${JSON.stringify(source)})`;
+  for (const candidate of [
+    ...element.querySelectorAll('.image__full, .sc-artwork, .image'),
+    element,
+  ]) {
+    const background =
+      element.ownerDocument.defaultView.getComputedStyle(
+        candidate,
+      ).backgroundImage;
+    if (background !== 'none') return background;
+  }
+  return 'none';
+}
+
 export function createTrackVisuals({ document, readTrack }) {
   let layer, incoming, nextTrack, notice;
   const avatar = () =>
     document.querySelector(
       '.playControls__soundBadge .playbackSoundBadge__avatar',
     );
-  const cover = (element) => {
-    const image = element?.querySelector('img');
-    if (image) return `url(${JSON.stringify(image.currentSrc || image.src)})`;
-    const background = element?.querySelector('.image') || element;
-    return background
-      ? document.defaultView.getComputedStyle(background).backgroundImage
-      : 'none';
-  };
   const path = (url) => new URL(url, document.location.href).pathname;
 
   function overlap(state) {
@@ -31,7 +42,7 @@ export function createTrackVisuals({ document, readTrack }) {
       layer.className = 'soundcloud-tempo-crossfade-artwork';
       layer.setAttribute('aria-hidden', 'true');
       const outgoing = document.createElement('span');
-      outgoing.style.backgroundImage = cover(host);
+      outgoing.style.backgroundImage = readTrackArtwork(host);
       incoming = document.createElement('span');
       incoming.className = 'soundcloud-tempo-incoming-artwork';
       layer.append(outgoing, incoming);
@@ -43,7 +54,7 @@ export function createTrackVisuals({ document, readTrack }) {
           const image = row?.querySelector(
             '.queueItemView__artwork, .sound__coverArt, .playableTile__artwork',
           );
-          const background = cover(image);
+          const background = readTrackArtwork(image);
           if (background !== 'none') {
             incoming.style.backgroundImage = background;
             break;
@@ -55,7 +66,7 @@ export function createTrackVisuals({ document, readTrack }) {
     if (!host) return;
     if (layer.parentElement !== host) host.append(layer);
     if (nextTrack && readTrack() === nextTrack) {
-      const background = cover(host);
+      const background = readTrackArtwork(host);
       if (background !== 'none') incoming.style.backgroundImage = background;
     }
     const { progress, start, end } = artworkTransition(

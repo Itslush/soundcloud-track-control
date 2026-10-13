@@ -39,7 +39,7 @@ See the [guide](https://itslush.github.io/soundcloud-track-control/guide/) for c
 
 [Development setup](docs/DEVELOPMENT.md) · [Architecture](docs/ARCHITECTURE.md) · [Testing](docs/TESTING.md) · [Known limitations and audit](docs/MAINTAINABILITY.md)
 
-The local, unreleased mobile-player and waveform candidate is described in [its implementation and QA review](docs/MOBILE-WAVEFORM-REVIEW.md). It needs SoundCloud's desktop-site player in a userscript-capable Android browser; it is not a native Android app. [Source ownership](src/README.md) describes the feature folders and shared playback contracts.
+The mobile player needs SoundCloud's desktop-site player in a userscript-capable Android browser; it is not a native Android app. [Source ownership](src/README.md) describes the feature folders and shared playback contracts.
 
 ## Credits
 
