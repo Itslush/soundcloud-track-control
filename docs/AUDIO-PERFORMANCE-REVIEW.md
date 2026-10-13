@@ -29,7 +29,7 @@ Twenty unchanged playback-time events previously produced 100 mutations in the m
 
 ## Behavior checks
 
-- `npm test` and `npm run test:unit`: 598 unit tests pass with FFmpeg configured, with no skips.
+- `npm test` and `npm run test:unit`: 599 unit tests pass with FFmpeg configured, with no skips.
 - `npm run typecheck` and `npm run release`: pass.
 - `verify-steady-audio.py`: the actual bundle runs in muted Firefox with moving stars. It captures three four-second stereo PCM windows for each of six settings: 1x, 0.8x, 1.15x, -6.5 st, 0.8x with -6.5 st, and return to normal. All windows have finite output, expected pitch and level, no silent quanta, no missing inputs, and no detected discontinuities. Steady-state media parameters and worklet messages remain unchanged. One pitch node is created and reused.
 - `verify-wasm-boundaries.py`: seek and source-replacement PCM checks pass at 48 and 96 kHz, including a deliberately contaminated-silence detector control.
@@ -39,7 +39,7 @@ Twenty unchanged playback-time events previously produced 100 mutations in the m
 - `verify-star-paint.py`: actual motion remains active with fewer than 20 paints per one-second observation.
 - Fresh feature captures retain their PNG checksums and match the v1.2.7.2 artifact. Capture and transfer-budget verification pass.
 
-The first GitHub run stalled during Firefox audio startup on the headless Linux runner and was cancelled. CI now starts a 48 kHz stereo PulseAudio null sink; the Firefox test also has a 15-second startup deadline. This changes test infrastructure only, not the shipped audio path or its assertions.
+The first GitHub run stalled during Firefox audio startup on the headless Linux runner and was cancelled. Firefox now runs in a separate CI job with a 48 kHz stereo PulseAudio null sink and a 15-second startup deadline. Isolating that audio server keeps Chromium on its existing headless output. A regression test also reproduces and fixes a capture-fixture error when Firefox calls a completed worklet again while its inputs remain connected. These changes affect test infrastructure only, not the shipped audio path or its assertions.
 
 ## Maintainability review
 

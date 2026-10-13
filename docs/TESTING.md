@@ -8,7 +8,7 @@
 
 `python tests/verify-star-paint.py` checks moving and paused stars through the shipped controls and records renderer paint events. The bounded layer must stay below 20 paints per one-second observation. Transform updates still run each animation frame. The test does not measure phone power use or total GPU memory.
 
-These browser checks run in `tests/run.py`, together with seek, track replacement, crossfade, appearance, and mobile-control regressions. Real-device confirmation remains necessary for the reported Android audio hitching.
+Run `python tests/run.py` for the 31 browser suites, including star paint, seeking, track replacement, crossfade, appearance, and mobile controls. Run `python tests/verify-steady-audio.py` separately for sustained Firefox audio. CI gates publication on both jobs and isolates Firefox's Linux audio server from Chromium. Real-device confirmation remains necessary for the reported Android audio hitching.
 
 ## Mobile player and waveform candidate
 

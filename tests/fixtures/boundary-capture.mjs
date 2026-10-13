@@ -24,6 +24,7 @@ registerProcessor(
     }
 
     process(inputs) {
+      if (this.cursor >= this.frames) return false;
       if (!this.armed) return true;
       const quantum = this.cursor / 128;
       this.timestamps[quantum] = currentFrame;

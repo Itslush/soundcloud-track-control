@@ -26,12 +26,6 @@ jobs:
       - run: npm run test:transfer
       - run: python -m pip install -r tests/requirements.txt
       - run: python -m playwright install --with-deps chromium firefox
-      - name: Start audio output for Firefox
-        run: |
-          sudo apt-get install -y pulseaudio
-          pulseaudio --start --exit-idle-time=-1
-          pactl load-module module-null-sink sink_name=tempo_ci rate=48000 channels=2
-          pactl set-default-sink tempo_ci
       - run: python tests/test-transition-completion.py
       - run: python tests/test-repeat-completion.py
       - run: python tests/test-baseline-diagnostics.py
@@ -70,3 +64,26 @@ jobs:
           python tests/verify-demo-recovery.py
           python tests/verify-preview-lifecycle.py
           python tests/verify-navigation.py
+  firefox-audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --ignore-scripts
+      - run: npm run build:script
+      - run: python -m pip install -r tests/requirements.txt
+      - run: python -m playwright install --with-deps firefox
+      - name: Start audio output for Firefox
+        run: |
+          sudo apt-get install -y pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=tempo_ci rate=48000 channels=2
+          pactl set-default-sink tempo_ci
+      - run: python tests/verify-steady-audio.py
