@@ -203,9 +203,23 @@ export function createTempoAppearance({ onChange, onError } = {}) {
           scrollbar-color: var(--tempo-page-line) var(--tempo-page-ground);
         }
         ${scope} body {
+          isolation: isolate;
+        }
+        ${scope} .soundcloud-tempo-starfield {
+          position: fixed;
+          inset: 0;
+          overflow: hidden;
+          pointer-events: none;
+          z-index: -1;
+        }
+        ${scope} .soundcloud-tempo-stars {
+          position: absolute;
+          inset: -32px;
           background-image: url("data:image/svg+xml,${encodeURIComponent(stars)}");
           background-size: 960px 840px;
           background-repeat: repeat;
+          background-position: 32px 32px;
+          transform: translate3d(0, 0, 0);
         }
         ${scope}[${attribute}="light"], ${scope}[${attribute}="light"] body {
           --tempo-page-ground: #f4f4f4;
@@ -222,7 +236,7 @@ export function createTempoAppearance({ onChange, onError } = {}) {
           --link-rgb: 178,60,0;
           color-scheme: light;
         }
-        ${scope}[${attribute}="light"] body {
+        ${scope}[${attribute}="light"] .soundcloud-tempo-stars {
           background-image: url("data:image/svg+xml,${encodeURIComponent(stars.replaceAll('#c1ccdf', '#555').replaceAll('#ece2d1', '#666'))}");
         }
         ${scope} .l-container {
@@ -263,6 +277,9 @@ export function createTempoAppearance({ onChange, onError } = {}) {
           background-color: var(--tempo-page-accent);
         }
       }
+      @media (forced-colors: active) {
+        ${scope} .soundcloud-tempo-starfield { display: none; }
+      }
     `;
   }
 
@@ -276,6 +293,8 @@ export function createTempoAppearance({ onChange, onError } = {}) {
     } finally {
       entry.drift?.(0);
       entry.drift = undefined;
+      entry.field?.remove();
+      entry.field = undefined;
       entry.style?.remove();
       entry.style = undefined;
       entry.root = undefined;
@@ -283,6 +302,9 @@ export function createTempoAppearance({ onChange, onError } = {}) {
       if (entry.motion)
         entry.document.removeEventListener('visibilitychange', entry.motion);
       entry.motion = undefined;
+      if (entry.ready)
+        entry.document.removeEventListener('DOMContentLoaded', entry.ready);
+      entry.ready = undefined;
     }
   }
 
@@ -320,14 +342,8 @@ export function createTempoAppearance({ onChange, onError } = {}) {
       const element = doc.createElement('style');
       element.textContent = css ||= stylesheet();
       const previous = target.getAttribute(attribute);
-      let position;
       try {
         (doc.head || target).append(element);
-        const index = element.sheet.insertRule(
-          `html[${attribute}] body { background-position: 0 0; }`,
-          element.sheet.cssRules.length,
-        );
-        position = element.sheet.cssRules[index].style;
         target.setAttribute(attribute, next);
       } catch (error) {
         element.remove();
@@ -336,8 +352,36 @@ export function createTempoAppearance({ onChange, onError } = {}) {
       entry.style = element;
       entry.root = target;
       entry.previousAttribute = previous;
+    } else entry.root.setAttribute(attribute, next);
+    entry.applied = next;
+    if (!doc.body) {
+      if (!entry.ready) {
+        entry.ready = () => {
+          doc.removeEventListener('DOMContentLoaded', entry.ready);
+          entry.ready = undefined;
+          if (!disposed) renderDocument(entry, selected);
+        };
+        doc.addEventListener('DOMContentLoaded', entry.ready);
+      }
+      return;
+    }
+    if (!entry.field) {
+      const field = doc.createElement('div');
+      field.className = 'soundcloud-tempo-starfield';
+      field.setAttribute('aria-hidden', 'true');
+      const stars = doc.createElement('div');
+      stars.className = 'soundcloud-tempo-stars';
+      field.append(stars);
+      doc.body.prepend(field);
+      entry.field = field;
       entry.drift = createStarMotion((x, y) => {
-        position.backgroundPosition = `${x}px ${y}px`;
+        // Rebase a small margin instead of allocating a whole extra tile on each side.
+        const baseX = Math.floor(x / 32) * 32;
+        const baseY = Math.floor(y / 32) * 32;
+        const position = `${baseX + 32}px ${baseY + 32}px`;
+        if (stars.style.backgroundPosition !== position)
+          stars.style.backgroundPosition = position;
+        stars.style.transform = `translate3d(${x - baseX}px, ${y - baseY}px, 0)`;
       }, doc.defaultView);
       entry.motion = () => {
         entry.drift(
@@ -346,8 +390,7 @@ export function createTempoAppearance({ onChange, onError } = {}) {
       };
       doc.addEventListener('visibilitychange', entry.motion);
       entry.motion();
-    } else entry.root.setAttribute(attribute, next);
-    entry.applied = next;
+    }
   }
 
   function render(next) {

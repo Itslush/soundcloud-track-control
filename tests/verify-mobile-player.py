@@ -152,6 +152,15 @@ try:
             assert geometry['layout'] > width*1.5, geometry
             assert abs(geometry['host']-width) < 2 and geometry['button'] >= 43.9, geometry
             page.evaluate("""() => { window.mobileAudio=new Audio(); mobileAudio.muted=true; Object.defineProperty(mobileAudio,'duration',{value:201}); mobileAudio.play().catch(()=>{}); mobileAudio.pause(); mobileAudio.currentTime=40; mobileAudio.dispatchEvent(new Event('loadedmetadata')); }""")
+            idle_mutations = page.evaluate('''async () => {
+              const root=document.querySelector('#soundcloud-tempo-control').shadowRoot;
+              const observer=new MutationObserver(()=>{});
+              observer.observe(root.querySelector('.touch-transport'),{subtree:true,childList:true,attributes:true,characterData:true});
+              for(let i=0;i<20;i++) document.dispatchEvent(new Event('timeupdate'));
+              const count=observer.takeRecords().length;
+              observer.disconnect();return count;
+            }''')
+            assert idle_mutations == 0, idle_mutations
             page.locator('.touch-expand').tap()
             exact = page.locator('#touch-rate')
             exact.fill('1.375'); exact.press('Tab')

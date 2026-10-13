@@ -93,6 +93,7 @@ def fixture(browser):
                     panel.screenshot(path=str(ROOT / f'test-results/appearance-{host_theme}-{mode}-{width}.png'))
                 page.emulate_media(forced_colors='active')
                 assert page.locator('body').evaluate('el => getComputedStyle(el).backgroundImage') == 'none'
+                expect(page.locator('.soundcloud-tempo-starfield')).to_have_css('display', 'none')
                 page.emulate_media(forced_colors='none')
                 theme(page, 'native')
                 expect(page.locator('body')).to_have_css('background-color', native)
@@ -136,8 +137,8 @@ def live(browser):
         for mode, background in [('charcoal', 'rgb(17, 17, 17)'), ('oled', 'rgb(0, 0, 0)')]:
             page.evaluate('(mode) => appearanceProbe.setMode(mode)', mode)
             expect(page.locator('body')).to_have_css('background-color', background)
-            before = page.locator('body').evaluate('el => getComputedStyle(el).backgroundPosition')
-            page.wait_for_function('before => getComputedStyle(document.body).backgroundPosition !== before', arg=before)
+            before = page.locator('.soundcloud-tempo-stars').evaluate('el => el.style.transform')
+            page.wait_for_function('before => document.querySelector(".soundcloud-tempo-stars").style.transform !== before', arg=before)
             surface = 'rgb(32, 32, 32)' if mode == 'charcoal' else 'rgb(11, 11, 11)'
             expect(page.locator('.playControls__inner')).to_have_css('background-color', surface)
             expect(page.locator('.playControls__prev')).to_have_css('background-color', surface)

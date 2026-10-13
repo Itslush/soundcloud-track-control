@@ -2,7 +2,9 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const { test } = require('node:test');
 
-const source = require('./module-fixture.cjs')(['appearance/tempo-appearance.js']);
+const source = require('./module-fixture.cjs')([
+  'appearance/tempo-appearance.js',
+]);
 const key = 'soundcloud.tempo.appearance';
 const attribute = 'data-tempo-appearance';
 
@@ -12,6 +14,7 @@ function fixture({
   blockedWrite,
   blockedAccess,
   rootReady = true,
+  bodyReady = true,
 } = {}) {
   const values = new Map(saved === undefined ? [] : [[key, saved]]);
   const changes = [];
@@ -19,6 +22,8 @@ function fixture({
   const notifications = [];
   const writes = [];
   const styles = [];
+  const fields = [];
+  const body = { prepend: (element) => fields.push(element) };
   const frames = new Map();
   let frameId = 0,
     time = 0;
@@ -47,20 +52,21 @@ function fixture({
   const document = {
     documentElement: rootReady ? root : null,
     head: rootReady ? root : null,
+    body: rootReady && bodyReady ? body : null,
     createElement(name) {
-      assert.equal(name, 'style');
+      assert.ok(['style', 'div'].includes(name));
       return {
         textContent: '',
-        sheet: {
-          cssRules: [],
-          insertRule() {
-            this.cssRules.push({ style: { backgroundPosition: '0px 0px' } });
-            return this.cssRules.length - 1;
-          },
+        style: {},
+        children: [],
+        setAttribute() {},
+        append(child) {
+          this.children.push(child);
         },
         remove() {
-          const index = styles.indexOf(this);
-          if (index >= 0) styles.splice(index, 1);
+          const list = name === 'style' ? styles : fields;
+          const index = list.indexOf(this);
+          if (index >= 0) list.splice(index, 1);
         },
       };
     },
@@ -108,6 +114,7 @@ function fixture({
     notifications,
     attributes,
     styles,
+    fields,
     frames,
     step() {
       time += 1000 / 60;
@@ -116,9 +123,14 @@ function fixture({
       pending.forEach((fn) => fn(time));
     },
     position() {
-      return styles[0].sheet.cssRules[0].style.backgroundPosition
-        .split(' ')
+      const style = fields[0].children[0].style;
+      const offset = style.transform
+        .match(/translate3d\(([^,]+),([^,]+)/)
+        .slice(1)
         .map(parseFloat);
+      return style.backgroundPosition
+        .split(' ')
+        .map((value, i) => parseFloat(value) - 32 + offset[i]);
     },
     values,
     writes,
@@ -134,6 +146,7 @@ function fixture({
     ready() {
       document.documentElement = root;
       document.head = root;
+      document.body = body;
       documentListeners.get('DOMContentLoaded')?.();
     },
   };
@@ -371,7 +384,7 @@ test('stars drift without changing host geometry, pause when hidden and respect 
   assert.match(css, /--tempo-page-ground: #000/);
   assert.doesNotMatch(
     css,
-    /(?<![\w-])(?:filter|transition|position|display|width|height|padding|margin|font-family)\s*:/,
+    /(?<![\w-])(?:filter|transition|width|height|padding|margin|font-family)\s*:/,
   );
   assert.doesNotMatch(css, /(?:^|[\s,])\*\s*[{,:]/);
   const svg = decodeURIComponent(css.match(/data:image\/svg\+xml,([^\"]+)/)[1]);
@@ -396,6 +409,45 @@ test('stars drift without changing host geometry, pause when hidden and respect 
   assert.equal(f.styles[0].textContent, css);
   f.appearance.dispose();
   assert.equal(f.frames.size, 0);
+  assert.equal(f.fields.length, 0);
+});
+
+test('stars wait for the body and cancel deferred mounting on disposal', () => {
+  const f = fixture({ saved: 'oled', bodyReady: false });
+  assert.equal(f.fields.length, 0);
+  f.ready();
+  assert.equal(f.fields.length, 1);
+  assert.equal(f.frames.size, 1);
+  f.appearance.dispose();
+  assert.equal(f.fields.length, 0);
+  const cancelled = fixture({ saved: 'charcoal', bodyReady: false });
+  cancelled.appearance.dispose();
+  cancelled.ready();
+  assert.equal(cancelled.fields.length, 0);
+  assert.equal(cancelled.frames.size, 0);
+});
+
+test('star motion crosses texture rebases continuously without growing the layer', () => {
+  const f = fixture({ saved: 'oled' });
+  f.step();
+  let previous = f.position(),
+    rebases = 0,
+    background;
+  for (let frame = 0; frame < 3600; frame++) {
+    f.step();
+    const next = f.position();
+    assert.ok(
+      Math.hypot(...next.map((value, i) => value - previous[i])) <=
+        10 / 60 + 1e-6,
+    );
+    const style = f.fields[0].children[0].style;
+    if (background !== style.backgroundPosition) rebases++;
+    background = style.backgroundPosition;
+    previous = next;
+  }
+  assert.ok(rebases > 1 && rebases < 100, String(rebases));
+  assert.equal(f.fields.length, 1);
+  f.appearance.dispose();
 });
 
 test('explicit star motion persists, synchronizes and restores the system default', () => {

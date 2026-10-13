@@ -126,26 +126,26 @@ with sync_playwright() as p:
     page.locator('.appearance-settings summary').click()
     page.locator('input[name=appearance][value=oled]').check()
     page.locator('#apply-saved').press('Escape')
-    drift = {'before': page.locator('body').evaluate('el => getComputedStyle(el).backgroundPosition')}
+    drift = {'before': page.locator('.soundcloud-tempo-stars').evaluate('el => el.style.transform')}
     page.wait_for_timeout(1500)
-    drift['after'] = page.locator('body').evaluate('el => getComputedStyle(el).backgroundPosition')
+    drift['after'] = page.locator('.soundcloud-tempo-stars').evaluate('el => el.style.transform')
     assert drift['before'] != drift['after'], drift
     page.emulate_media(reduced_motion='reduce')
     page.wait_for_timeout(100)
-    stopped = page.locator('body').evaluate('el => getComputedStyle(el).backgroundPosition')
+    stopped = page.locator('.soundcloud-tempo-stars').evaluate('el => el.style.transform')
     page.wait_for_timeout(250)
-    assert page.locator('body').evaluate('el => getComputedStyle(el).backgroundPosition') == stopped
+    assert page.locator('.soundcloud-tempo-stars').evaluate('el => el.style.transform') == stopped
     page.locator('.settings-button').click()
     page.locator('#star-motion').check()
     page.locator('#star-speed').fill('4')
     page.locator('#apply-saved').press('Escape')
-    actual_before = page.locator('body').evaluate('el => getComputedStyle(el).backgroundPosition')
+    actual_before = page.locator('.soundcloud-tempo-stars').evaluate('el => el.style.transform')
     page.wait_for_timeout(1500)
-    actual_after = page.locator('body').evaluate('el => getComputedStyle(el).backgroundPosition')
+    actual_after = page.locator('.soundcloud-tempo-stars').evaluate('el => el.style.transform')
     assert actual_before != actual_after, (actual_before, actual_after)
     page.reload()
-    resumed = page.locator('body').evaluate('el => getComputedStyle(el).backgroundPosition')
-    page.wait_for_function('before => getComputedStyle(document.body).backgroundPosition !== before', arg=resumed)
+    resumed = page.locator('.soundcloud-tempo-stars').evaluate('el => el.style.transform')
+    page.wait_for_function('before => document.querySelector(".soundcloud-tempo-stars").style.transform !== before', arg=resumed)
     page.locator('.settings-button').click()
     page.locator('.appearance-settings summary').click()
     expect(page.locator('#star-motion')).to_be_checked()
@@ -154,9 +154,9 @@ with sync_playwright() as p:
     expect(page.locator('#star-speed')).to_be_disabled()
     page.locator('#apply-saved').press('Escape')
     page.emulate_media(reduced_motion='no-preference')
-    stopped = page.locator('body').evaluate('el => getComputedStyle(el).backgroundPosition')
+    stopped = page.locator('.soundcloud-tempo-stars').evaluate('el => el.style.transform')
     page.wait_for_timeout(250)
-    assert page.locator('body').evaluate('el => getComputedStyle(el).backgroundPosition') == stopped
+    assert page.locator('.soundcloud-tempo-stars').evaluate('el => el.style.transform') == stopped
     page.set_viewport_size({'width': 390, 'height': 844})
     page.locator('.settings-button').click()
     page.screenshot(path=str(ROOT/'test-results/control-settings-mobile.png'))

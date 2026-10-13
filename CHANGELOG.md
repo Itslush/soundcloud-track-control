@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.7.2
+
+- Reduced playback work while tempo and pitch adjustments are active, without lowering audio-quality settings. Testing on Firefox Android is still needed.
+- Kept the stars moving while reducing background repainting.
+- Removed unnecessary phone-player refreshes during playback.
+
 ## 1.2.7.1
 
 - Removed the optional waveform view. Tempo and pitch timelines are still available.

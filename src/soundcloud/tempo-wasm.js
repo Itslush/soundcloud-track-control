@@ -168,7 +168,7 @@ export function createWasmAudio({
           node.configure({
             blockMs: (Math.floor(sampleRate * 0.12) / sampleRate) * 1000,
             intervalMs: (Math.floor(sampleRate * 0.03) / sampleRate) * 1000,
-            splitComputation: false,
+            splitComputation: true,
           }),
         );
         state.latency = await timed(node.latency());

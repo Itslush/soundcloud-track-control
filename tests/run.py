@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parent
 SUITES = [
     'verify-release.py', 'verify-inline.py', 'verify-mobile-player.py', 'verify-phone-layout.py', 'verify-ux.py', 'verify-library.py', 'verify-compact-library.py', 'verify-control-styles.py',
     'verify-control-affordances.py', 'verify-editor-session.py', 'verify-timeline.py', 'verify-pitch-automation.py', 'verify-pitch-mode.py', 'verify-wasm.py', 'verify-wasm-boundaries.py',
-    'verify-share-links.py', 'verify-native-copy.py', 'verify-embedded-track.py', 'verify-display-duration.py', 'verify-editor-zoom.py',
+    'verify-steady-audio.py', 'verify-appearance.py', 'verify-star-paint.py', 'verify-share-links.py', 'verify-native-copy.py', 'verify-embedded-track.py', 'verify-display-duration.py', 'verify-editor-zoom.py',
     'verify-timeline-pan.py', 'verify-timeline-pan-style.py', 'verify-fade-start.py', 'verify-output.py', 'verify-crossfade.py', 'verify-track-visuals.py', 'verify-overhead.py', 'verify-artwork-overhead.py', 'verify-updates.py',
 ]
 

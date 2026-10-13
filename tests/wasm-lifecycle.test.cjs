@@ -118,7 +118,7 @@ function fixture() {
         node.configurations.push(options);
         if (node.configureGate) await node.configureGate.promise;
       };
-      node.latency = async () => 0.12;
+      node.latency = async () => 0.15;
       node.schedule = async (options) => {
         node.schedules.push(options);
         if (options.active && node.scheduleGate)
@@ -183,17 +183,17 @@ test('pause, seek and mode changes reuse one node with full default-equivalent r
   const node = value.nodes[0];
   assert.equal(node.configurations[0].blockMs, 120);
   assert.equal(node.configurations[0].intervalMs, 30);
-  assert.equal(node.configurations[0].splitComputation, false);
+  assert.equal(node.configurations[0].splitComputation, true);
   assert.deepEqual(value.input.gain.events.slice(-3), [
     ['cancel', 0],
     ['set', 0, 0],
-    ['set', 1, 0.12],
+    ['set', 1, 0.15],
   ]);
   const wet = [...node.connections][0];
   assert.deepEqual(wet.gain.events.slice(-3), [
     ['set', 0, 0],
-    ['set', 0, 0.24],
-    ['ramp', 1, 0.25],
+    ['set', 0, 0.3],
+    ['ramp', 1, 0.31],
   ]);
   for (let index = 0; index < 20; index++) {
     value.audio.paused = true;

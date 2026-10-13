@@ -93,12 +93,28 @@ export function createMobilePlayer({
   const window = document.defaultView;
   const pageLayout = createMobileLayout(document);
   const events = new AbortController();
+  const observedMedia = new WeakSet();
+  const mediaEvents = [
+    'play',
+    'pause',
+    'ended',
+    'durationchange',
+    'volumechange',
+    'emptied',
+  ];
   const on = (target, name, listener) =>
     target?.addEventListener(name, listener, { signal: events.signal });
+  function refreshDetached(event) {
+    if (!event.target.isConnected) refresh();
+  }
   function readPlayback() {
     let audio;
     for (const reference of media) {
       const candidate = reference.deref();
+      if (candidate && !observedMedia.has(candidate)) {
+        observedMedia.add(candidate);
+        for (const name of mediaEvents) on(candidate, name, refreshDetached);
+      }
       if (candidate && (!audio || !candidate.paused)) audio = candidate;
     }
     return {
@@ -252,6 +268,9 @@ export function createMobilePlayer({
         break;
     }
   });
+  function text(element, value) {
+    if (element.textContent !== value) element.textContent = value;
+  }
   function refresh() {
     if (disposed) return;
     const state = readPlayback();
@@ -293,28 +312,40 @@ export function createMobilePlayer({
       !previous ||
       previous.disabled ||
       previous.getAttribute('aria-disabled') === 'true';
-    play.setAttribute('aria-label', state.paused ? 'Play' : 'Pause');
-    play
-      .querySelector('path')
-      .setAttribute('d', state.paused ? 'M8 4l12 8-12 8Z' : 'M8 4v16M16 4v16');
+    const playLabel = state.paused ? 'Play' : 'Pause';
+    if (play.getAttribute('aria-label') !== playLabel) {
+      play.setAttribute('aria-label', playLabel);
+      play
+        .querySelector('path')
+        .setAttribute(
+          'd',
+          state.paused ? 'M8 4l12 8-12 8Z' : 'M8 4v16M16 4v16',
+        );
+    }
     const title = native('.playbackSoundBadge__titleLink');
-    transport.querySelector('strong').textContent =
+    text(
+      transport.querySelector('strong'),
       title?.getAttribute('title') ||
-      title?.textContent?.trim() ||
-      'Choose a track';
-    transport.querySelector('.touch-caption span').textContent =
+        title?.textContent?.trim() ||
+        'Choose a track',
+    );
+    text(
+      transport.querySelector('.touch-caption span'),
       native('.playbackSoundBadge__lightLink')?.textContent?.trim() ||
-      state.track ||
-      '';
+        state.track ||
+        '',
+    );
     const nativeNotice = native('.soundcloud-tempo-pitch-notice');
-    pitchNotice.textContent = nativeNotice?.textContent || '';
-    pitchNotice.hidden = !nativeNotice || nativeNotice.hidden;
+    text(pitchNotice, nativeNotice?.textContent || '');
+    const hideNotice = !nativeNotice || nativeNotice.hidden;
+    if (pitchNotice.hidden !== hideNotice) pitchNotice.hidden = hideNotice;
     const error = root.querySelector('.error');
-    feedback.textContent = error.hidden
-      ? root.querySelector('.status').textContent
-      : error.title;
+    text(
+      feedback,
+      error.hidden ? root.querySelector('.status').textContent : error.title,
+    );
     const save = adjustments.querySelector('[data-action=save]');
-    save.textContent = root.querySelector('.memory').title || 'Save tempo';
+    text(save, root.querySelector('.memory').title || 'Save tempo');
     save.disabled = !state.track;
     refreshArtwork();
     if (state.audio && root.activeElement !== volume)
@@ -371,14 +402,7 @@ export function createMobilePlayer({
   on(window, 'resize', scheduleLayout);
   on(coarse, 'change', scheduleLayout);
   on(document, 'visibilitychange', refresh);
-  for (const name of [
-    'play',
-    'pause',
-    'timeupdate',
-    'durationchange',
-    'volumechange',
-    'emptied',
-  ]) {
+  for (const name of mediaEvents) {
     document.addEventListener(name, refresh, {
       capture: true,
       signal: events.signal,

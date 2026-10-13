@@ -1,5 +1,15 @@
 # Testing
 
+## Playback performance maintenance
+
+`python tests/verify-steady-audio.py` runs the shipped userscript in muted Firefox with stars enabled. It captures three four-second stereo PCM windows at each of six tempo and pitch settings. Assertions cover frequency, level, sample discontinuities, silent blocks, missing inputs, render-frame continuity, unchanged steady-state parameters, and reuse of one pitch processor. These are desktop-engine fixtures, not Firefox Android or speaker-output measurements.
+
+`node tests/measure-dsp.cjs` compares callback costs for the pinned Signalsmith processor with split computation off and on. Five alternating pairs use 1,024 warmup callbacks and 8,192 measured callbacks at 48 kHz. The script checks the output and records raw timing distributions in `test-results/dsp-callback-cost.json`. Run it without other test processes. It measures synchronous computation, not audio-device deadlines.
+
+`python tests/verify-star-paint.py` checks moving and paused stars through the shipped controls and records renderer paint events. The bounded layer must stay below 20 paints per one-second observation. Transform updates still run each animation frame. The test does not measure phone power use or total GPU memory.
+
+These browser checks run in `tests/run.py`, together with seek, track replacement, crossfade, appearance, and mobile-control regressions. Real-device confirmation remains necessary for the reported Android audio hitching.
+
 ## Mobile player and waveform candidate
 
 Build with `npm run build` and run `npm test`, `npm run typecheck` and `python tests/run.py`. The browser runner now includes 27 suites. Set `FFMPEG_PATH` to the installed FFmpeg executable to run the audio-render tests without skips. For the existing public backend, build the website with `PUBLIC_API_BASE=https://tempo.88-96-45-138.sslip.io/soundcloud-tempo-control/`; the legacy backend prefix is intentional.
