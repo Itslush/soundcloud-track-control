@@ -39,6 +39,8 @@ Twenty unchanged playback-time events previously produced 100 mutations in the m
 - `verify-star-paint.py`: actual motion remains active with fewer than 20 paints per one-second observation.
 - Fresh feature captures retain their PNG checksums and match the v1.2.7.2 artifact. Capture and transfer-budget verification pass.
 
+The first GitHub run stalled during Firefox audio startup on the headless Linux runner and was cancelled. CI now starts a 48 kHz stereo PulseAudio null sink; the Firefox test also has a 15-second startup deadline. This changes test infrastructure only, not the shipped audio path or its assertions.
+
 ## Maintainability review
 
 The production change stays in three existing modules. The DSP change is one configuration flag. Star ownership and cleanup remain in the appearance module. The mobile change removes a periodic event subscription, avoids redundant writes, and observes detached media without retaining it in a strong collection. Disposal aborts those listeners. No new runtime dependency, settings option, timer, quality downgrade, or alternative audio path is introduced. Changed production files remain below 1,000 lines.

@@ -46,13 +46,24 @@ try:
         page.wait_for_selector('.touch-play')
         page.evaluate('''async () => {
           const {steadyAudio}=await import('/tests/fixtures/steady-audio.mjs');
-          window.steady=await steadyAudio();
+          let timer;
+          try {
+            window.steady=await Promise.race([
+              steadyAudio(),
+              new Promise((_,reject)=>{
+                timer=setTimeout(()=>reject(new Error('Firefox audio startup timed out; check the audio output device')),15000);
+              }),
+            ]);
+          } finally {
+            clearTimeout(timer);
+          }
           const root=document.querySelector('#soundcloud-tempo-control').shadowRoot;
           for(const [id,checked] of [['preserve-key',false],['use-wasm',true]]){
             const input=root.getElementById(id);input.checked=checked;
             input.dispatchEvent(new Event('change',{bubbles:true}));
           }
         }''')
+        print('Firefox audio started; capturing sustained adjusted playback.', flush=True)
         results = []
         expect(page.locator('.touch-play')).to_have_attribute('aria-label', 'Pause')
         for tempo, shift in [(1, 0), (.8, 0), (1.15, 0), (1, -6.5), (.8, -6.5), (1, 0)]:
