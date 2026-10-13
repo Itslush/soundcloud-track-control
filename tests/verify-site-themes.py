@@ -27,6 +27,7 @@ with sync_playwright() as playwright:
     expect(page.locator('html')).to_have_attribute('data-theme', 'charcoal')
     for width in [1440, 390, 320]:
         page.set_viewport_size({'width': width, 'height': 950})
+        assert ' '.join(page.locator('#hero-title').inner_text().split()) == 'Change speed and pitch on SoundCloud.'
         for theme in backgrounds:
             page.locator('.site-appearance summary').click()
             choice = page.locator(f'[data-site-theme="{theme}"]')
