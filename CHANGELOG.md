@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.7
+
+- Larger footer links, account icons and secondary controls on phones, including Firefox's desktop-site view.
+- Update notices have their own space above the phone player, with reachable links and a Dismiss button.
+
 ## 1.2.6
 
 - The phone player stays above SoundCloud's footer, with Settings available without expanding Controls.

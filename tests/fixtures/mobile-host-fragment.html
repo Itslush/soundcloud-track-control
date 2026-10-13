@@ -6,6 +6,14 @@
 .header{position:fixed;height:46px}.header__inner{display:flex;height:46px}.header__left,.header__middle,.header__right{width:33%}
 .header__navMenu{display:flex}.header__navMenuItem{list-style:none}.headerSearch__input{width:180px}
 .header__logo:not(.m-loggedIn) .header__logoLink-iconOnly{display:none}.header__logoLink svg{width:48px;height:24px}
+.header__moreButtonIcon,.header__userNavUsernameButtonIcon,.notificationIcon{width:22px;height:22px;position:relative}
+.header__right svg{width:22px;height:22px}.headerSearch__submit svg{width:0;height:0}
+.header__userNavAvatar .image__full{width:100%;height:100%}.notificationIcon__badge{position:absolute;top:0;right:0;width:8px;height:8px;border-radius:50%;background:#f50}
+.header__userNavUsernameButton{display:flex;align-items:center;width:auto;margin-right:16px}.header__userNavAvatar{margin-top:-3px}
+.l-footer{font-size:14px;line-height:1.4}.l-footer a{font-size:14px}.footer__localeSelector{margin-top:12px}
+.sidebarHeader__title,.sidebarHeader__actualTitle,.sidebarHeader__more{font-size:12px;line-height:16px}
+.banner{display:flex;align-items:center;font-size:14px;line-height:18px;padding:20px 30px}.banner__content{display:flex;align-items:center;max-width:800px}.banner__closeIcon{width:22px;height:22px}
+.mobileAppsButtons a{height:40px;float:left}.mobileAppsButtons__appStore{width:120px}.mobileAppsButtons__googlePlay{width:135px}
 .g-tabs{display:flex;list-style:none}.g-tabs a{display:block;height:32px}
 .sc-truncate{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lazyLoadingList__list{margin:0;padding:0;list-style:none}.fixture-library{display:grid;grid-template-columns:repeat(6,1fr)}
@@ -25,10 +33,17 @@
         <li class="header__navMenuItem"><a href="/discover">Home</a></li><li class="header__navMenuItem"><a href="/feed">Feed</a></li><li class="header__navMenuItem"><a href="/you/library">Library</a></li>
       </ul></nav>
     </div>
-    <div class="header__middle"><form class="header__search headerSearch"><input class="headerSearch__input" aria-label="Search tracks"></form></div>
-    <div class="header__right"><button>Account</button><a href="/upload">Upload</a><button>More</button></div>
+    <div class="header__middle"><form class="header__search headerSearch"><input class="headerSearch__input" aria-label="Search tracks"><button class="headerSearch__submit" aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor"/><path d="m15 15 6 6" stroke="currentColor"/></svg></button></form></div>
+    <div class="header__right">
+      <a href="/upload">Upload</a>
+      <button class="header__userNavUsernameButton" aria-label="Account"><span class="header__userNavAvatar image" style="width:26px;height:26px"><span class="image__full" style="display:block;background:#555"></span></span><span class="header__userNavUsernameButtonIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor"/></svg></span></button>
+      <button class="header__userNavActivitiesButton" aria-label="Notifications"><span class="notificationIcon activities"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18h14l-2-4V9a5 5 0 0 0-10 0v5ZM10 21h4" fill="none" stroke="currentColor"/></svg><span class="notificationIcon__badge"></span></span></button>
+      <button class="header__userNavMessagesButton" aria-label="Messages"><span class="notificationIcon messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3ZM3 5l9 8 9-8" fill="none" stroke="currentColor"/></svg></span></button>
+      <button aria-label="More"><span class="header__moreButtonIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h3m5 0h3m5 0h3" stroke="currentColor"/></svg></span></button>
+    </div>
   </div>
 </header>
+<div class="l-product-banners"><div class="banner"><div class="banner__contentContainer"><div class="banner__content"><span>Illustrative SoundCloud banner with enough text to wrap on a narrow phone. <a href="/upload">Upload</a></span></div></div><button class="banner__close" aria-label="Dismiss fixture banner"><svg class="banner__closeIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" stroke="currentColor"/></svg></button></div></div>
 <main class="l-container l-content l-fluid-fixed">
   <div class="l-main">
     <ul class="g-tabs"><li><a href="/you/library">Overview</a></li><li><a href="/you/likes">Likes</a></li><li><a href="/you/sets">Playlists</a></li><li><a href="/you/albums">Albums</a></li><li><a href="/you/stations">Stations</a></li><li><a href="/you/following">Following</a></li><li><a href="/you/history">History</a></li></ul>
@@ -39,5 +54,6 @@
       <div class="tileGallery m-hasItemsForward"><div class="tileGallery__slider"><div class="tileGallery__sliderPanel"></div></div><div class="tileGallery__sliderPeek tileGallery__sliderPeekForward"><button class="tileGallery__slideForwardButton">Next tracks</button></div></div>
     </li></ul>
   </div>
-  <aside class="l-sidebar-right"><div class="streamSidebar l-fixed" style="top:70px">Sidebar fixture</div></aside>
+  <aside class="l-sidebar-right"><div class="streamSidebar l-fixed" style="top:70px"><div class="sidebarHeader"><h4 class="sidebarHeader__title"><span class="sidebarHeader__actualTitle">Sidebar fixture</span></h4><a class="sidebarHeader__more" href="/you/likes">View all</a></div><footer class="l-footer standard"><a class="sc-link-secondary" href="/terms-of-use">Legal</a> · <a class="sc-link-secondary" href="/pages/privacy">Privacy</a> · <a class="sc-link-secondary" href="/pages/cookies">Cookie Policy</a> · <a class="sc-link-secondary" href="/pages/contact">Contact</a><div class="footer__localeSelector"><a class="localeSelector" href="#language" role="button">Language: <span class="localeSelector_language">English (US)</span></a></div></footer></div></aside>
 </main>
+<div class="mobileAppsButtons m-sidebar"><a class="mobileAppsButtons__appStore" href="https://apps.apple.com/" aria-label="App Store fixture">App Store fixture</a><a class="mobileAppsButtons__googlePlay" href="https://play.google.com/" aria-label="Google Play fixture">Google Play fixture</a></div>

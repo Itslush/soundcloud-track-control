@@ -82,6 +82,19 @@ try:
                 expect(first_play).to_be_visible()
                 expect(page.locator('html')).to_have_attribute('data-track-control-mobile-layout', '')
                 page.wait_for_timeout(120)
+                for selector, minimum in [('.header__right svg', 21.9), ('.header__userNavAvatar .image__full', 25.9), ('.headerSearch__submit svg', 21.9), ('.notificationIcon__badge', 7.9)]:
+                    for element in page.locator(selector).all():
+                        bounds = element.bounding_box()
+                        assert min(bounds['width'], bounds['height']) * scale >= minimum, (selector, bounds, scale)
+                for element in page.locator('.l-footer a').all():
+                    assert float(element.evaluate('el=>parseFloat(getComputedStyle(el).fontSize)')) * scale >= 13.9
+                    assert element.bounding_box()['height'] * scale >= 43.9
+                for element in page.locator('.sidebarHeader__actualTitle,.sidebarHeader__more').all():
+                    assert float(element.evaluate('el=>parseFloat(getComputedStyle(el).fontSize)')) * scale >= 13.9
+                assert page.locator('.banner__content span').evaluate('el=>parseFloat(getComputedStyle(el).fontSize)*visualViewport.scale') >= 13.9
+                for element in page.locator('.banner__close,.mobileAppsButtons a').all():
+                    bounds = element.bounding_box()
+                    assert bounds['height'] * scale >= 43.9 and bounds['x'] + bounds['width'] <= 980, bounds
                 measured = page.evaluate('''() => {
                     const scale=visualViewport.scale, header=document.querySelector('.header');
                     const items=[...document.querySelectorAll('.fixture-library > li')].map(item=>item.getBoundingClientRect());
@@ -122,6 +135,9 @@ try:
                 expect(page.get_by_role('button', name='Play fixture track 14', exact=True)).to_be_visible()
                 page.get_by_role('button', name='Play fixture track 19', exact=True).click()
                 assert page.evaluate('phoneActions.at(-1)') == 'Play fixture track 19'
+                page.locator('.l-footer a[href="/pages/privacy"]').focus()
+                page.keyboard.press('Enter')
+                assert page.evaluate('phoneActions.at(-1)') == '/pages/privacy'
                 page.evaluate('window.scrollTo(0,0)')
                 page.screenshot(path=str(ROOT / f'test-results/phone-page-{engine}-{width}.png'))
                 page.evaluate('''() => {

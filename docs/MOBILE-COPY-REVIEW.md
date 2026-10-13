@@ -1,5 +1,28 @@
 # Phone layout and copy review
 
+## v1.2.7 sizing and update notice
+
+The user's Firefox Android screenshots confirm the v1.2.6 two-column cards and accessible mobile Settings button. They also expose footer text and account glyphs that still use desktop-sized pixels, and an update notice clipped against the player.
+
+The notice lives inside the plugin's shadow root. Its fixed positioning conflicts with the scaled, scrolling mobile host; this is not a missing z-index or a SoundCloud text rule crossing the shadow boundary. The phone notice now occupies its own row before transport, so the existing host ResizeObserver reserves its height. Dismiss returns focus to the visible mobile Settings button. The desktop notice keeps its position. Its link uses underlined foreground text for readable contrast under the native theme as well as the three custom appearances.
+
+The mobile adapter now sizes the native header glyphs and avatar, footer links and language selector, sidebar headings/actions, promotional message and dismiss control, and app-store links. Selectors come from the public SoundCloud page and its current bundle. These overrides only apply while the existing mobile-layout attribute is present. Background artwork, original destinations and native handlers remain unchanged. No new observer, animation loop, dependency, preference or shared-link format is introduced.
+
+Focused evidence:
+
+- Before the notice correction, the 320px fixture placed its top at 1350.56 CSS px while the host began at 1620.06, reproducing clipping outside the host. The updated notice fits inside the host and ends before transport begins.
+- Before the glyph correction, a 22px native SVG measured only 7.18px at the simulated 320/980 viewport scale. Header icons now measure 22px, avatars 26px, footer text 14px and link targets at least 44px in the phone fixtures.
+- `tests/verify-updates.py` exercises Chromium and Firefox at 320x640, 393x844, 844x393 and 393x360, with native, Light, Charcoal and OLED appearances. It checks notice bounds, non-overlap, text contrast, target height, Settings/Escape, dismissal focus and page errors. First install, reload, second tab and blocked storage retain their original behavior.
+- `tests/verify-phone-layout.py` checks known glyph and footer dimensions, banner wrapping, store-link bounds, original privacy-link activation, two/three columns, layout teardown and 200% title enlargement in both engines.
+- Public anonymous SoundCloud inspection confirms the footer, menu/search icons and sidebar selectors. Account-only avatar/mail/notification markup was inspected in the public source and represented in fixtures, not tested through a signed-in account.
+- Final public Firefox inspection measures 14px footer/banner text, 22px search/menu glyphs and 44px targets at the simulated phone scale. Store graphics preserve their native proportions. Language spacing and the sidebar dismiss glyph were corrected in the bounded visual review. The document remains 980 CSS px wide without horizontal overflow.
+
+Verification: the unit run passed 600 tests with zero skips; all 29 muted browser suites passed. Final v1.2.7 focused layout and notice checks passed after the last CSS changes. Type checking and the release build passed. Main-agent screenshot inspection confirmed the footer and notice layout. These are desktop browser checks with simulated phone geometry, not physical-device evidence.
+
+Design and review: preserve ENERGY 1 / RHYTHM 2 / MOTION 2. The notice row separates temporary feedback from playback without adding a modal. Existing type, flat boundaries and themes remain; no decoration or marketing copy is added. The main-agent delivery gate below still applies, with R-03/R-25/R-26/R-32/R-34/R-35 evidence extended by the focused tests above. The native link contrast correction is deliberate, not a new accent palette. The source changes stay in the existing layout and update-notice owners; storage, audio processing and saved settings are untouched.
+
+Physical Firefox Android behavior, account-only menus and low-end hardware performance remain unverified for this revision. The installed desktop plugin and backend are not part of this change. Empty native loading placeholders are not claimed fixed by these sizing changes.
+
 ## v1.2.6 follow-up
 
 The mobile player now uses a manual popover so SoundCloud's transformed footer cannot move it below the viewport. Settings is on the collapsed transport and opens the existing customization panel. Native footer descendants are hidden only while the mobile adapter is active. Teardown restores the desktop player and the original root styles.

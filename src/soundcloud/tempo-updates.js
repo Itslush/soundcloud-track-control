@@ -37,7 +37,7 @@ export function showReleaseNotice(ui, VERSION, WEBSITE) {
       line-height: 1.5;
       font-family: inherit;
     }
-    .release-notice a { color: var(--tempo-accent, #ff7733); }
+    .release-notice a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
     .release-notice button {
       padding: 6px 9px;
       border: 1px solid var(--tempo-track, #888);
@@ -47,6 +47,26 @@ export function showReleaseNotice(ui, VERSION, WEBSITE) {
       cursor: pointer;
     }
     .release-notice :focus-visible { outline: 2px solid var(--tempo-accent, #ff7733); outline-offset: 3px; }
+    :host([data-touch-player]) .release-notice {
+      position: static;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      width: 100%;
+      max-width: none;
+      margin: 0 0 8px;
+      padding: 8px;
+      gap: 8px;
+      font-size: 14px;
+    }
+    :host([data-touch-player]) .release-notice > span { grid-column: 1 / -1; }
+    :host([data-touch-player]) .release-notice :is(a,button) {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 6px 9px;
+      box-sizing: border-box;
+      font: inherit;
+    }
   `;
   const message = document.createElement('span');
   message.setAttribute('role', 'status');
@@ -68,10 +88,13 @@ export function showReleaseNotice(ui, VERSION, WEBSITE) {
     () => {
       notice.remove();
       style.remove();
-      ui.settingsButton.focus();
+      const settings = ui.host.hasAttribute('data-touch-player')
+        ? ui.root.querySelector('.touch-settings')
+        : ui.settingsButton;
+      settings.focus();
     },
     { once: true },
   );
   notice.append(dismiss);
-  ui.root.append(style, notice);
+  ui.root.prepend(style, notice);
 }
