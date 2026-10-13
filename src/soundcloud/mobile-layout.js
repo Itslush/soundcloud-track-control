@@ -70,7 +70,9 @@ export function createMobileLayout(document) {
       if (!style.isConnected) (document.head || root).append(style);
       if (!root.hasAttribute(attribute)) root.setAttribute(attribute, '');
       for (const [name, value] of Object.entries({
-        '--tc-phone-scale': String(1 / geometry.scale),
+        '--tc-phone-scale': String(
+          Math.max(1, document.defaultView.innerWidth / geometry.width),
+        ),
         '--tc-phone-dock': `${(dockHeight + 16) / geometry.scale}px`,
         '--tc-phone-columns': geometry.width >= 600 ? '3' : '2',
       })) {

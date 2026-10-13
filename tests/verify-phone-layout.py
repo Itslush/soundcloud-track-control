@@ -94,6 +94,16 @@ try:
                 page.locator('.g-tabs a').nth(1).click()
                 assert page.evaluate('phoneActions') == ['Play fixture track 0', '/you/likes']
                 page.screenshot(path=str(ROOT / f'test-results/phone-page-{engine}-{width}.png'))
+                page.evaluate('''() => {
+                    visualViewport.scale *= 2;
+                    visualViewport.width /= 2;
+                    visualViewport.height /= 2;
+                    visualViewport.dispatchEvent(new Event('resize'));
+                }''')
+                page.wait_for_timeout(80)
+                zoomed = page.locator('.soundTitle__title').first.evaluate('element => parseFloat(getComputedStyle(element).fontSize) * visualViewport.scale')
+                assert zoomed >= 31.9, zoomed
+                measured['zoomedTitleSize'] = zoomed
                 assert not errors, errors
                 evidence.append({'engine': engine, 'physicalWidth': width, 'simulatedAndroidGeometry': True, **measured})
                 context.close()
