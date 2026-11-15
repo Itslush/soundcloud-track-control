@@ -299,6 +299,30 @@ export const controlsStyle = `
           margin-bottom: 8px;
         }
 
+        .mixer-dialog {
+          box-sizing: border-box;
+          width: min(940px, 96vw);
+          height: min(690px, 92dvh);
+          max-width: none;
+          max-height: none;
+          padding: 0;
+          margin: auto;
+          background: #151515;
+          color: #eee;
+          border: 1px solid #555;
+          border-radius: 5px;
+          overflow: hidden;
+        }
+        .mixer-dialog[open] { display: flex; flex-direction: column; }
+        @media (max-width: 620px) {
+          .mixer-dialog { width: calc(100vw - 12px); height: calc(100dvh - 12px); }
+        }
+        .mixer-dialog::backdrop { background: rgb(0 0 0 / .76); }
+        .mixer-dialog header { display: flex; align-items: center; gap: 16px; padding: 8px 13px; min-height: 36px; }
+        .mixer-dialog strong { margin-right: auto; font-size: 16px; }
+        .mixer-dialog a, .mixer-dialog button { color: inherit; font: inherit; }
+        .mixer-dialog button { background: transparent; border: 1px solid #888; border-radius: 3px; padding: 5px 8px; }
+        .mixer-dialog iframe { display: block; width: 100%; min-height: 0; flex: 1; border: 0; }
         .settings-actions {
           display: flex;
           align-items: center;

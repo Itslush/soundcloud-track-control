@@ -177,6 +177,8 @@ export function createMobilePlayer({
         });
     }
     const background = readTrackArtwork(source);
+    transport.firstElementChild.style.filter =
+      source?.querySelector('.image')?.style.filter || '';
     if (transport.firstElementChild.style.backgroundImage !== background)
       transport.firstElementChild.style.backgroundImage = background;
   }

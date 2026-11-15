@@ -2,7 +2,7 @@
 import Page from '../layouts/Page.astro';
 import NumberField from '../components/NumberField.astro';
 import Icon from '../components/Icon.astro';
-import { release } from '../lib/release';
+import { release, route } from '../lib/release';
 import '../styles/set.css';
 ---
 
@@ -20,6 +20,7 @@ import '../styles/set.css';
       Join tracks with their tempo and pitch settings. Choose the order and
       crossfades, then create one playable copy.
     </p>
+    <a class="text-link" href={route('mixer/')}>Open two-deck mixer</a>
     <noscript>Enable JavaScript to configure a set.</noscript>
     <form id="set-add-form" class="set-add" novalidate>
       <label for="set-source">SoundCloud track or shared settings link</label>

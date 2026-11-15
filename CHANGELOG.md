@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.7.6
+
+- Changing semitones keeps playback audible as the pitch shifter warms up. Returning to zero during playback keeps the shifter ready for the next adjustment.
+- Crossfade preloads the next verified SoundCloud queue item as playback starts. Play buttons and waveform seeks respond immediately and use a prepared outgoing fade when available.
+- Open the two-deck mixer in Advanced audio or on the website. Load two public SoundCloud tracks or audio files, adjust each deck independently, and blend them with the crossfader.
+- Cover color follows audible pitch on the player and website. Returning to the original pitch restores the original artwork.
+
 ## 1.2.7.5
 
 - Lowering pitch by 1 to 4 semitones now keeps more of a distorted kick’s original waveform, including in shared tracks and crossfades.

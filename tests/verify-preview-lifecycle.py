@@ -170,6 +170,25 @@ with sync_playwright() as runtime:
     pitch(page, True)
     page.locator('#preview-play').click()
     ready(page, 0)
+    pitch(page, False)
+    page.locator('#demo-speed-number').fill('1')
+    page.locator('#demo-speed-number').press('Enter')
+    before = page.evaluate('lifecycleState().configured')
+    page.locator('#demo-key-shift').fill('-2')
+    page.locator('#demo-key-shift').press('Enter')
+    ready(page, before)
+    before = page.evaluate('lifecycleState().configured')
+    for shift in ['-4', '-4.5', '-1', '0', '0.5', '0', '-2']:
+        page.locator('#demo-key-shift').fill(shift)
+        page.locator('#demo-key-shift').press('Enter')
+        page.wait_for_timeout(150)
+        assert page.evaluate('lifecycleState().connected === 1')
+        assert page.evaluate('lifecycleState().configured') == before
+    page.locator('#demo-key-shift').fill('0')
+    page.locator('#demo-key-shift').press('Enter')
+    page.locator('#demo-speed-number').fill('0.75')
+    page.locator('#demo-speed-number').press('Enter')
+    pitch(page, True)
     peaks = []
     for _ in range(5):
         before = page.evaluate('lifecycleState().configured')

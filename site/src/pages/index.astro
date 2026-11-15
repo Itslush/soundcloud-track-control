@@ -92,7 +92,7 @@ const technical = [
     id: 'crossfade',
     title: 'Crossfade',
     overview: 'Blend the end of a track into the next one.',
-    text: 'Choose 1–10 seconds of overlap. The player prepares the next queued track as playback starts. If you press Play on another track, the current one keeps playing while the fade loads. Unsupported streams or incoming tempo timelines play normally. Shared sets can contain 2 to 10 public tracks, up to 15 minutes of original audio and 30 minutes after adjustment. Each track can keep its own saved timeline. Status and local diagnostics explain when an overlap is unavailable.',
+    text: 'Choose 1–10 seconds of overlap. The player prepares the next queued track as playback starts. Click Play or a waveform to crossfade when the outgoing audio is ready. Cold clicks go straight to SoundCloud. Unsupported streams or incoming tempo timelines play normally. Shared sets can contain 2 to 10 public tracks, up to 15 minutes of original audio and 30 minutes after adjustment. Each track can keep its own saved timeline. Status and local diagnostics explain when an overlap is unavailable.',
     alt: 'Crossfade controls, overlap duration and the diagnostics disclosure.',
   },
   {
@@ -173,9 +173,10 @@ const technical = [
               </a>
             )}
             {feature.id === 'set' && (
-              <a class="text-link" href={route('set/')}>
-                Build a set
-              </a>
+              <div class="set-links">
+                <a class="text-link" href={route('set/')}>Build a set</a>
+                <a class="text-link" href={route('mixer/')}>Two-deck mixer</a>
+              </div>
             )}
           </div>
           <div

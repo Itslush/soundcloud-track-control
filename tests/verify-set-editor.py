@@ -86,12 +86,14 @@ try:
         assert resolves == posts == gets == []
         expect(page.locator('#set-track-tempo-0')).to_have_attribute('readonly', '')
         expect(page.locator('#set-track-pitch-0')).to_have_attribute('readonly', '')
+        assert page.locator('.set-artwork').first.evaluate('image=>image.style.filter') == 'hue-rotate(-52.5deg)'
         page.locator('#set-source').fill('https://soundcloud.com/listener/second')
         page.locator('#set-add').click()
         expect(page.locator('.set-track')).to_have_count(2)
         assert len(resolves) == 1 and posts == []
         page.locator('#set-track-pitch-1').fill('-2.5')
         page.locator('#set-track-pitch-1').press('Enter')
+        assert page.locator('.set-artwork').last.evaluate('image=>image.style.filter') == 'hue-rotate(-37.5deg)'
         page.locator('.set-track').last.locator('[data-pitch="preserve"]').click()
         expect(page.locator('.set-track').last.locator('[data-pitch="preserve"]')).to_have_attribute('aria-pressed', 'true')
         page.locator('.set-track').last.locator('[data-pitch="natural"]').click()

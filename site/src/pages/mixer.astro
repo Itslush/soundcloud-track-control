@@ -1,0 +1,22 @@
+---
+import Page from '../layouts/Page.astro';
+import '../styles/mixer.css';
+---
+
+<Page
+  title="Two-deck mixer"
+  description="Load two SoundCloud tracks or audio files, adjust their speed and pitch, and mix between them."
+>
+  <script is:inline>
+    if (window.self !== window.top)
+      document.documentElement.classList.add('embedded-mixer');
+  </script>
+  <section class="mixer-shell shell" aria-labelledby="mixer-heading">
+    <h1 id="mixer-heading">Two-deck mixer</h1>
+    <div id="two-deck-mixer"></div>
+    <noscript>Enable JavaScript to mix tracks.</noscript>
+  </section>
+</Page>
+<script>
+  import '../scripts/mixer';
+</script>

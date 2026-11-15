@@ -39,6 +39,8 @@ with sync_playwright() as p:
                 page.keyboard.press('Tab')
                 assert page.evaluate("!!document.querySelector('#soundcloud-tempo-control').shadowRoot.activeElement?.matches(':focus-visible')")
             assert text_contrast(notice) >= 4.5
+            page.locator('#quick-key-shift').fill('0')
+            page.locator('#quick-key-shift').dispatch_event('change')
             page.add_script_tag(content=module)
             page.evaluate('''() => {
               const color = value => `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='${value}'/%3E%3C/svg%3E")`;
@@ -76,6 +78,8 @@ with sync_playwright() as p:
             assert right[0] < 30 and right[2] > 200, right
             feather = pixels.getpixel((12, 8))
             assert 150 < feather[0] < 210 and 45 < feather[2] < 105, feather
+            page.locator('#quick-key-shift').fill('-3.5')
+            page.locator('#quick-key-shift').dispatch_event('change')
             bar = page.locator('.playControls')
             bar_box, notice_box = bar.bounding_box(), notice.bounding_box()
             assert notice_box['y'] >= bar_box['y'] and notice_box['y'] + notice_box['height'] <= bar_box['y'] + bar_box['height'] + 1

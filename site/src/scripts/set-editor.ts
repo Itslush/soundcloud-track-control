@@ -1,4 +1,8 @@
-import { decodeTempoCode, tempoShareLink } from '../../../src/sharing/tempo-share.js';
+import { artworkFilter } from '../../../src/appearance/artwork-filter.js';
+import {
+  decodeTempoCode,
+  tempoShareLink,
+} from '../../../src/sharing/tempo-share.js';
 import { validateProfile } from '../../../src/timeline/tempo-profile.js';
 import {
   adjustedDuration,
@@ -238,6 +242,14 @@ function render() {
     pitch.value = String(
       item.profile.pitchPoints?.[0].k ?? item.profile.keyShift ?? 0,
     );
+    const syncArtwork = () => {
+      image.style.filter = artworkFilter(
+        item.profile.points[0].r,
+        item.profile.pitchPoints?.[0].k ?? item.profile.keyShift ?? 0,
+        item.profile.pitch === 'preserve',
+      );
+    };
+    syncArtwork();
     tempo.readOnly = item.profile.points.length > 1;
     pitch.readOnly = Boolean(item.profile.pitchPoints);
     const fixedTempo = get<HTMLButtonElement>('.set-fixed-tempo');
@@ -265,11 +277,13 @@ function render() {
     });
     tempo.addEventListener('change', () => {
       item.profile.points[0].r = tempo.valueAsNumber;
+      syncArtwork();
       changed();
     });
     pitch.addEventListener('change', () => {
       if (pitch.valueAsNumber !== (item.profile.keyShift ?? 0))
         item.profile.keyShift = pitch.valueAsNumber;
+      syncArtwork();
       changed();
     });
     get<HTMLElement>('.set-overlap').hidden = index === items.length - 1;

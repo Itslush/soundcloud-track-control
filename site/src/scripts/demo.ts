@@ -3,6 +3,7 @@ import {
   peakProtectionKey,
   readPeakProtection,
 } from '../../../src/audio/pitch-quality.mjs';
+import { artworkFilter } from '../../../src/appearance/artwork-filter.js';
 import { formatPitchNotice } from '../../../src/sharing/tempo-pitch-notice.js';
 import { release } from '../lib/release';
 import { createTempoEditor } from '../../../src/timeline/tempo-editor.js';
@@ -243,6 +244,13 @@ export function initDemo(sharedProfile?: TempoProfile) {
           ? (editor.draftPlayback(time)?.keyShift ?? 0)
           : Number(keyInput.value) || 0;
       const notice = phase === 'ready' ? formatPitchNotice(shift) : '';
+      const preserve =
+        !original &&
+        (follow.checked
+          ? (editor.draftPlayback(time)?.pitch ?? pitchInput.value)
+          : pitchInput.value) === 'preserve';
+      artwork.style.filter =
+        phase === 'ready' ? artworkFilter(rate, shift, preserve) : '';
       if (pitchNotice.textContent !== notice) pitchNotice.textContent = notice;
       pitchNotice.hidden = !notice;
       get('preview-readout').textContent =

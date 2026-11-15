@@ -178,7 +178,7 @@ test('key shifting composes with pitch preservation and updates at the same spee
   }
 });
 
-test('unity playback leaves the dry path open even with Preserve Key enabled', async () => {
+test('unity playback starts dry and keeps an active processor across zero', async () => {
   const value = fixture();
   value.state.speed = 1;
   value.refresh();
@@ -193,10 +193,18 @@ test('unity playback leaves the dry path open even with Preserve Key enabled', a
   value.state.keyShift = 0;
   value.refresh();
   await settle();
-  assert.equal(value.api.active(value.audio), false);
-  assert.equal(value.nodes[0].connections.size, 0);
-  assert.equal(value.input.gain.value, 0);
+  assert.equal(value.api.active(value.audio), true);
+  assert.equal(value.nodes[0].schedules.at(-1).semitones, 0);
+  assert.ok(value.nodes[0].connections.size);
   assert.equal(value.api.label(), 'Original pitch at 1×.');
+  for (const semitones of [-4.5, -4, -1, -0.5, 0, 0.5, 0, -2]) {
+    value.state.keyShift = semitones;
+    value.refresh();
+    await settle();
+    assert.equal(value.nodes[0].schedules.at(-1).semitones, semitones);
+    assert.equal(value.nodes[0].configurations.length, 1);
+    assert.equal(value.api.active(value.audio), true);
+  }
 });
 
 test('peak protection switches only the output route of an active pitch processor', async () => {
@@ -234,6 +242,12 @@ test('pause, seek and mode changes reuse one node and the short pitch window', a
   const [headroom] = node.connections;
   const [shaper] = headroom.connections;
   const [wet] = shaper.connections;
+  const dry = [...value.boost.connections].find((item) => item !== value.input);
+  assert.deepEqual(dry.gain.events.slice(-3), [
+    ['set', 1, 0],
+    ['set', 1, 0.3],
+    ['ramp', 0, 0.31],
+  ]);
   assert.deepEqual(wet.gain.events.slice(-3), [
     ['set', 0, 0],
     ['set', 0, 0.3],

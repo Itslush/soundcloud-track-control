@@ -1,3 +1,5 @@
+import { artworkFilter } from '../appearance/artwork-filter.js';
+
 const trackCardSelector =
   '.playableTile, .sound, .queueItemView, .soundBadge, .trackItem';
 const trackCardTitleSelector =
@@ -116,12 +118,20 @@ export function createPageArtwork({
     }
   }
 
+  function clearHue(entry) {
+    if (entry.image) entry.image.style.filter = entry.nativeFilter;
+    entry.image = null;
+    entry.overlay?.remove();
+    entry.overlay = null;
+  }
+
   function collectPageArtwork() {
     const targets = new Map();
     for (const page of [document, ...(readEmbeddedPages()?.documents() || [])])
       collectArtworkTargets(page, targets);
     for (const [artwork, entry] of pageArtwork) {
       if (targets.get(artwork) !== entry.key) {
+        clearHue(entry);
         entry.badge?.remove();
         if (entry.positioned) {
           artwork.classList.remove('soundcloud-tempo-page-position');
@@ -133,7 +143,9 @@ export function createPageArtwork({
       if (!pageArtwork.has(artwork)) {
         artwork.classList.remove('soundcloud-tempo-page-position');
         artwork
-          .querySelectorAll(':scope > .soundcloud-tempo-page-indicator')
+          .querySelectorAll(
+            ':scope > .soundcloud-tempo-page-indicator, :scope > .soundcloud-tempo-page-hue',
+          )
           .forEach((badge) => badge.remove());
         pageArtwork.set(artwork, { key, badge: null, positioned: false });
       }
@@ -148,11 +160,19 @@ export function createPageArtwork({
   }
 
   function renderPageArtwork(full) {
-    const { trackKey, rate, failure } = readTrack();
+    const {
+      trackKey,
+      rate,
+      failure,
+      shift = 0,
+      preserve = false,
+    } = readTrack();
     const playbackChanged =
       !lastPlayback ||
       lastPlayback.trackKey !== trackKey ||
       lastPlayback.rate !== rate ||
+      lastPlayback.shift !== shift ||
+      lastPlayback.preserve !== preserve ||
       lastPlayback.failed !== Boolean(failure);
     const targets = full ? pageArtwork : new Map();
     if (!full) {
@@ -166,12 +186,60 @@ export function createPageArtwork({
           targets.set(artwork, entry);
     }
     changedTracks.clear();
-    lastPlayback = { trackKey, rate, failed: Boolean(failure) };
+    lastPlayback = {
+      trackKey,
+      rate,
+      shift,
+      preserve,
+      failed: Boolean(failure),
+    };
     for (const [artwork, entry] of targets) {
       if (!artwork.isConnected) {
         pageArtwork.delete(artwork);
         tracks.get(entry.key)?.delete(artwork);
         continue;
+      }
+      const hue =
+        entry.key === trackKey && !failure
+          ? artworkFilter(rate, shift, preserve)
+          : '';
+      const image = artwork.querySelector('.image__full, img');
+      if (entry.image !== image) {
+        clearHue(entry);
+        entry.image = image;
+        entry.nativeFilter = image?.style.filter || '';
+      }
+      if (image) {
+        const filter = [entry.nativeFilter, hue].filter(Boolean).join(' ');
+        if (image.style.filter !== filter) image.style.filter = filter;
+      } else if (hue) {
+        if (!entry.overlay) {
+          const overlay = artwork.ownerDocument.createElement('span');
+          overlay.className = 'soundcloud-tempo-page-hue';
+          overlay.setAttribute('aria-hidden', 'true');
+          overlay.style.cssText =
+            'position:absolute;inset:0;pointer-events:none;background-size:cover;background-position:center;z-index:1';
+          entry.overlay = overlay;
+          if (
+            artwork.ownerDocument.defaultView.getComputedStyle(artwork)
+              .position === 'static'
+          ) {
+            artwork.classList.add('soundcloud-tempo-page-position');
+            entry.positioned = true;
+          }
+          artwork.append(overlay);
+        }
+        const background =
+          artwork.ownerDocument.defaultView.getComputedStyle(
+            artwork,
+          ).backgroundImage;
+        if (entry.overlay.style.backgroundImage !== background)
+          entry.overlay.style.backgroundImage = background;
+        if (entry.overlay.style.filter !== hue)
+          entry.overlay.style.filter = hue;
+      } else if (entry.overlay) {
+        entry.overlay.remove();
+        entry.overlay = null;
       }
       if (!savedRates.has(entry.key)) {
         savedRates.set(entry.key, readSavedRate(entry.key));
@@ -243,7 +311,7 @@ export function createPageArtwork({
           </style>
           ${tempoLogo()}
         `;
-        entry.positioned =
+        entry.positioned ||=
           artwork.ownerDocument.defaultView.getComputedStyle(artwork)
             .position === 'static';
         if (entry.positioned) {

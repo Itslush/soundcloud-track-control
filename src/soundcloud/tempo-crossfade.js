@@ -21,6 +21,10 @@ export function createCrossfade({
   let seconds = 5;
   let selected;
   let job;
+  let warm;
+  let pendingNext;
+  let staleIdentity;
+  let staleRetries = 0;
   let timer;
   let message = '';
   let disposed = false;
@@ -53,19 +57,50 @@ export function createCrossfade({
     onState?.();
   }
 
-  function cancel(reason) {
+  function cancel(reason, keepPreload = false) {
     const previous = job;
     job = null;
+    if (!keepPreload) {
+      pendingNext?.controller.abort();
+      pendingNext = null;
+    }
     visual(null);
-    if (previous?.deadline !== undefined)
-      timers.clearTimeout(previous.deadline);
     previous?.controller.abort();
+    previous?.prefetch?.controller.abort();
     try {
-      previous?.next?.dispose();
+      if (!keepPreload) previous?.next?.dispose();
     } finally {
       previous?.route?.dispose();
     }
     if (previous && reason) status(`Crossfade cancelled: ${reason}.`);
+  }
+
+  function clearWarm() {
+    warm?.controller.abort();
+    warm = null;
+  }
+
+  function startPreload(audio, track) {
+    const controller = new AbortController();
+    const pending = { audio, track, src: audio.currentSrc, controller };
+    const promise = preloadNext(audio, { signal: controller.signal }).then(
+      (next) => {
+        pending.next = next;
+        if (controller.signal.aborted) next.dispose();
+        else
+          controller.signal.addEventListener('abort', () => next.dispose(), {
+            once: true,
+          });
+        return { next };
+      },
+      (error) => {
+        if (error.code === 'SOUNDCLOUD_HOST_STALE') retryStale(pending);
+        else pending.retryPosition = audio.currentTime + 2;
+        return { error };
+      },
+    );
+    pending.promise = promise;
+    return pending;
   }
 
   function signature(audio) {
@@ -79,6 +114,34 @@ export function createCrossfade({
       settings.shift,
       settings.variable,
     ]);
+  }
+
+  function keepVerifiedNext(current) {
+    try {
+      if (
+        current.next &&
+        pendingNext?.next === current.next &&
+        pendingNext.audio === current.audio &&
+        pendingNext.track === readTrack() &&
+        pendingNext.src === current.audio.currentSrc &&
+        current.next.matches()
+      )
+        return true;
+    } catch {}
+    pendingNext?.controller.abort();
+    pendingNext = null;
+    current.next = null;
+    return false;
+  }
+
+  function retryStale(current) {
+    const identity = JSON.stringify([current.track, current.audio.currentSrc]);
+    if (staleIdentity !== identity) {
+      staleIdentity = identity;
+      staleRetries = 0;
+    }
+    if (staleRetries++ === 0)
+      current.retryPosition = current.audio.currentTime + 2;
   }
 
   async function decode(current, url, start, length = Infinity) {
@@ -135,8 +198,10 @@ export function createCrossfade({
     status('Preparing the next track’s opening…');
     try {
       const settings = nextSettingsFor(current.next.trackUrl);
-      if (settings.variable)
+      if (settings.variable) {
+        current.failedNextSettings = JSON.stringify(settings);
         throw new Error('The next track uses a tempo timeline.');
+      }
       const url = current.next.streamUrl();
       const decoded = await decode(
         current,
@@ -153,18 +218,25 @@ export function createCrossfade({
         current.controller,
       );
       if (job !== current || current.controller.signal.aborted) return;
-      if (!current.next.matches() || current.next.streamUrl() !== url)
+      if (!current.next.matches())
+        throw Object.assign(new Error('The next queued track changed.'), {
+          code: 'SOUNDCLOUD_HOST_STALE',
+        });
+      if (current.next.streamUrl() !== url) {
+        current.failedNextStream = url;
         throw new Error('The next stream changed during preparation.');
+      }
       current.opening = opening;
       current.openingUrl = url;
       current.nextSettings = settings;
+      staleRetries = 0;
       status('Crossfade ready.');
     } catch (error) {
       if (job === current && !current.controller.signal.aborted) {
         current.failed = true;
         current.buffer = null;
-        current.next?.dispose();
-        current.next = null;
+        const hadNext = Boolean(current.next);
+        if (!keepVerifiedNext(current) && hadNext) retryStale(current);
         status(`Playing normally. ${error.message}`);
       }
     } finally {
@@ -176,12 +248,13 @@ export function createCrossfade({
     try {
       const { signal } = current.controller;
       current.waitingNext = true;
-      current.next = await preloadNext(current.audio, { signal });
+      if (current.preloaded) {
+        const result = await current.preloaded;
+        if (result.error) throw result.error;
+        current.next = result.next;
+      } else current.next = await preloadNext(current.audio, { signal });
       current.waitingNext = false;
-      if (job !== current || signal.aborted) {
-        current.next.dispose();
-        return;
-      }
+      if (job !== current || signal.aborted) return;
       current.waitingSource = true;
       status('Identifying the current track’s audio…');
       const source = await resolveSource(current.audio, { signal });
@@ -204,8 +277,8 @@ export function createCrossfade({
       if (job !== current || signal.aborted) return;
       const latest = await resolveSource(current.audio, { signal });
       if (job !== current || signal.aborted) return;
+      if (signature(current.audio) !== current.signature) return;
       if (
-        signature(current.audio) !== current.signature ||
         latest.status !== 'bound' ||
         latest.sourceId !== current.sourceId ||
         latest.generation !== current.generation
@@ -218,17 +291,29 @@ export function createCrossfade({
       if (job === current && error.name !== 'AbortError') {
         const waitingSource = current.waitingSource;
         current.failed = true;
-        if (
-          error.code === 'SOUNDCLOUD_QUEUE_PENDING' ||
-          error.code === 'SOUNDCLOUD_HOST_STALE'
-        )
+        if (error.code === 'SOUNDCLOUD_QUEUE_PENDING')
           current.retryPosition =
             current.audio.currentTime + 2 * readSettings(current.audio).rate;
-        current.retryWhenBound = waitingSource;
+        if (error.code === 'SOUNDCLOUD_HOST_STALE') {
+          if (pendingNext?.retryPosition !== undefined)
+            current.retryPosition = pendingNext.retryPosition;
+          else retryStale(current);
+        }
+        if (waitingSource) {
+          try {
+            current.retryWhenBound =
+              sourceFor(current.audio).status !== 'bound';
+          } catch {}
+        }
         current.waitingNext = false;
         current.waitingSource = false;
-        current.next?.dispose();
-        current.next = null;
+        const hadNext = Boolean(current.next);
+        if (
+          !keepVerifiedNext(current) &&
+          hadNext &&
+          error.code !== 'SOUNDCLOUD_HOST_STALE'
+        )
+          retryStale(current);
         status(
           `Playing normally. ${
             waitingSource
@@ -240,96 +325,111 @@ export function createCrossfade({
     }
   }
 
-  // A track-page Play button can replace the native player before its successor is buffered.
-  // Keep playing the outgoing track while preparing just the samples needed for its fade.
-  function manualPlay(target, play) {
+  function warmManual() {
     const audio = selected;
-    if (
-      !target ||
-      !enabled ||
-      disposed ||
-      !audio ||
-      audio.paused ||
-      audio.seeking
-    )
-      return false;
+    if (!enabled || disposed || !audio || audio.paused || audio.seeking) return;
     const track = readTrack();
-    if (!track || target === track || !Number.isFinite(audio.duration))
-      return false;
+    if (!track || !Number.isFinite(audio.duration)) return;
     const settings = readSettings(audio);
-    if (settings.variable || !graph.crossfadeReady(audio, settings))
-      return false;
+    if (settings.variable || !graph.crossfadeReady(audio, settings)) return;
     const start = audio.currentTime;
-    if ((audio.duration - start) / settings.rate < 0.5) return false;
-    cancel();
-    const current = (job = {
+    if ((audio.duration - start) / settings.rate < 0.5) return;
+    const sig = signature(audio);
+    if (
+      warm?.signature === sig &&
+      (warm.tail
+        ? (warm.tail.start + warm.tail.buffer.duration - start) /
+            settings.rate >=
+          0.5
+        : start - warm.start < settings.rate)
+    )
+      return;
+    clearWarm();
+    const current = (warm = {
       audio,
       track,
-      target,
-      oldSrc: audio.currentSrc,
-      signature: signature(audio),
+      start,
+      signature: sig,
       controller: new AbortController(),
     });
-    function fallback() {
-      if (job !== current) return;
-      const stillPlaying =
-        selected === audio &&
-        readTrack() === track &&
-        audio.currentSrc === current.oldSrc &&
-        !audio.paused;
-      cancel();
-      if (stillPlaying) play();
-    }
-    current.deadline = timers.setTimeout(fallback, 1500);
-    status('Preparing the crossfade while this track plays…');
     void (async () => {
       try {
         const source = await resolveSource(audio, current.controller);
-        if (job !== current) return;
-        if (source.status !== 'bound') return fallback();
+        if (warm !== current || source.status !== 'bound') return;
         const tail = await decode(
           current,
           source.playlistUrl,
           start,
           (seconds + 2) * settings.rate,
         );
-        if (job !== current) return;
-        const position = audio.currentTime;
-        const offset = position - tail.start;
-        const overlap = Math.min(
-          seconds,
-          (tail.buffer.duration - offset) / settings.rate,
-        );
         const latest = sourceFor(audio);
         if (
+          warm !== current ||
           signature(audio) !== current.signature ||
-          !graph.crossfadeReady(audio, settings) ||
           latest.status !== 'bound' ||
           latest.sourceId !== source.sourceId ||
           latest.generation !== source.generation ||
-          Math.abs(tail.duration - audio.duration) > 0.25 ||
-          offset < 0 ||
-          overlap < 0.5
+          Math.abs(tail.duration - audio.duration) > 0.25
         )
-          return fallback();
-        current.position = position;
-        current.overlapSeconds = overlap;
-        current.route = graph.beginCrossfade(
-          audio,
-          tail.buffer,
-          offset,
-          settings.rate,
-          overlap,
-          null,
-        );
-        timers.clearTimeout(current.deadline);
-        current.deadline = undefined;
-        status('Crossfading into the selected track…');
-      } catch {
-        return fallback();
-      }
-      if (!play()) cancel();
+          return;
+        current.tail = tail;
+        current.source = source;
+      } catch {}
     })();
+  }
+
+  function manualPlay(target, seek = false) {
+    const current = warm;
+    const audio = selected;
+    if (
+      !current?.tail ||
+      !target ||
+      (target === readTrack()) !== seek ||
+      audio !== current.audio ||
+      audio.paused ||
+      audio.seeking ||
+      signature(audio) !== current.signature
+    )
+      return false;
+    const settings = readSettings(audio);
+    const source = sourceFor(audio);
+    const offset = audio.currentTime - current.tail.start;
+    const overlap = Math.min(
+      seconds,
+      (current.tail.buffer.duration - offset) / settings.rate,
+    );
+    if (
+      !graph.crossfadeReady(audio, settings) ||
+      source.status !== 'bound' ||
+      source.sourceId !== current.source.sourceId ||
+      source.generation !== current.source.generation ||
+      offset < 0 ||
+      overlap < 0.5
+    )
+      return false;
+    warm = null;
+    cancel();
+    current.target = target;
+    current.seek = seek;
+    current.oldSrc = audio.currentSrc;
+    current.position = audio.currentTime;
+    current.overlapSeconds = overlap;
+    job = current;
+    try {
+      current.route = graph.beginCrossfade(
+        audio,
+        current.tail.buffer,
+        offset,
+        settings.rate,
+        overlap,
+        null,
+      );
+      current.tail = null;
+      status('Crossfading into the selected track…');
+    } catch {
+      cancel();
+      return false;
+    }
     return true;
   }
 
@@ -343,12 +443,41 @@ export function createCrossfade({
         current.route.endTime - current.route.context.currentTime;
       const track = readTrack();
       if (
+        !current.prefetch &&
+        !current.seek &&
+        track === current.target &&
+        !audio.paused &&
+        (audio !== current.audio || audio.currentSrc !== current.oldSrc)
+      ) {
+        current.prefetch = startPreload(audio, track);
+      }
+      if (
         remaining <= 0 ||
         current.route.context.state !== 'running' ||
         (track && track !== current.track && track !== current.target)
       ) {
+        const prefetch = current.prefetch;
+        const promote =
+          prefetch &&
+          track === prefetch.track &&
+          audio === prefetch.audio &&
+          !audio.paused;
+        if (promote) current.prefetch = null;
         cancel();
+        if (promote) pendingNext = prefetch;
         return;
+      }
+      if (current.seek && current.seeked) {
+        const source = sourceFor(audio);
+        if (source.status !== 'bound') return;
+        if (
+          audio !== current.audio ||
+          source.sourceId !== current.source.sourceId ||
+          source.generation !== current.source.generation
+        ) {
+          cancel('seeked track changed');
+          return;
+        }
       }
       if (
         !current.fading &&
@@ -356,9 +485,11 @@ export function createCrossfade({
         !audio.paused &&
         !audio.seeking &&
         audio.readyState >= 2 &&
-        (audio !== current.audio ||
-          audio.currentSrc !== current.oldSrc ||
-          audio.currentTime < current.position - 0.1) &&
+        (current.seek
+          ? current.seeked
+          : audio !== current.audio ||
+            audio.currentSrc !== current.oldSrc ||
+            audio.currentTime < current.position - 0.1) &&
         graph.crossfadeReady(audio, readSettings(audio))
       ) {
         current.incomingTrack = track;
@@ -453,25 +584,54 @@ export function createCrossfade({
       }
       return;
     }
-    if (audio.paused || audio.seeking || !Number.isFinite(audio.duration))
-      return;
+    if (audio.paused || audio.seeking) return;
     const settings = readSettings(audio);
+    const track = readTrack();
     const currentSignature = signature(audio);
+    const samePreload =
+      pendingNext?.audio === audio &&
+      pendingNext.track === track &&
+      pendingNext.src === audio.currentSrc &&
+      (!pendingNext.next || pendingNext.next.matches());
     if (job && job.signature !== currentSignature)
-      cancel('track or tempo changed');
+      cancel('track or tempo changed', Boolean(samePreload));
     if (job?.next && !job.next.matches()) cancel('queue changed');
-    if (job?.failed && audio.currentTime >= job.retryPosition) cancel();
+    if (job?.failed && audio.currentTime >= job.retryPosition)
+      cancel(undefined, Boolean(samePreload));
     if (
       job?.failed &&
       job.retryWhenBound &&
       sourceFor(audio).status === 'bound'
     )
-      cancel();
-    const remaining = (audio.duration - audio.currentTime) / settings.rate;
+      cancel(undefined, Boolean(samePreload));
+    if (
+      job?.failedNextSettings &&
+      job.next &&
+      JSON.stringify(nextSettingsFor(job.next.trackUrl)) !==
+        job.failedNextSettings
+    )
+      cancel(undefined, Boolean(samePreload));
+    if (
+      job?.failedNextStream &&
+      job.next &&
+      job.next.streamUrl() !== job.failedNextStream
+    )
+      cancel(undefined, Boolean(samePreload));
+    if (
+      pendingNext &&
+      (!samePreload || audio.currentTime >= pendingNext.retryPosition)
+    ) {
+      pendingNext.controller.abort();
+      pendingNext = null;
+    }
+    if (!job && !pendingNext && track) pendingNext = startPreload(audio, track);
+    if (!track) return;
     if (settings.variable) {
       status('Crossfade waits until the tempo timeline is steady.');
       return;
     }
+    if (!Number.isFinite(audio.duration)) return;
+    const remaining = (audio.duration - audio.currentTime) / settings.rate;
     if (!graph.crossfadeReady(audio, settings)) {
       status('Crossfade needs a ready player audio connection.');
       return;
@@ -481,12 +641,14 @@ export function createCrossfade({
       return;
     }
     if (!job) {
+      const prefetch = pendingNext;
       job = {
         audio,
         track: readTrack(),
         signature: currentSignature,
         start: Math.max(0, audio.duration - (seconds + 2) * settings.rate),
         controller: new AbortController(),
+        preloaded: prefetch?.promise,
       };
       status('Preloading the next track…');
       void prepare(job);
@@ -512,7 +674,7 @@ export function createCrossfade({
         JSON.stringify(job.nextSettings) ||
       job.next.streamUrl() !== job.openingUrl
     ) {
-      cancel('next track settings changed');
+      cancel('next track settings changed', true);
       return;
     }
     status('Crossfade ready.');
@@ -586,6 +748,9 @@ export function createCrossfade({
 
   function reload() {
     cancel();
+    clearWarm();
+    staleIdentity = undefined;
+    staleRetries = 0;
     try {
       enabled = storage.getItem(enabledKey) === 'true';
       const value = Number(storage.getItem(secondsKey));
@@ -604,8 +769,19 @@ export function createCrossfade({
     onState?.();
   }
 
-  const events = ['pause', 'seeking', 'playing'];
+  const events = ['pause', 'seeking', 'seeked', 'playing'];
   function mediaEvent(event) {
+    if (job?.target && job.seek && event.type === 'seeking') {
+      if (job.seeking) return cancel('player seeking again');
+      job.seeking = true;
+      return;
+    }
+    if (job?.target && job.seek && job.seeking && event.type === 'seeked') {
+      job.seeked = true;
+      safeTick();
+      return;
+    }
+    if (event.type === 'seeked') return;
     if (event.type === 'playing') {
       safeTick();
       return;
@@ -617,11 +793,16 @@ export function createCrossfade({
       (event.type === 'seeking' || !job.incomingTrack)
     )
       return;
+    if (event.type === 'pause') {
+      staleIdentity = undefined;
+      staleRetries = 0;
+    }
     cancel(`player ${event.type}`);
   }
 
   return {
     manualPlay,
+    warmManual,
     enabled: () => enabled,
     seconds: () => seconds,
     label: () => message,
@@ -644,7 +825,9 @@ export function createCrossfade({
               sourceCapture: sourceStats(),
               graphReady: graph.crossfadeReady(audio, readSettings(audio)),
               rate: readSettings(audio).rate,
-              nextBufferedSeconds: round(job?.next?.bufferedSeconds?.()),
+              nextBufferedSeconds: round(
+                (job?.next ?? pendingNext?.next)?.bufferedSeconds?.(),
+              ),
               requiredSeconds: round(job?.requiredSeconds),
               handoffErrorSeconds: round(job?.handoffError),
               openingSecondsRemaining: job?.route
@@ -680,7 +863,11 @@ export function createCrossfade({
                             ? 'waiting-for-next-buffer'
                             : job?.next
                               ? 'decoding-outgoing'
-                              : 'idle',
+                              : pendingNext?.next
+                                ? 'preloaded'
+                                : pendingNext
+                                  ? 'finding-next-track'
+                                  : 'idle',
         player,
         history: history.map((entry) => ({ ...entry })),
       };
@@ -706,13 +893,32 @@ export function createCrossfade({
       for (const event of events)
         selected?.removeEventListener(event, mediaEvent);
       if (!job?.route) cancel('selected player changed');
+      clearWarm();
       selected = audio;
       for (const event of events) audio.addEventListener(event, mediaEvent);
       job?.route?.silence(audio);
     },
-    cancel: () => cancel('playback controls changed'),
+    cancel: () => {
+      clearWarm();
+      cancel('playback controls changed');
+    },
+    settingsChanged() {
+      let keep = false;
+      try {
+        keep = Boolean(
+          pendingNext &&
+            pendingNext.audio === selected &&
+            pendingNext.track === readTrack() &&
+            pendingNext.src === selected.currentSrc &&
+            (!pendingNext.next || pendingNext.next.matches()),
+        );
+      } catch {}
+      clearWarm();
+      cancel('tempo or pitch changed', keep);
+    },
     dispose() {
       disposed = true;
+      clearWarm();
       cancel();
       timers.clearInterval(timer);
       for (const event of events)

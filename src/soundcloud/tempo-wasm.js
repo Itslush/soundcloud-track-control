@@ -41,16 +41,22 @@ export function createWasmAudio({
     const starting = wet && !state.active;
     state.active = wet;
     state.wet.gain.cancelScheduledValues(state.source.context.currentTime);
-    state.dry.gain.value = wet ? 0 : 1;
+    state.dry.gain.cancelScheduledValues(state.source.context.currentTime);
     if (starting) {
       const now = state.source.context.currentTime;
+      state.dry.gain.setValueAtTime(1, now);
+      state.dry.gain.setValueAtTime(1, now + state.latency * 2);
+      state.dry.gain.linearRampToValueAtTime(0, now + state.latency * 2 + 0.01);
       state.input.gain.cancelScheduledValues(now);
       state.input.gain.setValueAtTime(0, now);
       state.input.gain.setValueAtTime(1, now + state.latency);
       state.wet.gain.setValueAtTime(0, now);
       state.wet.gain.setValueAtTime(0, now + state.latency * 2);
       state.wet.gain.linearRampToValueAtTime(1, now + state.latency * 2 + 0.01);
-    } else state.wet.gain.value = wet ? 1 : 0;
+    } else {
+      state.dry.gain.value = 1;
+      state.wet.gain.value = 0;
+    }
   }
 
   function clear(state) {
@@ -206,7 +212,8 @@ export function createWasmAudio({
     state.speed = speed;
     state.semitones =
       readKeyShift() - (preservesKey() ? 12 * Math.log2(speed) : 0);
-    const wanted = enabled && (speed !== 1 || state.semitones !== 0);
+    const wanted =
+      enabled && (speed !== 1 || state.semitones !== 0 || state.connected);
     const changed = state.wanted !== wanted;
     state.wanted = wanted;
     if (state.buffered) return false;
@@ -745,11 +752,11 @@ export function createWasmAudio({
           continue;
         }
         const state = states.get(audio);
+        if (state?.speed === 1 && !shift) return 'Original pitch at 1×.';
         if (state?.active)
           return shift
             ? `Key shift ${shift > 0 ? '+' : ''}${shift} semitones.`
             : 'Pitch preservation active.';
-        if (state?.speed === 1 && !shift) return 'Original pitch at 1×.';
         if (state?.loading)
           return 'Loading WASM · browser correction until ready.';
         if (state?.failed)

@@ -191,6 +191,8 @@ def main():
             expect(badges.nth(0)).to_be_hidden()
             expect(badges.nth(2)).to_be_hidden()
             rate(.9)
+            page.wait_for_function("document.querySelector('#test-covers .image > span[aria-hidden]')?.style.filter.startsWith('hue-rotate(')")
+            assert page.locator('#test-covers > a').nth(1).locator('.image > span[aria-hidden]').count() == 0
             expect(badges.nth(0)).to_be_visible()
             expect(badges.nth(0)).to_have_attribute('data-active', 'true')
             memory.click()

@@ -106,6 +106,11 @@ try:
         expect(page.locator('#preview-artwork')).to_be_visible()
         expect(page.locator('#preview-pitch-notice')).to_have_text('Pitch shifted −5 st')
         assert page.locator('#preview-artwork').evaluate('image=>image.complete && image.naturalWidth > 0')
+        assert page.locator('#preview-artwork').evaluate('image=>image.style.filter') == 'hue-rotate(-75deg)'
+        page.locator('#preview-compare').click()
+        assert page.locator('#preview-artwork').evaluate('image=>image.style.filter') == ''
+        page.locator('#preview-compare').click()
+        assert page.locator('#preview-artwork').evaluate('image=>image.style.filter') == 'hue-rotate(-75deg)'
         page.locator('#preview-artwork').dispatch_event('error')
         expect(page.locator('#preview-artwork')).to_be_hidden()
         assert page.locator('.timeline-demo').get_attribute('data-playback') != 'error'

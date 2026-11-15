@@ -224,6 +224,9 @@ export function createTempoEmbeddedPages(api) {
     });
     installCopy(entry);
     listen(entry, entry.doc, 'click', api.playerClick, true);
+    listen(entry, entry.doc, 'pointerover', api.playerClick, true);
+    listen(entry, entry.doc, 'pointerdown', api.playerClick, true);
+    listen(entry, entry.doc, 'focusin', api.playerClick, true);
     listen(
       entry,
       entry.doc,

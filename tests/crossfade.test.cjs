@@ -47,8 +47,18 @@ function fixture(onVisual) {
   const api = createCrossfade({
     onVisual,
     readNextRate: () => state.nextRate,
+    readNextSettings: () => ({
+      ...settings,
+      rate: state.nextRate,
+      variable: state.nextVariable ?? settings.variable,
+    }),
     preloadNext: async () => {
       state.preloads++;
+      await state.preloadWait;
+      if (state.hostStale)
+        throw Object.assign(new Error('Host changed.'), {
+          code: 'SOUNDCLOUD_HOST_STALE',
+        });
       if (state.queuePending)
         throw Object.assign(new Error('No next track is queued.'), {
           code: 'SOUNDCLOUD_QUEUE_PENDING',
@@ -267,7 +277,7 @@ test('pending identification waits for proof and cannot resume after cancellatio
   }
 });
 
-test('Play on a long track starts a single preload as soon as the graph is ready', async () => {
+test('Play on a long track starts a single preload before the graph is ready', async () => {
   const f = fixture();
   f.audio.duration = 183.05;
   f.audio.currentTime = 1.4;
@@ -275,6 +285,7 @@ test('Play on a long track starts a single preload as soon as the graph is ready
   f.api.set(true, 10);
   f.tick();
   assert.match(f.api.label(), /needs a ready player/);
+  assert.equal(f.state.preloads, 1);
   f.state.graphReady = true;
   f.audio.dispatchEvent(new Event('playing'));
   assert.match(f.api.label(), /Preloading the next track/);
@@ -287,79 +298,327 @@ test('Play on a long track starts a single preload as soon as the graph is ready
   f.api.dispose();
 });
 
+test('cancelling a resolved preload before graph adoption releases it', async () => {
+  const f = fixture();
+  f.state.graphReady = false;
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  assert.equal(f.state.preloads, 1);
+  assert.equal(f.state.releases, 0);
+  f.api.cancel();
+  assert.equal(f.state.releases, 1);
+  f.api.dispose();
+  assert.equal(f.state.releases, 1);
+});
+
+test('variable, short and unknown-duration playing tracks still preload once', async () => {
+  for (const duration of [4, NaN, 30]) {
+    const f = fixture();
+    f.audio.duration = duration;
+    f.audio.currentTime = 1;
+    f.settings.variable = true;
+    f.state.graphReady = false;
+    f.api.set(true, 5);
+    f.audio.dispatchEvent(new Event('playing'));
+    await settle();
+    f.tick();
+    assert.equal(f.state.preloads, 1);
+    assert.equal(f.state.reads, 0);
+    assert.equal(f.state.releases, 0);
+    f.audio.dispatchEvent(new Event('pause'));
+    assert.equal(f.state.releases, 1);
+    f.api.dispose();
+  }
+});
+
+test('tempo and pitch edits retain the verified preload but queue changes replace it', async () => {
+  const f = fixture();
+  assert.doesNotThrow(() => f.api.settingsChanged());
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  f.api.settingsChanged();
+  f.settings.shift = 3;
+  f.tick();
+  await settle();
+  f.api.settingsChanged();
+  f.settings.rate = 1.25;
+  f.tick();
+  await settle();
+  f.api.settingsChanged();
+  f.settings.variable = true;
+  f.tick();
+  await settle();
+  assert.equal(f.state.preloads, 1);
+  assert.equal(f.state.releases, 0);
+  f.state.nextTrack = 'third';
+  f.tick();
+  await settle();
+  assert.equal(f.state.preloads, 2);
+  assert.equal(f.state.releases, 1);
+  f.api.dispose();
+  assert.equal(f.state.releases, 2);
+});
+
+test('tempo edits during a slow preload retain its eventual queue item', async () => {
+  const f = fixture();
+  let finish;
+  f.state.preloadWait = new Promise((resolve) => {
+    finish = resolve;
+  });
+  f.api.set(true, 5);
+  f.tick();
+  f.api.settingsChanged();
+  f.settings.shift = -2;
+  f.tick();
+  f.api.settingsChanged();
+  f.settings.rate = 0.75;
+  f.tick();
+  finish();
+  await settle();
+  f.tick();
+  await settle();
+  assert.equal(f.state.preloads, 1);
+  assert.equal(f.state.releases, 0);
+  f.api.dispose();
+  assert.equal(f.state.releases, 1);
+});
+
+test('an edit arriving during decoding does not release the verified queue item', async () => {
+  const f = fixture();
+  let finish;
+  f.state.decodeWait = new Promise((resolve) => {
+    finish = resolve;
+  });
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  f.settings.shift = 2;
+  finish();
+  await settle();
+  f.tick();
+  await settle();
+  assert.equal(f.state.preloads, 1);
+  assert.equal(f.state.releases, 0);
+  f.api.dispose();
+  assert.equal(f.state.releases, 1);
+});
+
+test('outgoing identification and decode failures retain a verified next item', async () => {
+  for (const failure of ['unbound', 'decode']) {
+    const f = fixture();
+    f.state.bound = failure !== 'unbound';
+    f.state.fail = failure === 'decode';
+    f.api.set(true, 5);
+    f.tick();
+    await settle();
+    assert.equal(f.api.diagnostics().stage, 'unavailable');
+    assert.equal(f.state.releases, 0);
+    for (let i = 0; i < 4; i++) f.tick();
+    assert.equal(f.state.preloads, 1);
+    f.state.bound = true;
+    f.state.fail = false;
+    if (failure === 'decode') f.api.settingsChanged();
+    f.tick();
+    await settle();
+    assert.equal(f.state.preloads, 1);
+    assert.equal(f.state.releases, 0);
+    f.api.dispose();
+    assert.equal(f.state.releases, 1);
+  }
+});
+
+test('an incoming tempo timeline keeps its preload and retries when steady', async () => {
+  const f = fixture();
+  f.state.nextVariable = true;
+  f.state.cached = 30;
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  f.tick();
+  await settle();
+  assert.equal(f.api.diagnostics().stage, 'unavailable');
+  assert.equal(f.state.releases, 0);
+  for (let i = 0; i < 4; i++) f.tick();
+  assert.equal(f.state.preloads, 1);
+  f.state.nextVariable = false;
+  f.tick();
+  await settle();
+  f.tick();
+  await settle();
+  assert.equal(f.api.label(), 'Crossfade ready.');
+  assert.equal(f.state.preloads, 1);
+  assert.equal(f.state.releases, 0);
+  f.api.dispose();
+  assert.equal(f.state.releases, 1);
+});
+
+test('a persistently stale host is retried once rather than polled forever', async () => {
+  const f = fixture();
+  f.state.hostStale = true;
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  for (let i = 0; i < 8; i++) {
+    f.audio.currentTime += 2;
+    f.tick();
+    await settle();
+  }
+  assert.equal(f.state.preloads, 2);
+  f.api.dispose();
+});
+
+test('a queue replacement during a decode failure retries the new item', async () => {
+  const f = fixture();
+  let finish;
+  f.state.decodeWait = new Promise((resolve) => {
+    finish = resolve;
+  });
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  f.state.nextTrack = 'third';
+  f.state.fail = true;
+  finish();
+  await settle();
+  assert.equal(f.state.releases, 1);
+  f.state.fail = false;
+  f.audio.currentTime += 2;
+  f.tick();
+  await settle();
+  assert.equal(f.state.preloads, 2);
+  f.api.dispose();
+  assert.equal(f.state.releases, 2);
+});
+
 test('manual Play prepares a bounded outgoing tail and fades into the selected native track', async () => {
   const f = fixture();
   f.audio.currentTime = 4;
   f.api.set(true, 2);
-  let plays = 0;
-  assert.equal(
-    f.api.manualPlay('chosen', () => {
-      plays++;
-      f.audio.dispatchEvent(new Event('pause'));
-      f.state.track = 'chosen';
-      f.audio.currentSrc = 'blob:chosen';
-      f.audio.currentTime = 0;
-      f.audio.dispatchEvent(new Event('playing'));
-      return true;
-    }),
-    true,
-  );
-  assert.equal(plays, 0);
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.api.manualPlay('chosen'), true);
+  f.audio.dispatchEvent(new Event('pause'));
+  f.state.track = 'chosen';
+  f.audio.currentSrc = 'blob:chosen';
+  f.audio.currentTime = 0;
+  f.audio.dispatchEvent(new Event('playing'));
   f.tick();
   await settle();
-  assert.equal(plays, 1);
   assert.equal(f.state.clicks, 0);
   assert.equal(f.state.start.buffer.duration, 4);
   assert.equal(f.state.start.opening, null);
   assert.equal(f.state.fades[0].duration, 2);
+  assert.equal(
+    f.state.preloads,
+    1,
+    'preload starts while the outgoing bridge is playing',
+  );
   f.context.currentTime = 2;
   f.tick();
   assert.equal(f.state.stops, 1);
+  f.tick();
+  await settle();
+  assert.equal(
+    f.state.preloads,
+    1,
+    'the following preparation reuses that preload',
+  );
   f.api.dispose();
 });
 
-test('slow manual preparation forwards the click once, cancellation discards obsolete clicks', async () => {
-  for (const outcome of [
-    'timeout',
-    'cancel',
-    'replaced',
-    'identity',
-    'decode',
-  ]) {
+test('cold, cancelled and stale manual preparations never defer native selection', async () => {
+  for (const outcome of ['cold', 'cancel', 'replaced', 'identity', 'decode']) {
     const f = fixture();
     f.api.set(true, 3);
-    let finish,
-      plays = 0;
+    let finish;
     f.state.decodeWait = new Promise((resolve) => {
       finish = resolve;
     });
-    assert.equal(
-      f.api.manualPlay('first', () => {
-        throw new Error();
-      }),
-      false,
-    );
-    assert.ok(
-      f.api.manualPlay('chosen', () => {
-        plays++;
-        return true;
-      }),
-    );
-    if (outcome === 'timeout') f.state.deadline();
+    f.api.warmManual();
+    assert.equal(f.api.manualPlay('chosen'), false);
     if (outcome === 'cancel') f.api.cancel();
     if (outcome === 'replaced') f.state.track = 'different-selection';
     if (outcome === 'identity') f.state.bound = false;
     if (outcome === 'decode') f.state.fail = true;
     finish();
     await settle();
-    assert.equal(
-      plays,
-      ['cancel', 'replaced'].includes(outcome) ? 0 : 1,
-      outcome,
-    );
+    if (outcome !== 'cold')
+      assert.equal(f.api.manualPlay('chosen'), false, outcome);
     assert.equal(f.state.start, undefined);
     f.api.dispose();
   }
+});
+
+test('a rapid later selection releases a pending next-track preload', async () => {
+  const f = fixture();
+  f.audio.currentTime = 4;
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  let finish;
+  f.state.preloadWait = new Promise((resolve) => {
+    finish = resolve;
+  });
+  assert.equal(f.api.manualPlay('chosen'), true);
+  f.state.track = 'chosen';
+  f.audio.currentSrc = 'blob:chosen';
+  f.audio.currentTime = 0;
+  f.audio.dispatchEvent(new Event('playing'));
+  assert.equal(f.state.preloads, 1);
+  f.api.cancel();
+  finish();
+  await settle();
+  assert.equal(f.state.releases, 1);
+  f.api.dispose();
+});
+
+test('a warmed same-track seek fades only after the native seek completes', async () => {
+  const f = fixture();
+  f.audio.currentTime = 4;
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.api.manualPlay('first', true), true);
+  f.audio.seeking = true;
+  f.audio.dispatchEvent(new Event('seeking'));
+  f.tick();
+  assert.equal(f.state.fades.length, 0);
+  f.audio.currentTime = 18;
+  f.audio.seeking = false;
+  f.audio.dispatchEvent(new Event('seeked'));
+  assert.equal(f.state.fades.length, 1);
+  assert.equal(f.audio.currentTime, 18);
+  f.api.dispose();
+});
+
+test('a repeated native seek cancels its old bridge', async () => {
+  const f = fixture();
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.api.manualPlay('first', true), true);
+  f.audio.dispatchEvent(new Event('seeking'));
+  f.audio.dispatchEvent(new Event('seeking'));
+  f.audio.dispatchEvent(new Event('seeked'));
+  assert.equal(f.state.stops, 1);
+  assert.equal(f.state.fades.length, 0);
+  f.api.dispose();
+});
+
+test('a seek cannot hand off to a changed source', async () => {
+  const f = fixture();
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.api.manualPlay('first', true), true);
+  f.audio.dispatchEvent(new Event('seeking'));
+  f.state.track = 'replacement';
+  f.audio.dispatchEvent(new Event('seeked'));
+  assert.equal(f.state.stops, 1);
+  assert.equal(f.state.fades.length, 0);
+  f.api.dispose();
 });
 
 test('a pending payload hash at the fade boundary waits without dropping the prepared overlap', async () => {
@@ -561,7 +820,7 @@ test('a late native start stays masked until it matches the already-audible open
 });
 
 test('opening cancellation, changed stream and exhausted handoff restore safely', async () => {
-  for (const action of ['cancel', 'stream', 'timeout']) {
+  for (const action of ['cancel', 'stream', 'queue', 'timeout']) {
     const f = fixture();
     f.state.cached = 24;
     f.api.set(true, 5);
@@ -577,6 +836,7 @@ test('opening cancellation, changed stream and exhausted handoff restore safely'
     if (action === 'cancel') f.api.cancel();
     if (action === 'stream')
       f.state.nextUrl = 'https://a.sndcdn.com/replacement.m3u8';
+    if (action === 'queue') f.state.nextTrack = 'third';
     finish();
     await settle();
     assert.equal(f.state.clicks, 0);
@@ -587,7 +847,23 @@ test('opening cancellation, changed stream and exhausted handoff restore safely'
       f.tick();
       assert.equal(f.state.stops, 1);
       assert.match(f.api.label(), /before SoundCloud could synchronize/);
-    } else assert.equal(f.state.releases, 1);
+    } else if (action === 'cancel') assert.equal(f.state.releases, 1);
+    else if (action === 'queue') {
+      assert.equal(f.state.releases, 1);
+      f.audio.currentTime += 2;
+      f.tick();
+      await settle();
+      assert.equal(f.state.preloads, 2);
+    } else {
+      assert.equal(f.state.releases, 0);
+      f.tick();
+      await settle();
+      f.tick();
+      await settle();
+      assert.equal(f.api.label(), 'Crossfade ready.');
+      assert.equal(f.state.preloads, 1);
+    }
     f.api.dispose();
+    assert.equal(f.state.releases, action === 'queue' ? 2 : 1);
   }
 });

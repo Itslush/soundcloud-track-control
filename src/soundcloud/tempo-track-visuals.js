@@ -1,5 +1,6 @@
 import { formatPitchNotice } from '../sharing/tempo-pitch-notice.js';
 import { artworkTransition } from '../appearance/artwork-transition.js';
+import { artworkFilter } from '../appearance/artwork-filter.js';
 
 export function readTrackArtwork(element) {
   if (!element) return 'none';
@@ -21,7 +22,12 @@ export function readTrackArtwork(element) {
 }
 
 export function createTrackVisuals({ document, readTrack }) {
-  let layer, incoming, nextTrack, notice;
+  let layer,
+    incoming,
+    nextTrack,
+    notice,
+    filteredImage,
+    nativeFilter = '';
   const avatar = () =>
     document.querySelector(
       '.playControls__soundBadge .playbackSoundBadge__avatar',
@@ -40,6 +46,7 @@ export function createTrackVisuals({ document, readTrack }) {
       nextTrack = state.nextTrack ? path(state.nextTrack) : null;
       layer = document.createElement('span');
       layer.className = 'soundcloud-tempo-crossfade-artwork';
+      layer.style.filter = filteredImage?.style.filter || '';
       layer.setAttribute('aria-hidden', 'true');
       const outgoing = document.createElement('span');
       outgoing.style.backgroundImage = readTrackArtwork(host);
@@ -77,7 +84,20 @@ export function createTrackVisuals({ document, readTrack }) {
     layer.style.setProperty('--tempo-artwork-end', `${end * 100}%`);
   }
 
-  function pitch(shift) {
+  function pitch(shift, rate = 1, preserve = false) {
+    const currentAvatar = avatar();
+    const currentImage = currentAvatar?.querySelector('.image');
+    if (filteredImage !== currentImage) {
+      if (filteredImage) filteredImage.style.filter = nativeFilter;
+      filteredImage = currentImage;
+      nativeFilter = currentImage?.style.filter || '';
+    }
+    const filter = artworkFilter(rate, shift, preserve);
+    if (currentImage)
+      currentImage.style.filter = [nativeFilter, filter]
+        .filter(Boolean)
+        .join(' ');
+    if (layer) layer.style.filter = filter;
     const host = document.querySelector(
       '.playControls__soundBadge .playbackSoundBadge__titleContextContainer',
     );

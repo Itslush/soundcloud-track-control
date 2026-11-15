@@ -1,0 +1,344 @@
+.mixer-shell {
+  max-width: 990px;
+  padding-block: clamp(32px, 6vw, 74px);
+}
+.mixer-shell h1 {
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  margin: 0 0 26px;
+}
+.deck-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.mixer-deck,
+.mixer-fader {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  padding: clamp(15px, 2.5vw, 27px);
+  color: var(--ink);
+}
+.deck-heading,
+.deck-track,
+.deck-source-row,
+.deck-file-row,
+.deck-transport,
+.deck-times,
+.mixer-fader > div,
+.mixer-blend,
+.deck-lock {
+  display: flex;
+  align-items: center;
+}
+.deck-heading,
+.deck-times,
+.mixer-fader > div:first-child {
+  justify-content: space-between;
+}
+.deck-heading h2 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+}
+.deck-light {
+  width: 0.54rem;
+  height: 0.54rem;
+  border: 1px solid var(--control);
+  border-radius: 100%;
+}
+.deck-light[data-playing='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.deck-track {
+  gap: 17px;
+  margin: 23px 0;
+  min-width: 0;
+}
+.deck-sleeve {
+  width: clamp(62px, 8vw, 86px);
+  aspect-ratio: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+.deck-sleeve img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.deck-record {
+  display: grid;
+  place-items: center;
+  width: 82%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: repeating-radial-gradient(
+    circle at center,
+    #171717 0 3px,
+    #303030 3.5px 4px
+  );
+}
+.deck-record::after {
+  content: '';
+  width: 25%;
+  aspect-ratio: 1;
+  background: var(--accent);
+  border: 4px solid #141414;
+  border-radius: 50%;
+}
+.deck-track-text {
+  min-width: 0;
+}
+.deck-track h3 {
+  font-size: clamp(1.05rem, 2vw, 1.36rem);
+  overflow-wrap: anywhere;
+  margin: 0;
+  line-height: 1.25;
+}
+.deck-track p,
+.deck-status,
+.deck-source label,
+.deck-times,
+.deck-lock,
+.mixer-fader output {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+.deck-track p {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+.deck-source label {
+  display: block;
+  font-weight: 650;
+  margin: 0 0 4px;
+}
+.deck-source-row {
+  gap: 7px;
+}
+.deck-source-row input {
+  min-width: 0;
+  flex: 1;
+  appearance: none;
+  color: var(--ink);
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  height: 38px;
+  padding: 0 9px;
+  font: inherit;
+  font-size: 0.88rem;
+}
+.deck-source-row input:focus {
+  outline: none;
+  border-bottom: 2px solid var(--accent);
+}
+.deck-source-row button {
+  min-height: 38px;
+  padding: 0 14px;
+  color: var(--ink);
+  border: 1px solid var(--control);
+  background: transparent;
+  border-radius: 3px;
+}
+.mixer-shell button {
+  font-family: inherit;
+  cursor: pointer;
+}
+.mixer-shell :disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.deck-file-row {
+  gap: 14px;
+  min-height: 40px;
+  flex-wrap: wrap;
+}
+.deck-file {
+  color: var(--ink);
+  font-size: 0.84rem;
+  border: 0;
+  border-bottom: 1px solid var(--control);
+  padding: 0;
+  background: transparent;
+}
+.deck-status {
+  min-width: 0;
+}
+.deck-transport {
+  gap: 14px;
+  border-block: 1px solid var(--line);
+  padding: 13px 0;
+  margin: 4px 0 16px;
+}
+.deck-play {
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  color: var(--on-accent);
+  background: var(--accent);
+  flex: none;
+}
+.deck-play svg {
+  width: 19px;
+  fill: currentColor;
+}
+.deck-position {
+  min-width: 0;
+  flex: 1;
+}
+.deck-seek {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  padding-inline: 6px;
+  touch-action: none;
+  user-select: none;
+}
+.deck-rail {
+  position: relative;
+  flex: 1;
+  height: 2px;
+  background: var(--track);
+}
+.deck-fill {
+  position: absolute;
+  height: 100%;
+  background: var(--accent);
+}
+.deck-thumb {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: var(--surface);
+}
+.deck-times,
+.deck-adjustments output,
+.mixer-fader output {
+  font-variant-numeric: tabular-nums;
+}
+.deck-times {
+  padding-inline: 3px;
+  font-size: 0.74rem;
+}
+.deck-adjustments {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.deck-adjustments label {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+.deck-adjustments output {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.deck-adjustments input {
+  grid-column: 1/-1;
+}
+.deck-lock {
+  gap: 7px;
+  width: fit-content;
+  margin-top: 7px;
+}
+.deck-lock input {
+  accent-color: var(--accent);
+}
+.mixer-fader {
+  margin-top: 14px;
+}
+.mixer-fader label {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.mixer-fader > .mixer-blend {
+  gap: 15px;
+}
+.mixer-blend span {
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+#two-deck-mixer input[type='range'] {
+  --range-thumb-opacity: 1;
+  margin: 0;
+  height: 36px;
+  width: 100%;
+  min-width: 0;
+}
+.mixer-shell
+  :is(
+    button,
+    [role='slider'],
+    input[type='range'],
+    input[type='checkbox']
+  ):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.embedded-mixer body {
+  min-height: 0;
+}
+.embedded-mixer body > :not(main) {
+  display: none;
+}
+.embedded-mixer .mixer-shell {
+  padding: 12px;
+  width: 100%;
+}
+.embedded-mixer .mixer-shell h1 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+@media (max-width: 620px) {
+  .deck-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .deck-track {
+    margin: 12px 0;
+  }
+  .deck-file {
+    min-height: 38px;
+  }
+  .mixer-fader {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+  }
+}
+@media (forced-colors: active) {
+  .mixer-shell input[type='range'] {
+    appearance: auto;
+  }
+  .deck-rail,
+  .deck-fill {
+    border: 1px solid CanvasText;
+  }
+  .deck-thumb,
+  .deck-play,
+  .deck-light {
+    border: 2px solid ButtonText;
+  }
+}

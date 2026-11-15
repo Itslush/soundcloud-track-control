@@ -1,3 +1,4 @@
+import { mixerButton } from './tempo-mixer.js';
 import { controlsTemplate } from './tempo-controls-template.js';
 import { enhanceTempoFields } from './tempo-fields.js';
 import { syncTempoRange } from './tempo-range.js';
@@ -216,7 +217,7 @@ export function createTempoControls({
           return;
         }
         actions.keyShiftChanged(next);
-        services.crossfade?.cancel();
+        services.crossfade?.settingsChanged();
         services.timeline.setKeyShift(next);
         actions.updateAll();
       });
@@ -373,7 +374,8 @@ export function createTempoControls({
       try {
         localStorage.setItem(peakProtectionKey, String(ui.peakToggle.checked));
       } catch {
-        ui.settingsStatus.textContent = 'Peak protection changed for this session. The preference could not be saved.';
+        ui.settingsStatus.textContent =
+          'Peak protection changed for this session. The preference could not be saved.';
       }
       actions.syncPeakProtection(ui.peakToggle.checked);
     });
@@ -429,6 +431,7 @@ export function createTempoControls({
         window.open(destination.href, '_blank', 'noopener,noreferrer');
       });
       get('.settings-actions').prepend(buildSet);
+      get('.crossfade-debug').after(mixerButton(website, playback));
     }
     ui.pitchToggle.setAttribute('aria-describedby', 'pitch-mode-help');
     ui.pitchToggle.disabled = !actions.supportsPitch();
@@ -803,6 +806,8 @@ export function createTempoControls({
     const shift = services.timeline.keyShift() ?? playback.keyShift;
     services.trackVisuals.pitch(
       playback.trackKey && !playback.failure ? shift : 0,
+      playback.trackKey && !playback.failure ? playback.rate : 1,
+      actions.preservesKey(),
     );
     const pitch = 12 * Math.log2(playback.rate) + shift;
     const pitchText = `${pitch > 0 ? '+' : ''}${pitch.toFixed(2)} st`;

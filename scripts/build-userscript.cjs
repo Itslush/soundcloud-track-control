@@ -181,6 +181,7 @@ async function main() {
   const licenseDirectory = path.join(root, 'site/public/licenses');
   fs.mkdirSync(licenseDirectory, { recursive: true });
   for (const [name, source] of Object.entries({
+    'ElevenLabs-UI.txt': 'vendor/elevenlabs-ui/LICENSE.md',
     'Signalsmith.txt': 'vendor/signalsmith/LICENSE.txt',
     'Mediabunny.txt': 'vendor/mediabunny/LICENSE',
     'Mediabunny-notice.txt': 'vendor/mediabunny/NOTICE.md',

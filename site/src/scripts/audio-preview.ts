@@ -77,12 +77,13 @@ export class AudioPreview {
   constructor(
     onStatus: (message: string) => void,
     onFailure: (message: string) => void,
+    private readonly mixer?: { context: AudioContext; level: GainNode },
   ) {
     this.onStatus = onStatus;
     this.onFailure = onFailure;
     this.audio.crossOrigin = 'anonymous';
     this.audio.preload = 'metadata';
-    this.audio.volume = 0.15;
+    this.audio.volume = mixer ? 1 : 0.15;
     this.audio.hidden = true;
     document.querySelector('.timeline-demo')?.append(this.audio);
     for (const name of ['pause', 'seeking', 'emptied', 'ended'])
@@ -123,13 +124,10 @@ export class AudioPreview {
     this.needsReset = true;
     this.pending = false;
     this.applied = NaN;
-    if (this.dry)
-      this.dry.gain.value =
-        ((this.preserve && this.rate !== 1) || this.keyShift !== 0) &&
-        this.node &&
-        !this.failed
-          ? 0
-          : 0.5;
+    if (this.dry) {
+      this.dry.gain.cancelScheduledValues(this.context!.currentTime);
+      this.dry.gain.value = 0.5;
+    }
     if (this.input) {
       this.input.gain.cancelScheduledValues(this.context!.currentTime);
       this.input.gain.value = 0;
@@ -163,7 +161,8 @@ export class AudioPreview {
 
   private async graph() {
     if (this.context) return;
-    const context = new AudioContext();
+    const context = this.mixer?.context ?? new AudioContext();
+    const output = this.mixer?.level ?? context.destination;
     this.context = context;
     this.source = context.createMediaElementSource(this.audio);
     this.input = context.createGain();
@@ -173,8 +172,8 @@ export class AudioPreview {
     this.wet.gain.value = 0;
     this.input.gain.value = 0;
     this.source.connect(this.input);
-    this.source.connect(this.dry).connect(context.destination);
-    this.wet.connect(context.destination);
+    this.source.connect(this.dry).connect(output);
+    this.wet.connect(output);
   }
 
   private async prepare() {
@@ -247,11 +246,16 @@ export class AudioPreview {
     rate = Number.isFinite(rate) ? Math.max(0.25, Math.min(4, rate)) : 1;
     const changedMode =
       this.preserve !== preserve || this.keyShift !== keyShift;
+    const changedPreserve = this.preserve !== preserve;
     this.rate = rate;
     this.preserve = preserve;
     this.keyShift = keyShift;
     this.audio.playbackRate = rate;
-    if ((!preserve || rate === 1) && !keyShift) {
+    if (
+      (!preserve || rate === 1) &&
+      !keyShift &&
+      (!this.connected || changedPreserve)
+    ) {
       if (this.loading || this.connected || changedMode) this.reset();
       this.audio.preservesPitch = preserve;
       return;
@@ -280,9 +284,13 @@ export class AudioPreview {
         const starting = !Number.isFinite(this.applied);
         this.applied = semitones;
         this.audio.preservesPitch = false;
-        this.dry!.gain.value = 0;
         if (starting) {
           const now = this.context!.currentTime;
+          const dry = this.dry!.gain;
+          dry.cancelScheduledValues(now);
+          dry.setValueAtTime(0.5, now);
+          dry.setValueAtTime(0.5, now + this.latency * 2);
+          dry.linearRampToValueAtTime(0, now + this.latency * 2 + 0.01);
           const input = this.input!.gain;
           input.cancelScheduledValues(now);
           input.setValueAtTime(0, now);
@@ -437,7 +445,10 @@ export class AudioPreview {
     this.loadId++;
     this.clear();
     if (this.node) this.release(this.node);
-    void this.context?.close();
+    this.source?.disconnect();
+    this.dry?.disconnect();
+    this.wet?.disconnect();
+    if (!this.mixer) void this.context?.close();
   }
 }
 

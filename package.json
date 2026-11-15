@@ -1,6 +1,6 @@
 {
   "name": "soundcloud-track-control",
-  "version": "1.2.7.5",
+  "version": "1.2.7.6",
   "private": true,
   "description": "SoundCloud tempo userscript and its download website",
   "license": "MIT",
@@ -30,6 +30,8 @@
   "devDependencies": {
     "@fontsource-variable/mulish": "5.3.0",
     "@types/node": "26.4.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "astro": "7.3.1",
     "esbuild": "0.28.2",
     "prettier": "3.6.2",
@@ -37,7 +39,10 @@
     "typescript": "7.0.2"
   },
   "dependencies": {
+    "@radix-ui/react-slider": "1.6.1",
     "hls.js": "1.7.2",
-    "mediabunny": "1.55.7"
+    "mediabunny": "1.55.7",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   }
 }

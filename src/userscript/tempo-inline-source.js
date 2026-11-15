@@ -12,7 +12,7 @@ import { createOutputLevel } from '../soundcloud/tempo-output.js';
 import { createWasmAudio } from '../soundcloud/tempo-wasm.js';
 import { createBufferedPlayback } from '../soundcloud/tempo-buffered.js';
 import { createCrossfade } from '../soundcloud/tempo-crossfade.js';
-import { createCrossfadeClickHandler } from '../soundcloud/crossfade-controls.js';
+import { createCrossfadeClickHandler, installCrossfadeControls } from '../soundcloud/crossfade-controls.js';
 import { createTrackVisuals } from '../soundcloud/tempo-track-visuals.js';
 import { createTempoEditor } from '../timeline/tempo-editor.js';
 import { createTempoStore } from '../library/tempo-library.js';
@@ -144,7 +144,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     readSavedRate,
     formatRate,
     tempoLogo,
-    readTrack: () => ({ trackKey, rate, failure }),
+    readTrack: () => ({ trackKey, rate, failure, shift: timeline?.keyShift() ?? keyShift, preserve: preservesKey() }),
     readEmbeddedPages: () => embeddedPages,
   });
 
@@ -413,7 +413,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
   }
 
   function setRate(value) {
-    crossfade?.cancel();
+    crossfade?.settingsChanged();
     if (syncTrack()) {
       updateAll();
       return;
@@ -841,18 +841,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     currentTrack: currentTrackKey,
     embeddedKey: (doc) => embeddedPages.key(doc),
   });
-  document.addEventListener('click', crossfadeClick, true);
-  document.addEventListener(
-    'keydown',
-    (event) => {
-      if (
-        event.isTrusted &&
-        [' ', 'ArrowLeft', 'ArrowRight'].includes(event.key)
-      )
-        crossfade.cancel();
-    },
-    true,
-  );
+  installCrossfadeControls(document, crossfadeClick, crossfade);
   window.addEventListener('pagehide', () => crossfade.dispose());
   installGuards();
   clipboardSharing = installClipboardSharing({

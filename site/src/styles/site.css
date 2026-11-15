@@ -1189,3 +1189,5 @@ h3 {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+.set-links { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
