@@ -13,6 +13,7 @@ with sync_playwright() as p:
     page = browser.new_page()
     page.route('https://test.invalid/', lambda route: route.fulfill(body='<html></html>', content_type='text/html'))
     page.goto('https://test.invalid/')
+    page.add_script_tag(path=ROOT / "vendor/signalsmith/SignalsmithStretch.js")
     page.add_script_tag(content=bundle)
     bypass = page.evaluate("""async () => {
       const ctx = new OfflineAudioContext(2, 12288, 48000);
@@ -102,10 +103,10 @@ with sync_playwright() as p:
         return best;
       }
       const rows = [];
-      for (const shift of [-6, -3, 0, 3, 6]) {
+      for (const shift of [-6, -3, -2, 0, 3, 6]) {
         for (const legacy of [true, false]) {
           const ctx = new OfflineAudioContext(2, frames, rate);
-          const node = await createStretchNode(ctx, {
+          const node = await (legacy ? SignalsmithStretch : createStretchNode)(ctx, {
             numberOfInputs: 1,
             numberOfOutputs: 1,
             outputChannelCount: [2],
@@ -165,6 +166,58 @@ with sync_playwright() as p:
       }
       return rows;
     }""")
+    sustained = page.evaluate("""async () => {
+      const rate = 48000, n = rate * 5;
+      const ctx = new OfflineAudioContext(2, n, rate);
+      const buffer = ctx.createBuffer(2, n, rate);
+      for (let c = 0; c < 2; ++c) {
+        const x = buffer.getChannelData(c);
+        for (let i = 0; i < n; ++i) {
+          const phase = 2 * Math.PI * 46 * i / rate;
+          x[i] = (c ? -0.43 : 0.8) * Math.tanh(8 * (Math.sin(phase) + 0.22 * Math.sin(3 * phase + 0.9)));
+        }
+      }
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.playbackRate.value = 1.05;
+      const node = await createStretchNode(ctx, {outputChannelCount: [2]});
+      await node.configure({...pitchTiming, splitComputation: true});
+      await node.schedule({active: true, semitones: -2});
+      source.connect(node).connect(createPitchOutput(ctx, ctx.destination, false).input);
+      source.start();
+      const up = ctx.suspend(2.6), down = ctx.suspend(3.6);
+      const rendering = ctx.startRendering();
+      await up;
+      await node.schedule({active: true, semitones: 3});
+      await ctx.resume();
+      await down;
+      await node.schedule({active: true, semitones: -2});
+      await ctx.resume();
+      const out = await rendering;
+      node.port.close();
+      const left = out.getChannelData(0), right = out.getChannelData(1);
+      let crossings = 0, stereoError = 0, maxCrest = 0;
+      for (let start = rate / 2; start < rate * 2.5; start += 1920) {
+        let peak = 0, power = 0;
+        for (let i = start; i < start + 1920; ++i) {
+          peak = Math.max(peak, Math.abs(left[i]));
+          power += left[i] ** 2;
+          stereoError = Math.max(stereoError, Math.abs(right[i] + 0.43 / 0.8 * left[i]));
+          if (left[i] > 0 && left[i-1] <= 0) crossings++;
+        }
+        maxCrest = Math.max(maxCrest, 20 * Math.log10(peak / Math.sqrt(power / 1920)));
+      }
+      let minSwitchRms = Infinity;
+      for (let start = 2.5 * rate; start < 4.6 * rate; start += 1920) {
+        const power = left.subarray(start, start + 1920).reduce((sum, x) => sum + x*x, 0);
+        minSwitchRms = Math.min(minSwitchRms, Math.sqrt(power / 1920));
+      }
+      return {frequency: crossings / 2, stereoError, maxCrest, minSwitchRms};
+    }""")
+    assert abs(sustained['frequency'] - 46 * 1.05 * 2 ** (-2 / 12)) < 1, sustained
+    assert sustained['maxCrest'] < 1.5 and sustained['stereoError'] < 1e-5, sustained
+    assert sustained['minSwitchRms'] > 0.25, sustained
+    print('Sustained saturated kick, protection bypassed:', sustained)
     browser.close()
 
 for before, after in zip(results[::2], results[1::2]):

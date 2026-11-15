@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.7.5
+
+- Lowering pitch by 1 to 4 semitones now keeps more of a distorted kick’s original waveform, including in shared tracks and crossfades.
+
 ## 1.2.7.4
 
 - Added a peak protection switch to Advanced audio and the website player. Turn it off to hear the pitch shifter’s full output. Each player remembers your choice.

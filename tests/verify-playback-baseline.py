@@ -29,7 +29,7 @@ CONDITIONS = [
     {'name': 'plain-natural', 'userscript': False, 'preserve': False, 'rate': 0.85, 'buffered': False, 'label': None},
     {'name': 'userscript-natural', 'userscript': True, 'preserve': False, 'rate': 0.85, 'buffered': False, 'label': 'Natural pitch follows speed.'},
     {'name': 'plain-preserve', 'userscript': False, 'preserve': True, 'rate': 0.85, 'buffered': False, 'label': None},
-    {'name': 'userscript-preserve-wasm', 'userscript': True, 'preserve': True, 'rate': 0.85, 'buffered': False, 'label': 'Signalsmith WASM active.'},
+    {'name': 'userscript-preserve-wasm', 'userscript': True, 'preserve': True, 'rate': 0.85, 'buffered': False, 'label': 'Pitch preservation active.'},
     {'name': 'buffered-natural', 'userscript': True, 'preserve': False, 'rate': 0.025, 'buffered': True, 'label': 'Buffered playback · Natural pitch.'},
     {'name': 'buffered-preserve', 'userscript': True, 'preserve': True, 'rate': 0.025, 'buffered': True, 'label': 'Buffered playback · Preserve key.'},
 ]

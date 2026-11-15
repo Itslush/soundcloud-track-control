@@ -31,7 +31,7 @@ def main():
                 const Worklet=window.AudioWorkletNode;
                 window.AudioWorkletNode=new Proxy(Worklet,{construct(target,args){
                     const node=Reflect.construct(target,args);
-                    if(args[1]==='signalsmith-stretch')workletCreations++;
+                    if(args[1]==='soundcloud-live-pitch-v1')workletCreations++;
                     return node;
                 }});
                 const create=URL.createObjectURL, revoke=URL.revokeObjectURL;
@@ -65,7 +65,7 @@ def main():
             page.locator('.settings-button').click()
             page.locator('.advanced-audio > summary').click()
             page.locator('#preserve-key').check()
-            page.wait_for_function("document.querySelector('#soundcloud-tempo-control')?.shadowRoot?.querySelector('#wasm-status')?.textContent.includes('WASM active')", timeout=15000)
+            page.wait_for_function("document.querySelector('#soundcloud-tempo-control')?.shadowRoot?.querySelector('#wasm-status')?.textContent.includes('Pitch preservation active')", timeout=15000)
             page.wait_for_timeout(1200)
             preserved = page.evaluate('measure()')
             assert page.evaluate('workletUrls.size')==0
@@ -76,7 +76,7 @@ def main():
             assert page.evaluate('localStorage.getItem("soundcloud.tempo.useWasm")') == 'false'
             assert 'Browser pitch preservation' in page.locator('#wasm-status').inner_text()
             page.locator('#use-wasm').check()
-            page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('WASM active')")
+            page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('Pitch preservation active')")
             page.wait_for_timeout(500)
             assert not page.evaluate('audio.preservesPitch')
             page.evaluate('audio.currentTime=3')
@@ -122,7 +122,7 @@ def main():
                     await audio.play();
                     audio.currentTime=1;
                 }''', frequency)
-                status = 'Original pitch at 1×.' if rate == 1 else 'Signalsmith WASM active.'
+                status = 'Original pitch at 1×.' if rate == 1 else 'Pitch preservation active.'
                 expect(page.locator('#wasm-status')).to_have_text(status, timeout=10000)
                 page.wait_for_timeout(1200)
                 result = page.evaluate('measure()')
@@ -134,10 +134,10 @@ def main():
             page.locator('#rate-number').press('Enter')
             for index in range(12):
                 page.evaluate('async () => { audio.pause(); audio.currentTime=1; await audio.play(); }')
-                page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('WASM active')")
+                page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('Pitch preservation active')")
                 page.locator('#use-wasm').uncheck()
                 page.locator('#use-wasm').check()
-                page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('WASM active')")
+                page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('Pitch preservation active')")
                 page.wait_for_function('!audio.preservesPitch && !audio.paused && !audio.seeking')
             assert page.evaluate('workletCreations') == 1
             page.evaluate('''async () => {
@@ -149,7 +149,7 @@ def main():
                 URL.revokeObjectURL(old);
                 await audio.play();
             }''')
-            page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('WASM active')")
+            page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('Pitch preservation active')")
             page.wait_for_timeout(1000)
             assert abs(page.evaluate('measure().frequency')-660)<8
             boundary = page.evaluate('''() => new Promise(resolve => {
@@ -169,7 +169,7 @@ def main():
             assert len(source_silent) >= 10, boundary
             assert all(sample['output'] < 1e-6 for sample in source_silent), boundary
             assert all(sample['output'] < 1e-6 for sample in boundary if sample['elapsed'] >= 0.15), boundary
-            page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('WASM active')")
+            page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('Pitch preservation active')")
             page.wait_for_timeout(1000)
             silence = page.evaluate('measure()')
             assert silence['peak'] < 1e-6, silence

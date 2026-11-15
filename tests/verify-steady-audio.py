@@ -29,7 +29,7 @@ try:
           }
           window.AudioWorkletNode=new Proxy(AudioWorkletNode,{construct(target,args){
             const node=Reflect.construct(target,args);
-            if(args[1]==='signalsmith-stretch'){
+            if(args[1]==='soundcloud-live-pitch-v1'){
               steadyAudit.nodes++;
               const post=node.port.postMessage.bind(node.port);
               node.port.postMessage=(data,...rest)=>{

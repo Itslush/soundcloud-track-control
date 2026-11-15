@@ -748,7 +748,7 @@ export function createWasmAudio({
         if (state?.active)
           return shift
             ? `Key shift ${shift > 0 ? '+' : ''}${shift} semitones.`
-            : 'Signalsmith WASM active.';
+            : 'Pitch preservation active.';
         if (state?.speed === 1 && !shift) return 'Original pitch at 1×.';
         if (state?.loading)
           return 'Loading WASM · browser correction until ready.';

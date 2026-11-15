@@ -88,7 +88,7 @@ def save_rate(page, path, rate):
 def label(mode, buffered):
     if buffered:
         return 'Buffered playback · Preserve key.' if mode == 'preserve' else 'Buffered playback · Natural pitch.'
-    return 'Signalsmith WASM active.' if mode == 'preserve' else 'Natural pitch follows speed.'
+    return 'Pitch preservation active.' if mode == 'preserve' else 'Natural pitch follows speed.'
 
 
 def seek_distinct_position(page):

@@ -80,7 +80,7 @@ SETUP = r'''async sampleRate => {
     const status = () => document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent;
     const waitActive = async () => {
         const deadline = performance.now()+12000;
-        while (!status().includes('WASM active')) {
+        while (!status().includes('Pitch preservation active')) {
             if (performance.now()>deadline) throw new Error('WASM did not activate: '+status());
             await new Promise(resolve => setTimeout(resolve, 10));
         }
@@ -207,7 +207,7 @@ def analyze(capture, pcm, latency, rate):
     final = capture['final']
     assert final['rate'] == rate and not final['paused'] and not final['seeking'], final
     assert final['mediaTime'] > (6 if capture['kind'] == 'seek' else 0), final
-    assert 'WASM active' in final['status'] and final['stretchNodes'] == 1, final
+    assert 'Pitch preservation active' in final['status'] and final['stretchNodes'] == 1, final
     expected_event = 'seeked' if capture['kind'] == 'seek' else 'loadstart'
     assert any(event['type'] == expected_event for event in capture['events']), capture['events']
     return {
@@ -261,7 +261,7 @@ def main():
                             const Original=AudioWorkletNode;
                             window.AudioWorkletNode=new Proxy(Original,{construct(target,args){
                                 const node=Reflect.construct(target,args);
-                                if(args[1]==='signalsmith-stretch')boundaryStretchNodes.push(node);
+                                if(args[1]==='soundcloud-live-pitch-v1')boundaryStretchNodes.push(node);
                                 return node;
                             }});
                         }''')
