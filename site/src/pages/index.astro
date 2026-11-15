@@ -85,14 +85,14 @@ const technical = [
     id: 'semitones',
     title: 'Pitch controls',
     overview: 'Set the pitch range and how much each arrow press changes it.',
-    text: 'Set your minimum, maximum and default increment within -12 to +12 semitones. The initial step is 0.5 st. Direct typing supports finer fractional values.',
-    alt: 'Semitone customization with separate minimum, maximum and default increment fields.',
+    text: 'Set your minimum, maximum and default increment within -12 to +12 semitones. The initial step is 0.5 st. You can reverse the player’s pitch arrows or type a precise value.',
+    alt: 'Semitone limits, default increment and the option to invert the player’s pitch arrows.',
   },
   {
     id: 'crossfade',
     title: 'Crossfade',
     overview: 'Blend the end of a track into the next one.',
-    text: 'Crossfade supports 1–10 seconds of overlap and needs a supported stream and a ready queue item. Unsupported streams or incoming tempo timelines play normally. Shared sets can contain 2 to 10 public tracks, up to 15 minutes of original audio and 30 minutes after adjustment. Each track can keep its own saved timeline. Status and local diagnostics explain when an overlap is unavailable.',
+    text: 'Choose 1–10 seconds of overlap. The player prepares the next queued track as playback starts. If you press Play on another track, the current one keeps playing while the fade loads. Unsupported streams or incoming tempo timelines play normally. Shared sets can contain 2 to 10 public tracks, up to 15 minutes of original audio and 30 minutes after adjustment. Each track can keep its own saved timeline. Status and local diagnostics explain when an overlap is unavailable.',
     alt: 'Crossfade controls, overlap duration and the diagnostics disclosure.',
   },
   {

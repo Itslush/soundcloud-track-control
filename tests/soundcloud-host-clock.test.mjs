@@ -440,6 +440,55 @@ test('a lazy queue is populated without playing or advancing either track', asyn
   await p.adapter.dispose();
 });
 
+test('current SoundCloud queue module preloads and releases without touching the displaced module', async () => {
+  const p = preloadFixture();
+  const manager = p.exportsById[20];
+  const queue = manager.getQueue();
+  const current = Function(
+    'I',
+    'K',
+    'let R=0,q="none";return {getCurrentQueueItem:function(){return I.at(R)},getCurrentSound:function(){var e=K.getCurrentQueueItem();return null==e?void 0:e.sound},getQueue:function(){return I},getQueueState:function(){return{currentIndex:R,repeatMode:q}}}',
+  )(queue, manager);
+  Object.assign(manager, current);
+  manager.pullNext = Function(
+    'u',
+    'let M=0;return function(e){u&&!u.stream.isEnded()&&(M=Math.max(M,e))>0&&u.stream.resume()}',
+  )({
+    stream: {
+      isEnded: () => false,
+      resume() {
+        p.items.push(p.next);
+        p.emitQueue();
+      },
+    },
+  });
+  p.runtime.c[18] = p.runtime.c[20];
+  p.runtime.c[20] = {
+    l: true,
+    exports: {
+      get getCurrentSound() {
+        throw new Error('unrelated module');
+      },
+    },
+  };
+  p.items.pop();
+  p.state.hasNext = true;
+  const preload = await p.adapter.preloadNext(p.audio);
+  assert.equal(p.state.requests, 2);
+  assert.equal(manager.getCurrentQueueItem(), p.currentItem);
+  assert.equal(preload.matches(), true);
+  preload.dispose();
+  assert.equal(p.state.requests, 1);
+  manager.getQueueState = () => {
+    throw new Error('new interface must not be invoked');
+  };
+  await assert.rejects(
+    p.adapter.preloadNext(p.audio),
+    /getQueueState accessor changed/,
+  );
+  await p.adapter.dispose();
+});
+
 test('waiting for a lazy queue cleans up on timeout, abort, track change and disposal', async () => {
   for (const action of ['timeout', 'abort', 'change', 'dispose']) {
     const p = preloadFixture();

@@ -43,7 +43,8 @@ async function run(splitComputation) {
   assert.equal(processor.wasmReady, true);
   const send = (method, value) =>
     processor.port.onmessage({ data: [0, method, value] });
-  send('configure', { blockMs: 120, intervalMs: 30, splitComputation });
+  const { pitchTiming } = await import('../src/audio/pitch-quality.mjs');
+  send('configure', { ...pitchTiming, splitComputation });
   send('schedule', { active: true, semitones: -6.5 });
   const input = [new Float32Array(quantum), new Float32Array(quantum)];
   const output = [new Float32Array(quantum), new Float32Array(quantum)];

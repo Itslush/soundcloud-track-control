@@ -92,8 +92,18 @@ export function createTrackVisuals({ document, readTrack }) {
       notice.className = 'soundcloud-tempo-pitch-notice';
       host.append(notice);
     }
-    const text = formatPitchNotice(shift);
-    if (notice.textContent !== text) notice.textContent = text;
+    const prefixText = 'Pitch shifted ';
+    const value = formatPitchNotice(shift, '');
+    const text = value ? prefixText + value : '';
+    if (notice.title !== text) {
+      notice.title = text;
+      if (text) {
+        const prefix = document.createElement('span');
+        prefix.className = 'soundcloud-tempo-pitch-prefix';
+        prefix.textContent = prefixText;
+        notice.replaceChildren(prefix, value);
+      } else notice.replaceChildren();
+    }
     notice.hidden = !text;
   }
   return { overlap, pitch };

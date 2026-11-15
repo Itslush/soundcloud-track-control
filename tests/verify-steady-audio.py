@@ -95,7 +95,7 @@ try:
             results.append({'tempo': tempo, 'shift': shift, 'nodes': after['nodes'], 'captures': captures})
         assert before['nodes'] == 1, before
         config = next(message[1] for message in before['messages'] if message[0] == 'configure')
-        assert config == {'blockMs': 120, 'intervalMs': 30, 'splitComputation': True}, config
+        assert config == {'blockMs': 77, 'intervalMs': 9, 'splitComputation': True}, config
         page.evaluate('steady.close()')
         expect(page.locator('.touch-play')).to_have_attribute('aria-label', 'Play')
         assert not errors, errors

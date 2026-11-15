@@ -223,6 +223,7 @@ export function createTempoEmbeddedPages(api) {
       attributeFilter: ['href', 'src', 'srcset', 'alt', 'sizes', 'aria-label'],
     });
     installCopy(entry);
+    listen(entry, entry.doc, 'click', api.playerClick, true);
     listen(
       entry,
       entry.doc,

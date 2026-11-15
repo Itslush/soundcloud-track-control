@@ -84,6 +84,7 @@ test('pitch range and step reject invalid settings and accept older note-mode pr
     { min: 12 },
     { step: 0 },
     { step: Infinity },
+    { invertArrows: 'false' },
   ])
     assert.ok(
       !api.validPitchSettings({ ...api.defaultPitchSettings, ...patch }),

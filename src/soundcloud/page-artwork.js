@@ -1,3 +1,18 @@
+const trackCardSelector =
+  '.playableTile, .sound, .queueItemView, .soundBadge, .trackItem';
+const trackCardTitleSelector =
+  'a.playableTile__mainHeading, .playableTile__mainHeading a, a.soundTitle__title, a.queueItemView__title, .queueItemView__title a, a.soundBadge__titleLink, a.trackItem__trackTitle';
+
+export function cardTrack(element, parseTrackKey) {
+  const card = element.closest(trackCardSelector);
+  return (
+    card &&
+    parseTrackKey(
+      card.querySelector(trackCardTitleSelector)?.getAttribute('href'),
+    )
+  );
+}
+
 export function createPageArtwork({
   parseTrackKey,
   readSavedRate,
@@ -71,13 +86,8 @@ export function createPageArtwork({
         visual && !['IMG', 'SVG'].includes(visual.tagName) ? visual : link;
       targets.set(artwork, key);
     }
-    for (const card of page.querySelectorAll(
-      '.playableTile, .sound, .queueItemView, .soundBadge, .trackItem',
-    )) {
-      const title = card.querySelector(
-        'a.playableTile__mainHeading, .playableTile__mainHeading a, a.soundTitle__title, a.queueItemView__title, .queueItemView__title a, a.soundBadge__titleLink, a.trackItem__trackTitle',
-      );
-      const key = parseTrackKey(title?.getAttribute('href'));
+    for (const card of page.querySelectorAll(trackCardSelector)) {
+      const key = cardTrack(card, parseTrackKey);
       const artwork = card.querySelector(
         '.playableTile__artwork .image, .sound__coverArt .image, .queueItemView__artwork .image, .soundBadge__avatar .image, .trackItem__artwork .image',
       );

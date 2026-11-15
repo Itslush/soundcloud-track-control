@@ -1,7 +1,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
-const source = require('./module-fixture.cjs')(['soundcloud/tempo-crossfade.js']);
+const source = require('./module-fixture.cjs')([
+  'soundcloud/tempo-crossfade.js',
+]);
 const { createCrossfade } = vm.runInNewContext(source + '\nfixtureModule;', {
   AbortController,
 });
@@ -77,13 +79,13 @@ function fixture(onVisual) {
         return {
           context,
           overlapEnd: context.currentTime + seconds,
-          endTime: context.currentTime + opening.duration,
+          endTime: context.currentTime + (opening?.duration ?? seconds),
           position: () => context.currentTime,
           nativePosition: (target) => target.currentTime,
           silence: () => true,
           fadeIn(target, duration) {
             state.fades.push({ target, duration });
-            this.endTime = context.currentTime + 0.08;
+            this.endTime = context.currentTime + (duration ?? 0.08);
             return true;
           },
           dispose: () => state.stops++,
@@ -93,6 +95,7 @@ function fixture(onVisual) {
     modules: {
       loadAudioDependencies: async () => {
         state.reads++;
+        await state.decodeWait;
         return {};
       },
       createPcmSource: () => ({}),
@@ -135,6 +138,8 @@ function fixture(onVisual) {
       setItem: (key, value) => values.set(key, value),
     },
     timers: {
+      setTimeout: (fn) => (state.deadline = fn),
+      clearTimeout: () => (state.deadline = null),
       setInterval: (fn) => {
         tick = fn;
         return 1;
@@ -262,7 +267,7 @@ test('pending identification waits for proof and cannot resume after cancellatio
   }
 });
 
-test('recovered graphs clear stale warnings before the preload window', () => {
+test('Play on a long track starts a single preload as soon as the graph is ready', async () => {
   const f = fixture();
   f.audio.duration = 183.05;
   f.audio.currentTime = 1.4;
@@ -271,11 +276,90 @@ test('recovered graphs clear stale warnings before the preload window', () => {
   f.tick();
   assert.match(f.api.label(), /needs a ready player/);
   f.state.graphReady = true;
-  f.tick();
-  assert.match(f.api.label(), /Preloading starts near the end/);
+  f.audio.dispatchEvent(new Event('playing'));
+  assert.match(f.api.label(), /Preloading the next track/);
   assert.equal(f.api.diagnostics().player.graphReady, true);
-  assert.equal(f.state.preloads, 0);
+  assert.equal(f.state.preloads, 1);
+  f.tick();
+  assert.equal(f.state.preloads, 1);
+  await settle();
+  assert.equal(f.state.clicks, 0);
   f.api.dispose();
+});
+
+test('manual Play prepares a bounded outgoing tail and fades into the selected native track', async () => {
+  const f = fixture();
+  f.audio.currentTime = 4;
+  f.api.set(true, 2);
+  let plays = 0;
+  assert.equal(
+    f.api.manualPlay('chosen', () => {
+      plays++;
+      f.audio.dispatchEvent(new Event('pause'));
+      f.state.track = 'chosen';
+      f.audio.currentSrc = 'blob:chosen';
+      f.audio.currentTime = 0;
+      f.audio.dispatchEvent(new Event('playing'));
+      return true;
+    }),
+    true,
+  );
+  assert.equal(plays, 0);
+  f.tick();
+  await settle();
+  assert.equal(plays, 1);
+  assert.equal(f.state.clicks, 0);
+  assert.equal(f.state.start.buffer.duration, 4);
+  assert.equal(f.state.start.opening, null);
+  assert.equal(f.state.fades[0].duration, 2);
+  f.context.currentTime = 2;
+  f.tick();
+  assert.equal(f.state.stops, 1);
+  f.api.dispose();
+});
+
+test('slow manual preparation forwards the click once, cancellation discards obsolete clicks', async () => {
+  for (const outcome of [
+    'timeout',
+    'cancel',
+    'replaced',
+    'identity',
+    'decode',
+  ]) {
+    const f = fixture();
+    f.api.set(true, 3);
+    let finish,
+      plays = 0;
+    f.state.decodeWait = new Promise((resolve) => {
+      finish = resolve;
+    });
+    assert.equal(
+      f.api.manualPlay('first', () => {
+        throw new Error();
+      }),
+      false,
+    );
+    assert.ok(
+      f.api.manualPlay('chosen', () => {
+        plays++;
+        return true;
+      }),
+    );
+    if (outcome === 'timeout') f.state.deadline();
+    if (outcome === 'cancel') f.api.cancel();
+    if (outcome === 'replaced') f.state.track = 'different-selection';
+    if (outcome === 'identity') f.state.bound = false;
+    if (outcome === 'decode') f.state.fail = true;
+    finish();
+    await settle();
+    assert.equal(
+      plays,
+      ['cancel', 'replaced'].includes(outcome) ? 0 : 1,
+      outcome,
+    );
+    assert.equal(f.state.start, undefined);
+    f.api.dispose();
+  }
 });
 
 test('a pending payload hash at the fade boundary waits without dropping the prepared overlap', async () => {

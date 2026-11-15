@@ -90,6 +90,7 @@ test('fractional pitch, automation and pitch preferences survive a backup round 
     max: 6,
     step: 0.25,
     notes: true,
+    invertArrows: true,
     source: 9,
   };
   input.tracks[0].timeline.data.pitchPoints = [

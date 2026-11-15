@@ -183,7 +183,9 @@ export function controlsTemplate({
             <button id="crossfade-debug-copy" type="button">Copy diagnostics</button>
             <p id="crossfade-debug-feedback" role="status"></p>
           </details>
-          <details class="pitch-customization"><summary>Semitone controls</summary><div class="pitch-bounds"><label>Minimum <input id="pitch-min" type="number" min="-12" max="12" step="0.5" value="-12"><span>st</span></label><label>Maximum <input id="pitch-max" type="number" min="-12" max="12" step="0.5" value="12"><span>st</span></label><label>Default increment <input id="pitch-step" type="number" min="0.001" max="12" step="0.1" value="0.5"><span>st</span></label></div></details>
+          <details class="pitch-customization"><summary>Semitone controls</summary><div class="pitch-bounds"><label>Minimum <input id="pitch-min" type="number" min="-12" max="12" step="0.5" value="-12"><span>st</span></label><label>Maximum <input id="pitch-max" type="number" min="-12" max="12" step="0.5" value="12"><span>st</span></label><label>Default increment <input id="pitch-step" type="number" min="0.001" max="12" step="0.1" value="0.5"><span>st</span></label></div>
+            <label class="random-label"><input id="pitch-invert-arrows" type="checkbox" />Invert player pitch arrows (up lowers pitch)</label>
+          </details>
           <label class="key-shift-label">Semitone shift <input id="key-shift" type="number" min="-12" max="12" step="0.5" value="0" /> st</label>
           <label class="random-label"
             ><input id="preserve-key" type="checkbox" />Preserve key by default</label

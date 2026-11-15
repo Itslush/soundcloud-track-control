@@ -1,3 +1,8 @@
+import {
+  pitchTiming,
+  protectedPitchInput,
+} from '../../../src/audio/pitch-quality.mjs';
+
 type StretchNode = AudioWorkletNode & {
   configure(options: object): Promise<void>;
   schedule(options: object): Promise<void>;
@@ -44,6 +49,7 @@ export class AudioPreview {
   private input?: GainNode;
   private dry?: GainNode;
   private wet?: GainNode;
+  private pitchInput?: GainNode;
   private node?: StretchNode;
   private hls?: import('hls.js').default;
   private localUrl = '';
@@ -118,7 +124,9 @@ export class AudioPreview {
     this.applied = NaN;
     if (this.dry)
       this.dry.gain.value =
-        (this.preserve || this.keyShift !== 0) && this.node && !this.failed
+        ((this.preserve && this.rate !== 1) || this.keyShift !== 0) &&
+        this.node &&
+        !this.failed
           ? 0
           : 0.5;
     if (this.input) {
@@ -196,13 +204,8 @@ export class AudioPreview {
       if (this.stopping) await this.stopping;
       if (epoch !== this.epoch || this.disposed || this.failed) return;
       const node = this.node!;
-      const sampleRate = this.context.sampleRate;
       await deadline(
-        node.configure({
-          blockMs: (Math.floor(sampleRate * 0.12) / sampleRate) * 1000,
-          intervalMs: (Math.floor(sampleRate * 0.03) / sampleRate) * 1000,
-          splitComputation: false,
-        }),
+        node.configure({ ...pitchTiming, splitComputation: false }),
       );
       this.latency = await deadline(node.latency());
       if (!Number.isFinite(this.latency) || this.latency < 0)
@@ -210,7 +213,8 @@ export class AudioPreview {
       if (epoch !== this.epoch || this.disposed || this.failed) return;
       this.input!.connect(node);
       this.connected = true;
-      node.connect(this.wet!);
+      this.pitchInput ??= protectedPitchInput(this.context, this.wet!);
+      node.connect(this.pitchInput);
       this.needsReset = false;
     } catch {
       this.useBrowser();
@@ -237,9 +241,9 @@ export class AudioPreview {
     this.preserve = preserve;
     this.keyShift = keyShift;
     this.audio.playbackRate = rate;
-    if (!preserve && !keyShift) {
-      if (this.connected || changedMode) this.reset();
-      this.audio.preservesPitch = false;
+    if ((!preserve || rate === 1) && !keyShift) {
+      if (this.loading || this.connected || changedMode) this.reset();
+      this.audio.preservesPitch = preserve;
       return;
     }
     this.audio.preservesPitch =

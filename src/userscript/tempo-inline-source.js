@@ -8,6 +8,7 @@ import { createOutputLevel } from '../soundcloud/tempo-output.js';
 import { createWasmAudio } from '../soundcloud/tempo-wasm.js';
 import { createBufferedPlayback } from '../soundcloud/tempo-buffered.js';
 import { createCrossfade } from '../soundcloud/tempo-crossfade.js';
+import { createCrossfadeClickHandler } from '../soundcloud/crossfade-controls.js';
 import { createTrackVisuals } from '../soundcloud/tempo-track-visuals.js';
 import { createTempoEditor } from '../timeline/tempo-editor.js';
 import { createTempoStore } from '../library/tempo-library.js';
@@ -705,6 +706,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
   });
   embeddedPages = createTempoEmbeddedPages({
     parseTrack: parseTrackKey,
+    playerClick: (event) => crossfadeClick(event),
     currentTrack: () => trackKey,
     copyLinks: copyLinksEnabled,
     shareLink: (text) => timeline.shareLink(text),
@@ -821,20 +823,13 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     },
   });
   crossfade.reload();
-  document.addEventListener(
-    'click',
-    (event) => {
-      if (
-        event.isTrusted &&
-        event.target instanceof Element &&
-        event.target.closest(
-          '.playControls__play,.playControls__next,.playControls__prev,.playControls__repeat,.playbackTimeline',
-        )
-      )
-        crossfade.cancel();
-    },
-    true,
-  );
+  const crossfadeClick = createCrossfadeClickHandler({
+    crossfade,
+    parseTrack: parseTrackKey,
+    currentTrack: currentTrackKey,
+    embeddedKey: (doc) => embeddedPages.key(doc),
+  });
+  document.addEventListener('click', crossfadeClick, true);
   document.addEventListener(
     'keydown',
     (event) => {
@@ -932,8 +927,10 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
       rate = applySaved ? clamp(savedRate ?? 1) : 1;
       updateAll();
     }
-    if (event.key === null || event.key === pitchSettingsKey)
+    if (event.key === null || event.key === pitchSettingsKey) {
       ui?.syncPitchControls?.();
+      mobilePlayer?.refresh();
+    }
     if (event.key === null || event.key === tempoIncrementKey) render();
     if (
       event.key === null ||

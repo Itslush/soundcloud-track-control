@@ -286,6 +286,10 @@ export function createMobilePlayer({
     }
     rate.step = root.querySelector('#tempo-increment').value || '0.025';
     pitch.step = currentPitch.step;
+    pitch.toggleAttribute(
+      'data-invert-arrows',
+      currentPitch.hasAttribute('data-invert-arrows'),
+    );
     for (const [slider, input] of [
       [rateSlider, rate],
       [pitchSlider, pitch],

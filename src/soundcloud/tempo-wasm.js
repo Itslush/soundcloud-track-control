@@ -1,3 +1,5 @@
+import { pitchTiming, protectedPitchInput } from '../audio/pitch-quality.mjs';
+
 export function createWasmAudio({
   audioModules,
   outputLevel,
@@ -163,14 +165,7 @@ export function createWasmAudio({
       if (!ready(state, epoch)) return;
       const node = state.node;
       if (state.needsReset) {
-        const sampleRate = state.source.context.sampleRate;
-        await timed(
-          node.configure({
-            blockMs: (Math.floor(sampleRate * 0.12) / sampleRate) * 1000,
-            intervalMs: (Math.floor(sampleRate * 0.03) / sampleRate) * 1000,
-            splitComputation: true,
-          }),
-        );
+        await timed(node.configure({ ...pitchTiming, splitComputation: true }));
         state.latency = await timed(node.latency());
         if (!ready(state, epoch)) return;
         if (!Number.isFinite(state.latency) || state.latency < 0)
@@ -178,7 +173,8 @@ export function createWasmAudio({
         state.needsReset = false;
         state.input.connect(node);
         state.connected = true;
-        node.connect(state.wet);
+        state.pitchInput ??= protectedPitchInput(state.source.context, state.wet);
+        node.connect(state.pitchInput);
       }
       await timed(node.schedule({ active: true, semitones }));
       if (
@@ -200,13 +196,14 @@ export function createWasmAudio({
   function sync(audio, enabled, speed) {
     const state = states.get(audio);
     if (!state) return false;
-    const changed = state.wanted !== enabled;
-    state.wanted = enabled;
     state.speed = speed;
     state.semitones =
       readKeyShift() - (preservesKey() ? 12 * Math.log2(speed) : 0);
+    const wanted = enabled && (speed !== 1 || state.semitones !== 0);
+    const changed = state.wanted !== wanted;
+    state.wanted = wanted;
     if (state.buffered) return false;
-    if (!enabled || audio.seeking || audio.paused) {
+    if (!wanted || audio.seeking || audio.paused) {
       if (changed || state.connected || state.active) clear(state);
       return false;
     }
@@ -425,8 +422,7 @@ export function createWasmAudio({
         );
         await timed(
           processor.configure({
-            blockMs: 120,
-            intervalMs: 30,
+            ...pitchTiming,
             splitComputation: false,
           }),
         );
@@ -434,7 +430,7 @@ export function createWasmAudio({
         if (!Number.isFinite(latency) || latency < 0 || latency > 1)
           throw new Error('Unsupported pitch processor latency.');
         await timed(processor.schedule({ active: true, semitones }));
-        input.connect(processor).connect(offline.destination);
+        input.connect(processor).connect(protectedPitchInput(offline, offline.destination));
       } else input.connect(offline.destination);
       signal.throwIfAborted();
       input.start();
@@ -477,9 +473,10 @@ export function createWasmAudio({
       !Number.isFinite(seconds) ||
       seconds <= 0 ||
       seconds > 10 ||
-      !Number.isFinite(opening?.duration) ||
-      opening.duration < seconds ||
-      opening.duration > 19
+      (opening !== null &&
+        (!Number.isFinite(opening?.duration) ||
+          opening.duration < seconds ||
+          opening.duration > 19))
     )
       throw new Error(
         'The player audio connection is not ready for crossfade.',
@@ -489,9 +486,9 @@ export function createWasmAudio({
     const tail = context.createBufferSource();
     const level = context.createGain();
     const envelope = context.createGain();
-    const head = context.createBufferSource();
-    const headEnvelope = context.createGain();
-    const headLevel = context.createGain();
+    const head = opening && context.createBufferSource();
+    const headEnvelope = opening && context.createGain();
+    const headLevel = opening && context.createGain();
     let processor = null;
     let unsubscribe;
     let levelAudio;
@@ -505,7 +502,7 @@ export function createWasmAudio({
         target,
         ({ volume, muted, outputDb }) => {
           level.gain.value = muted ? 0 : volume * 10 ** (outputDb / 20);
-          headLevel.gain.value = level.gain.value;
+          if (headLevel) headLevel.gain.value = level.gain.value;
         },
       );
       levelAudio = target;
@@ -524,7 +521,7 @@ export function createWasmAudio({
         tail.stop();
       } catch {}
       try {
-        head.stop();
+        head?.stop();
       } catch {}
       for (const node of [
         tail,
@@ -544,20 +541,20 @@ export function createWasmAudio({
     }
     try {
       tail.buffer = buffer;
-      head.buffer = opening;
+      if (head) head.buffer = opening;
       tail.playbackRate.value = rate;
       tail.connect(level);
       envelope.connect(state.output);
       followLevel(audio);
       // Both streams follow the same master volume, without double-applying the outgoing pitch processor.
-      head.connect(headEnvelope).connect(headLevel).connect(state.output);
+      head?.connect(headEnvelope).connect(headLevel).connect(state.output);
       // Keep the outgoing processor's history while the native player loads a new track.
       if (state.active && state.node) {
         processor = state.node;
         disconnect.call(state.input, processor);
         disconnect.call(processor);
         level.connect(processor);
-        processor.connect(envelope);
+        processor.connect(protectedPitchInput(context, envelope));
         processor.addEventListener('processorerror', dispose, { once: true });
         state.node = null;
         state.connected = false;
@@ -572,17 +569,17 @@ export function createWasmAudio({
       nativeFade.gain.setValueAtTime(0, now);
       envelope.gain.setValueAtTime(1, now);
       envelope.gain.linearRampToValueAtTime(0, now + seconds);
-      headEnvelope.gain.setValueAtTime(0, now);
-      headEnvelope.gain.linearRampToValueAtTime(1, now + seconds);
+      headEnvelope?.gain.setValueAtTime(0, now);
+      headEnvelope?.gain.linearRampToValueAtTime(1, now + seconds);
       tail.start(now, offset);
       tail.stop(now + seconds);
-      head.start(now);
+      head?.start(now);
     } catch (error) {
       dispose();
       throw error;
     }
     return {
-      endTime: now + opening.duration,
+      endTime: now + (opening?.duration ?? seconds),
       overlapEnd: now + seconds,
       startedAt: now,
       context,
@@ -618,9 +615,9 @@ export function createWasmAudio({
         fade.gain.setValueAtTime(0, at);
         fade.gain.linearRampToValueAtTime(1, at + duration);
         const time = context.currentTime;
-        headEnvelope.gain.cancelScheduledValues(time);
-        headEnvelope.gain.setValueAtTime(1, time);
-        headEnvelope.gain.linearRampToValueAtTime(0, time + duration);
+        headEnvelope?.gain.cancelScheduledValues(time);
+        headEnvelope?.gain.setValueAtTime(1, time);
+        headEnvelope?.gain.linearRampToValueAtTime(0, time + duration);
         this.endTime = time + duration;
         return true;
       },
@@ -726,6 +723,7 @@ export function createWasmAudio({
           return shift
             ? `Key shift ${shift > 0 ? '+' : ''}${shift} semitones.`
             : 'Signalsmith WASM active.';
+        if (state?.speed === 1 && !shift) return 'Original pitch at 1×.';
         if (state?.loading)
           return 'Loading WASM · browser correction until ready.';
         if (state?.failed)

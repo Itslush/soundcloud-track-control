@@ -17,7 +17,9 @@ export function enhanceTempoFields(root) {
         .map((node) => node.textContent.trim())
         .join(' ') ||
       'value';
-    function nudge(direction) {
+    const stepDirection = (arrow) =>
+      input.hasAttribute('data-invert-arrows') ? -arrow : arrow;
+    function nudge(arrow) {
       if (input.disabled || input.readOnly) return;
       const value = input.valueAsNumber;
       if (!Number.isFinite(value)) return;
@@ -28,8 +30,9 @@ export function enhanceTempoFields(root) {
           min,
           Math.min(
             max,
-            Math.round((value + direction * (Number(input.step) || 1)) * 1e6) /
-              1e6,
+            Math.round(
+              (value + stepDirection(arrow) * (Number(input.step) || 1)) * 1e6,
+            ) / 1e6,
           ),
         ),
       );
@@ -40,10 +43,6 @@ export function enhanceTempoFields(root) {
     const buttons = [1, -1].map((direction) => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.setAttribute(
-        'aria-label',
-        (direction > 0 ? 'Increase ' : 'Decrease ') + label,
-      );
       button.innerHTML =
         '<svg viewBox="0 0 10 8" aria-hidden="true"><path d="' +
         (direction > 0 ? 'm2 5 3-3 3 3' : 'm2 3 3 3 3-3') +
@@ -54,12 +53,16 @@ export function enhanceTempoFields(root) {
     });
     function sync() {
       buttons.forEach((button, index) => {
+        const increases = stepDirection(index === 0 ? 1 : -1) > 0;
+        const action = (increases ? 'Increase ' : 'Decrease ') + label;
+        if (button.getAttribute('aria-label') !== action)
+          button.setAttribute('aria-label', action);
         button.disabled =
           input.disabled ||
           input.readOnly ||
-          (index
-            ? input.min !== '' && input.valueAsNumber <= Number(input.min)
-            : input.max !== '' && input.valueAsNumber >= Number(input.max));
+          (increases
+            ? input.max !== '' && input.valueAsNumber >= Number(input.max)
+            : input.min !== '' && input.valueAsNumber <= Number(input.min));
       });
     }
     input.addEventListener('keydown', (event) => {
@@ -203,6 +206,15 @@ export function enhanceTempoFields(root) {
 }
 
 export const tempoFieldStyle = `
+:is(:host, .tempo-editor) input:is([type='text'], [type='number'], [type='search'], [type='url'], :not([type])):focus {
+  outline: none;
+  box-shadow: inset 0 -2px currentColor;
+}
+@media (forced-colors: active) {
+  :is(:host, .tempo-editor) input:is([type='text'], [type='number'], [type='search'], [type='url'], :not([type])):focus {
+    border-bottom: 2px solid Highlight;
+  }
+}
 .tempo-number { display:inline-flex; align-items:center; min-width:0; vertical-align:middle; }
 .tempo-number input { appearance:textfield; min-width:0; width:64px; }
 .tempo-number input::-webkit-inner-spin-button,.tempo-number input::-webkit-outer-spin-button { appearance:none; margin:0; }

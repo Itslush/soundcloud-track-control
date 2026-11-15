@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.7.3
+
+- Shortened the pitch shifter’s analysis window to reduce the sound that bleeds ahead of kick attacks. A soft ceiling catches peaks introduced by pitch shifting.
+- Crossfade starts preparing the next queued track when playback starts. Selecting another supported track also prepares a fade while the current track keeps playing.
+- Added an option under Advanced audio → Semitone controls to reverse the player’s pitch arrows.
+- Text fields use an underline while editing. The footer keeps the pitch value and its unit on one line, even beside a long track title.
+
 ## 1.2.7.2
 
 - Reduced playback work while tempo and pitch adjustments are active, without lowering audio-quality settings. Testing on Firefox Android is still needed.

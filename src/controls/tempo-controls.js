@@ -234,16 +234,18 @@ export function createTempoControls({
     });
     const syncPitchControls = () => {
       const settings = readPitchSettings();
+      get('#pitch-invert-arrows').checked = settings.invertArrows;
       for (const name of ['min', 'max', 'step'])
         get('#pitch-' + name).value = String(settings[name]);
       for (const input of [shiftInput, get('#quick-key-shift')]) {
         input.min = String(settings.min);
         input.max = String(settings.max);
         input.step = String(settings.step);
+        input.toggleAttribute('data-invert-arrows', settings.invertArrows);
       }
       ui.syncFields();
     };
-    for (const name of ['min', 'max', 'step'])
+    for (const name of ['min', 'max', 'step', 'invert-arrows'])
       get('#pitch-' + name).addEventListener('change', () => {
         const settings = Object.fromEntries(
           ['min', 'max', 'step'].map((name) => [
@@ -251,6 +253,7 @@ export function createTempoControls({
             Number(get('#pitch-' + name).value),
           ]),
         );
+        settings.invertArrows = get('#pitch-invert-arrows').checked;
         if (!validPitchSettings(settings)) {
           ui.settingsStatus.textContent =
             'Choose a pitch range inside −12 to +12 and a step between 0.001 and 12.';

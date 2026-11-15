@@ -12,12 +12,12 @@ modules = subprocess.check_output([
 with sync_playwright() as p:
     browser = p.chromium.launch(**browser_options(), headless=True, args=['--mute-audio', '--autoplay-policy=no-user-gesture-required'])
     results = []
-    for scenario in [{'shift':0,'rate':1,'preserve':False}, {'shift':12,'rate':1,'preserve':False}, {'shift':0,'rate':.5,'preserve':True}]:
+    for scenario in [{'shift':0,'rate':1,'preserve':False}, {'shift':12,'rate':1,'preserve':False}, {'shift':0,'rate':.5,'preserve':True}, {'shift':0,'rate':1,'preserve':False,'manual':True}]:
         page = browser.new_page()
         page.route('https://soundcloud.com/**', lambda route: route.fulfill(path=str(ROOT/'tests/fixtures/inline-fixture.html'), content_type='text/html'))
         page.goto('https://soundcloud.com/test-artist/first-track')
         page.add_script_tag(content=modules)
-        result = page.evaluate('''async ({shift,rate:nextRate,preserve}) => {
+        result = page.evaluate('''async ({shift,rate:nextRate,preserve,manual=false}) => {
           const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
           const context = new AudioContext({sampleRate:48000});
           await context.resume();
@@ -56,9 +56,19 @@ with sync_playwright() as p:
           await audio.play(); audio.currentTime = 7.5;
           await new Promise(resolve => audio.addEventListener('seeked',resolve,{once:true}));
           refresh();
-          for(let i=0; (shift||preserve) && !graph.active(audio) && i<100; i++) await wait(30);
-          if((shift||preserve) && !graph.active(audio)) throw new Error('Pitch processor not ready');
+          const ready = () => graph.crossfadeReady(audio,{shift,preserve,rate:audio.playbackRate});
+          for(let i=0; !ready() && i<100; i++) await wait(30);
+          if(!ready()) throw new Error('Outgoing audio graph not ready');
           let track = 'first', clicks = 0, requestedAt = null, clickedAt = null, readyAtClick = false, nativeStarted = false;
+          function startSecond() {
+            clicks++; clickedAt=performance.now(); readyAtClick=nextAudio.readyState>=3;
+            if (manual) { nextAudio.src=urls[1]; nextAudio.load(); }
+            track='second'; outgoing.pause(); audio=nextAudio; document.body.append(audio);
+            context.createMediaElementSource(audio).connect(analyser);
+            crossfade.select(audio); audio.addEventListener('playing',refresh);
+            setTimeout(()=>{nativeStarted=true; audio.play();},manual ? 100 : 1200);
+            return true;
+          }
           const values = new Map();
           const crossfade = createCrossfade({graph, readSettings:()=>({rate:audio===outgoing?1:nextRate,preserve,shift,variable:false}),
             readNextRate:()=>nextRate,
@@ -78,13 +88,7 @@ with sync_playwright() as p:
                 dispose(){},
               };
             },
-            nextButton:()=>({click(){
-              clicks++; clickedAt=performance.now(); readyAtClick=nextAudio.readyState>=3;
-              track='second'; outgoing.pause(); audio=nextAudio; document.body.append(audio);
-              context.createMediaElementSource(audio).connect(analyser);
-              crossfade.select(audio); audio.addEventListener('playing',refresh);
-              setTimeout(()=>{nativeStarted=true; audio.play();},1200);
-            }}),
+            nextButton:()=>({click:startSecond}),
             storage:{getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)},
             modules:{loadAudioDependencies:async()=>({}),createPcmSource:options=>options,createPcmWindow:({source})=>({
               info:async()=>({durationHint:12,sampleRate:48000}),
@@ -93,6 +97,7 @@ with sync_playwright() as p:
             })},
           });
           crossfade.select(audio); crossfade.set(true,2);
+          if(manual && !crossfade.manualPlay('second',startSecond)) throw new Error('Manual Play was declined');
           const spectrum = new Float32Array(analyser.frequencyBinCount);
           function measure() {
             analyser.getFloatFrequencyData(spectrum);
@@ -115,15 +120,16 @@ with sync_playwright() as p:
           return {shift,nextRate,preserve,clicks,simultaneous,final,readings,readyAtClick,minimumRms:Math.min(...levels),preloadLeadMs:clickedAt-requestedAt,diagnostics:crossfade.diagnostics()};
         }''', scenario)
         assert result['clicks'] == 1 and result['simultaneous'], result
-        assert result['readyAtClick'] and result['preloadLeadMs'] >= 1200, result
-        assert any(row['clicks'] == 1 and not row['nativeStarted'] and row['next'] > -58 for row in result['readings']), result
+        if not scenario.get('manual'):
+            assert result['readyAtClick'] and result['preloadLeadMs'] >= 1200, result
+            assert any(row['clicks'] == 1 and not row['nativeStarted'] and row['next'] > -58 for row in result['readings']), result
         assert any(row['stage'] == 'handing-off' for row in result['readings']) or any(entry['message'] == 'Crossfade complete.' for entry in result['diagnostics']['history']), result
         assert result['final']['old'] < -65 and result['final']['next'] > -50, result
         assert result['minimumRms'] > .004, result
         results.append({key:value for key,value in result.items() if key != 'readings'})
         page.close()
     context = browser.new_context()
-    context.add_init_script(userscript_source())
+    context.add_init_script('if(window===window.top){\n' + userscript_source() + '\n}')
     context.route('https://soundcloud.com/**', lambda route: route.fulfill(path=str(ROOT/'tests/fixtures/inline-fixture.html'), content_type='text/html'))
     page = context.new_page()
     page.goto('https://soundcloud.com/test-artist/first-track')
@@ -173,8 +179,25 @@ with sync_playwright() as p:
     page.locator('#crossfade-debug-refresh').click()
     selection = json.loads(page.locator('#crossfade-debug-output').inner_text())
     assert selection['player']['paused'] is False, 'Silent preload stole the active-player selection'
-    page.evaluate('preloadSelectionCleanup()')
     page.locator('.close-settings').click()
+    embedded = 'https://soundcloud.com/n/other/selected-track'
+    page.route(embedded, lambda route: route.fulfill(content_type='text/html', body='''
+        <section aria-label="Track header"><button aria-label="Play"><span>Play</span></button></section>
+        <article class="playableTile"><button class="playButton">Play card</button>
+          <a class="playableTile__mainHeading" href="/other/card">Card</a></article>
+        <script>document.addEventListener('click', e => parent.activations.push(e.isTrusted))</script>
+    '''))
+    page.evaluate('''url => {
+      window.activations=[];
+      const frame=document.createElement('iframe'); frame.src=url; document.body.prepend(frame);
+    }''', embedded)
+    frame = page.frame_locator('iframe')
+    expect(frame.locator('style[data-soundcloud-tempo-embedded]')).to_have_count(1)
+    for index, selector in enumerate(['section button span', 'article button']):
+        frame.locator(selector).click()
+        page.wait_for_function('count => activations.length >= count', arg=index + 1)
+        assert page.evaluate('activations') == [False] * (index + 1), 'Expected one delayed native activation per trusted Play'
+    page.evaluate('preloadSelectionCleanup()')
     page.evaluate('''() => {
       window.badgeFades=[];
       const animate=Element.prototype.animate;

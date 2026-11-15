@@ -198,6 +198,17 @@ try:
             expect(page.locator('#quick-key-shift')).to_have_value('-3')
             page.get_by_role('button',name='Decrease Key shift in semitones on mobile',exact=True).tap()
             expect(page.locator('#quick-key-shift')).to_have_value('-3.5')
+            page.evaluate("""() => {
+              const key = 'soundcloud.tempo.pitchControls';
+              localStorage.setItem(key, JSON.stringify({min:-12,max:12,step:0.5,invertArrows:true}));
+              window.dispatchEvent(new StorageEvent('storage',{key}));
+            }""")
+            upper_pitch = pitch.locator('..').get_by_role('button').first
+            expect(upper_pitch).to_have_accessible_name('Decrease Key shift in semitones on mobile')
+            upper_pitch.tap()
+            expect(page.locator('#quick-key-shift')).to_have_value('-4')
+            pitch.press('ArrowDown')
+            expect(page.locator('#quick-key-shift')).to_have_value('-3.5')
             pitch_slider = page.locator('#touch-pitch-slider')
             pitch_slider.focus(); pitch_slider.press('Home')
             expect(page.locator('#quick-key-shift')).to_have_value('-12')

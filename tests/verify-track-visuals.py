@@ -10,7 +10,7 @@ captures = ROOT / '.impeccable/review/artwork'
 captures.mkdir(parents=True, exist_ok=True)
 with sync_playwright() as p:
     browser = p.chromium.launch(**browser_options(), headless=True, args=['--mute-audio'])
-    for width in [390, 768, 1440]:
+    for width in [390, 768, 1206, 1440]:
         for theme in ['charcoal', 'light', 'oled']:
             page = browser.new_page(viewport={'width': width, 'height': 900})
             errors = []
@@ -25,6 +25,19 @@ with sync_playwright() as p:
             page.locator('#quick-key-shift').dispatch_event('change')
             notice = page.locator('.soundcloud-tempo-pitch-notice')
             expect(notice).to_have_text('Pitch shifted −3.5 st')
+            if width == 1206:
+                page.add_style_tag(content='.playbackSoundBadge__lightLink,.playbackSoundBadge__title{height:17px;display:flex;align-items:center}')
+                caption = page.locator('.playbackSoundBadge__titleContextContainer')
+                caption.evaluate("el => { el.style.flex='0 0 64px'; el.style.width='64px' }")
+                box = notice.bounding_box()
+                assert box['height'] == 12 and notice.evaluate('el=>el.scrollWidth <= el.clientWidth'), box
+                assert notice.get_attribute('title') == 'Pitch shifted −3.5 st'
+                for field in [page.locator('#rate-number'), page.locator('#quick-key-shift')]:
+                    field.click()
+                    assert field.evaluate("el=>getComputedStyle(el).outlineStyle === 'none' && getComputedStyle(el).boxShadow.includes('inset')")
+                page.locator('#rate-number').focus()
+                page.keyboard.press('Tab')
+                assert page.evaluate("!!document.querySelector('#soundcloud-tempo-control').shadowRoot.activeElement?.matches(':focus-visible')")
             assert text_contrast(notice) >= 4.5
             page.add_script_tag(content=module)
             page.evaluate('''() => {
@@ -82,4 +95,4 @@ with sync_playwright() as p:
             assert not errors, errors
             page.close()
     browser.close()
-print('PASS: directional covers, reduced motion, cancellation, fractional/zero pitch notice, contrast and footer bounds at three widths/themes. Isolated player fixture.')
+print('PASS: covers, pitch captions, focus treatment and footer bounds in four widths and three themes. Isolated player fixture.')

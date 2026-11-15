@@ -26,5 +26,5 @@ test('old note-mode settings retain pitch bounds and increment without enabling 
   const api = vm.runInNewContext(source + ';fixtureModule', {
     localStorage: { getItem() { return JSON.stringify({ min: -6, max: 7, step: 0.125, notes: true, source: 9 }); } },
   });
-  assert.deepEqual(JSON.parse(JSON.stringify(api.readPitchSettings())), { min: -6, max: 7, step: 0.125 });
+  assert.deepEqual(JSON.parse(JSON.stringify(api.readPitchSettings())), { min: -6, max: 7, step: 0.125, invertArrows: false });
 });

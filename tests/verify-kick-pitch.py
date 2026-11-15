@@ -1,0 +1,143 @@
+"""Render the reported kick through the pinned WASM and real Web Audio graph."""
+import json
+import subprocess
+from playwright.sync_api import sync_playwright
+from userscript_fixture import ROOT, browser_options
+
+bundle = subprocess.check_output([
+    'node', '-p', "require('./tests/module-fixture.cjs')(['soundcloud/tempo-dependency.js','audio/pitch-quality.mjs'])"
+], cwd=ROOT, text=True, encoding='utf-8')
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(**browser_options(), headless=True)
+    page = browser.new_page()
+    page.route('https://test.invalid/', lambda route: route.fulfill(body='<html></html>', content_type='text/html'))
+    page.goto('https://test.invalid/')
+    page.add_script_tag(content=bundle)
+    results = page.evaluate("""async () => {
+      const rate = 48000;
+      const frames = rate * 8;
+      const hits = Array.from({ length: 10 }, (_, i) =>
+        Math.round((0.55 + i * 0.53) * rate),
+      );
+      let seed = 5;
+      const burst = Array.from({ length: 144 }, (_, i) => {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        return 0.55 * (seed / 2147483648 - 1) * Math.sin((Math.PI * i) / 143) ** 2;
+      });
+      const input = new Float32Array(frames);
+      for (const hit of hits) {
+        for (let j = 0; j < rate * 0.275; j++) {
+          const t = j / rate,
+            phase = 2 * Math.PI * (52 * t + 238 * 0.02 * (1 - Math.exp(-t / 0.02)));
+          input[hit + j] =
+            (0.46 * Math.tanh(7 * Math.sin(phase)) + 0.35 * (burst[j] || 0)) *
+            Math.exp(-t / 0.093) *
+            Math.min(1, (rate * 0.275 - j) / 240);
+        }
+      }
+      for (let i = rate * 5.7; i < frames; i++) {
+        const hz = i < rate * 6.8 ? 440 : 55;
+        input[i] = 0.16 * Math.sin((2 * Math.PI * hz * i) / rate);
+      }
+      // Measure the dominant tone; secondary harmonics can add extra zero crossings.
+      function toneFrequency(pcm, start, expected) {
+        let max = 0,
+          best = 0;
+        for (let hz = expected - 10; hz <= expected + 10; hz += 0.25) {
+          let re = 0,
+            im = 0;
+          const omega = (2 * Math.PI * hz) / rate;
+          for (let i = 0; i < rate * 0.6; i += 8) {
+            const x = pcm[start + i] * (1 - Math.cos((2 * Math.PI * i) / (rate * 0.6)));
+            re += x * Math.cos(omega * i);
+            im += x * Math.sin(omega * i);
+          }
+          const power = re * re + im * im;
+          if (power > max) {
+            max = power;
+            best = hz;
+          }
+        }
+        const amplitude = (2 * Math.sqrt(max)) / ((rate * 0.6) / 8);
+        if (amplitude < 0.05) throw new Error('Shifted test tone is missing');
+        return best;
+      }
+      const rows = [];
+      for (const shift of [-6, -3, 0, 3, 6]) {
+        for (const legacy of [true, false]) {
+          const ctx = new OfflineAudioContext(2, frames, rate);
+          const node = await createStretchNode(ctx, {
+            numberOfInputs: 1,
+            numberOfOutputs: 1,
+            outputChannelCount: [2],
+          });
+          const timing = legacy ? { blockMs: 120, intervalMs: 30 } : pitchTiming;
+          await node.configure({ ...timing, splitComputation: true });
+          const delay = Math.round((await node.latency()) * rate);
+          await node.schedule({ active: true, semitones: shift });
+          const source = ctx.createBufferSource();
+          source.buffer = ctx.createBuffer(2, frames, rate);
+          source.buffer.copyToChannel(input, 0);
+          // Stress the peak guard independently in the second channel.
+          source.buffer.copyToChannel(
+            input.map((x) => x * 1.5),
+            1,
+          );
+          source
+            .connect(node)
+            .connect(
+              legacy ? ctx.destination : protectedPitchInput(ctx, ctx.destination),
+            );
+          source.start();
+          const rendered = await ctx.startRendering();
+          node.port.close();
+          const pcm = rendered.getChannelData(0),
+            pres = [],
+            levels = [];
+          for (const hit of hits) {
+            let pre = 0,
+              total = 0,
+              peak = 0;
+            for (let i = hit + delay - 7200; i < hit + delay + 18000; i++) {
+              total += pcm[i] ** 2;
+              if (i < hit + delay) pre += pcm[i] ** 2;
+              peak = Math.max(peak, Math.abs(pcm[i]));
+            }
+            pres.push(pre / total);
+            levels.push(peak);
+          }
+          const median = (a) => {
+            a.sort((a, b) => a - b);
+            return (a[4] + a[5]) / 2;
+          };
+          let wetPeak = 0;
+          for (const v of rendered.getChannelData(1))
+            wetPeak = Math.max(wetPeak, Math.abs(v));
+          rows.push({
+            shift,
+            legacy,
+            prePercent: median(pres) * 100,
+            peak: median(levels),
+            wetPeak,
+            hz: toneFrequency(pcm, rate * 6 + delay, 440 * 2 ** (shift / 12)),
+            bassHz: toneFrequency(pcm, rate * 7 + delay, 55 * 2 ** (shift / 12)),
+          });
+        }
+      }
+      return rows;
+    }""")
+    browser.close()
+
+for before, after in zip(results[::2], results[1::2]):
+    print(json.dumps([before, after]))
+    shift = after['shift']
+    assert after['wetPeak'] <= .99001, after
+    assert abs(after['hz'] - 440 * 2**(shift/12)) <= 1.5, after
+    assert abs(after['bassHz'] - 55 * 2**(shift/12)) <= .8, after
+    if shift:
+        assert after['prePercent'] < before['prePercent'], (before, after)
+    else:
+        assert abs(after['peak'] - before['peak']) < 1e-4, (before, after)
+    if shift == 3:
+        assert before['peak'] > 1 and after['peak'] < 1, (before, after)

@@ -1,4 +1,8 @@
 import { createHostClock } from './host-clock.mjs';
+import {
+  legacyQueueMethods,
+  queueProfiles,
+} from './soundcloud-queue-profiles.mjs';
 
 const SDK_EXPORTS = [
   ['100', 'BasePlayer', 'Ge', 'Ze', 're'],
@@ -36,13 +40,6 @@ const METHODS = [
     '_shouldBeEnded',
     '81653e3dbff82a7fbb9e22c489ada4893e4d6d17aa23c2049705527a9b33832a',
   ],
-];
-const QUEUE_METHODS = [
-  [
-    'getCurrentSound',
-    'function(){var e=W.getCurrentQueueItem();return null==e?void 0:e.sound}',
-  ],
-  ['getCurrentQueueItem', 'function(){return P.at(I)}'],
 ];
 const own = (value, key) => Object.getOwnPropertyDescriptor(value, key);
 const object = (value) =>
@@ -356,7 +353,7 @@ export function createSoundCloudHostClock({
       !inherits(HTML5PlayerBase, HLSMSEPlayer)
     )
       throw unsupported('the player inheritance changed');
-    for (const [name, expected] of QUEUE_METHODS) {
+    for (const [name, expected] of legacyQueueMethods) {
       const fn = remember(value.queueExports, name);
       if (typeof fn !== 'function' || source(fn) !== expected)
         throw unsupported(`the ${name} accessor changed`);
@@ -595,11 +592,21 @@ export function createSoundCloudHostClock({
     const queueRuntime = queueOf();
     if (!preloadRuntime || preloadRuntime.queue !== queueRuntime) {
       const captured = capture(queueRuntime, crypto);
-      const module = data(captured.cache, '20').value;
-      if (data(module, 'l').value !== true)
-        throw unsupported('the play queue has not loaded');
+      const profile = queueProfiles.find(({ id, methods }) => {
+        const module = own(captured.cache, id)?.value;
+        const manager = module && own(module, 'exports')?.value;
+        if (!object(manager) || own(module, 'l')?.value !== true) return false;
+        return methods.every(([key, expected]) => {
+          const method = own(manager, key)?.value;
+          return typeof method === 'function' && source(method) === expected;
+        });
+      });
+      if (!profile)
+        throw unsupported('the native play queue was not recognized');
+      const module = data(captured.cache, profile.id).value;
       preloadRuntime = {
         ...captured,
+        profile,
         queue: queueRuntime,
         module,
         manager: data(module, 'exports').value,
@@ -607,11 +614,7 @@ export function createSoundCloudHostClock({
     }
     const value = preloadRuntime;
     const manager = value.manager;
-    const methods = [
-      ...QUEUE_METHODS,
-      ['getQueue', 'function(){return P}'],
-      ['getQueueState', 'function(){return{currentIndex:I,repeatMode:j}}'],
-    ].map(([key, expected]) => {
+    const methods = value.profile.methods.map(([key, expected]) => {
       const descriptor = data(manager, key);
       if (
         typeof descriptor.value !== 'function' ||
@@ -630,7 +633,7 @@ export function createSoundCloudHostClock({
       if (
         queueOf() !== value.queue ||
         !sameDescriptor(own(value.queue, 'push'), value.push) ||
-        data(value.cache, '20').value !== value.module ||
+        data(value.cache, value.profile.id).value !== value.module ||
         data(value.module, 'exports').value !== manager
       )
         throw stale();
@@ -689,10 +692,7 @@ export function createSoundCloudHostClock({
     let item = next();
     if (!item && call(manager, 'getState', 'hasNext')) {
       const pull = data(manager, 'pullNext');
-      if (
-        source(pull.value) !==
-        'function(e){s&&!s.stream.isEnded()&&(O=Math.max(O,e))>0&&s.stream.resume()}'
-      )
+      if (source(pull.value) !== value.profile.pullNext)
         throw unsupported('the queue loading method changed');
       const queue = call(manager, 'getQueue');
       for (const target of [queue, manager])

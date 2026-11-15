@@ -79,6 +79,17 @@ async function fixture() {
     createMediaElementSource() {
       return new Node(this, 'source');
     }
+    createWaveShaper() {
+      const shaper = new Node(this, 'shaper');
+      // gainTo follows the small-signal slope through the native shaping curve.
+      Object.defineProperty(shaper, 'curve', {
+        set(points) {
+          const mid = Math.floor(points.length / 2);
+          shaper.gain.value = points[mid + 1] * mid;
+        },
+      });
+      return shaper;
+    }
     createBufferSource() {
       const node = new Node(this, 'tail');
       node.playbackRate = { value: 1 };

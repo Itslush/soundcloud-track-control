@@ -57,6 +57,9 @@ function fixture() {
     createGain() {
       return new Node(this);
     }
+    createWaveShaper() {
+      return new Node(this);
+    }
     createMediaElementSource() {
       return new Node(this);
     }
@@ -175,21 +178,44 @@ test('key shifting composes with pitch preservation and updates at the same spee
   }
 });
 
-test('pause, seek and mode changes reuse one node with full default-equivalent resets', async () => {
+test('unity playback leaves the dry path open even with Preserve Key enabled', async () => {
+  const value = fixture();
+  value.state.speed = 1;
+  value.refresh();
+  await settle();
+  assert.equal(value.nodes.length, 0);
+  assert.equal(value.api.active(value.audio), false);
+  assert.equal(value.input.gain.value, 0);
+  value.state.keyShift = 2;
+  value.refresh();
+  await settle();
+  assert.equal(value.api.active(value.audio), true);
+  value.state.keyShift = 0;
+  value.refresh();
+  await settle();
+  assert.equal(value.api.active(value.audio), false);
+  assert.equal(value.nodes[0].connections.size, 0);
+  assert.equal(value.input.gain.value, 0);
+  assert.equal(value.api.label(), 'Original pitch at 1×.');
+});
+
+test('pause, seek and mode changes reuse one node and the short pitch window', async () => {
   const value = fixture();
   value.refresh();
   await settle();
   assert.equal(value.api.active(value.audio), true);
   const node = value.nodes[0];
-  assert.equal(node.configurations[0].blockMs, 120);
-  assert.equal(node.configurations[0].intervalMs, 30);
+  assert.equal(node.configurations[0].blockMs, 77);
+  assert.equal(node.configurations[0].intervalMs, 9);
   assert.equal(node.configurations[0].splitComputation, true);
   assert.deepEqual(value.input.gain.events.slice(-3), [
     ['cancel', 0],
     ['set', 0, 0],
     ['set', 1, 0.15],
   ]);
-  const wet = [...node.connections][0];
+  const [headroom] = node.connections;
+  const [shaper] = headroom.connections;
+  const [wet] = shaper.connections;
   assert.deepEqual(wet.gain.events.slice(-3), [
     ['set', 0, 0],
     ['set', 0, 0.3],

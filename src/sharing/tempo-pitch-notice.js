@@ -1,4 +1,4 @@
-export function formatPitchNotice(shift) {
+export function formatPitchNotice(shift, prefix = 'Pitch shifted ') {
   const values = Array.isArray(shift) ? shift : [shift];
   const min = Math.min(...values),
     max = Math.max(...values);
@@ -7,5 +7,5 @@ export function formatPitchNotice(shift) {
     return `${rounded < 0 ? '−' : rounded > 0 ? '+' : ''}${Math.abs(rounded)}`;
   };
   if (min === 0 && max === 0) return '';
-  return `Pitch shifted ${format(min)}${min === max ? '' : ` to ${format(max)}`} st`;
+  return `${prefix}${format(min)}${min === max ? '' : ` to ${format(max)}`} st`;
 }

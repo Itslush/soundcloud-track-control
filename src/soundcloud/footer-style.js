@@ -76,10 +76,26 @@ export function installFooterStyle() {
       font-size: 10px;
       line-height: 12px;
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
     .soundcloud-tempo-pitch-notice[hidden] { display: none; }
     .soundcloud-tempo-footer .playbackSoundBadge__titleContextContainer:has(.soundcloud-tempo-pitch-notice:not([hidden])) {
       height: auto;
+      container: tempo-caption / inline-size;
+    }
+    .soundcloud-tempo-footer .playbackSoundBadge__titleContextContainer:has(.soundcloud-tempo-pitch-notice:not([hidden])) :is(.playbackSoundBadge__lightLink, .playbackSoundBadge__title, .playbackSoundBadge__titleLink) {
+      height: 15px;
+      line-height: 15px;
+      white-space: nowrap;
+    }
+    @container tempo-caption (max-width: 105px) {
+      .soundcloud-tempo-pitch-prefix {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
     }
     @media (prefers-reduced-motion: reduce) {
       .soundcloud-tempo-crossfade-artwork {
