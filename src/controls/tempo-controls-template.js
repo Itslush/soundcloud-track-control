@@ -178,6 +178,7 @@ export function controlsTemplate({
           <p id="crossfade-status" role="status"></p>
           <details class="crossfade-debug">
             <summary>Crossfade diagnostics</summary>
+            <p id="crossfade-next-track"></p>
             <pre id="crossfade-debug-output" tabindex="0" aria-label="Crossfade diagnostics"></pre>
             <button id="crossfade-debug-refresh" type="button">Refresh</button>
             <button id="crossfade-debug-copy" type="button">Copy diagnostics</button>

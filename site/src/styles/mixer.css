@@ -342,3 +342,121 @@
     border: 2px solid ButtonText;
   }
 }
+
+.embedded-mixer .mixer-shell {
+  padding: 4px;
+}
+.embedded-mixer .deck-pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+}
+.embedded-mixer .mixer-deck {
+  padding: 4px 6px;
+  display: grid;
+  grid-template-columns: auto minmax(50px, 1fr) minmax(90px, 1.5fr);
+  align-items: center;
+  gap: 6px;
+}
+.embedded-mixer .deck-heading {
+  gap: 4px;
+}
+.embedded-mixer .deck-heading h2 {
+  font-size: 11px;
+  white-space: nowrap;
+}
+.embedded-mixer .deck-expand {
+  background: transparent;
+  border: 1px solid var(--control);
+  border-radius: 3px;
+  color: var(--ink);
+  padding: 3px 5px;
+  font-size: 11px;
+}
+.embedded-mixer .deck-light,
+.embedded-mixer .deck-sleeve,
+.embedded-mixer .deck-track p {
+  display: none;
+}
+.embedded-mixer .deck-track {
+  margin: 0;
+  min-width: 0;
+}
+.embedded-mixer .deck-track h3 {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.embedded-mixer .deck-transport {
+  margin: 0;
+  padding: 0;
+  gap: 5px;
+  border: 0;
+}
+.embedded-mixer .deck-play {
+  width: 30px;
+  height: 30px;
+}
+.embedded-mixer .deck-seek {
+  min-height: 20px;
+}
+.embedded-mixer .deck-times {
+  font-size: 10px;
+}
+.embedded-mixer .deck-source,
+.embedded-mixer .deck-file-row,
+.embedded-mixer .deck-adjustments,
+.embedded-mixer .deck-lock {
+  display: none;
+}
+.embedded-mixer .mixer-deck[data-expanded='true'] .deck-source,
+.embedded-mixer .mixer-deck[data-expanded='true'] .deck-file-row,
+.embedded-mixer .mixer-deck[data-expanded='true'] .deck-adjustments,
+.embedded-mixer .mixer-deck[data-expanded='true'] .deck-lock {
+  display: grid;
+  grid-column: 1 / -1;
+}
+.embedded-mixer .mixer-deck[data-expanded='true'] .deck-file-row {
+  display: flex;
+  min-height: 30px;
+}
+.embedded-mixer .mixer-deck[data-expanded='true'] .deck-adjustments {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.embedded-mixer .mixer-deck[data-expanded='true'] .deck-lock {
+  display: flex;
+  margin: 0;
+}
+.embedded-mixer .mixer-fader {
+  margin-top: 4px;
+  padding: 2px 8px;
+  position: static;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.embedded-mixer .mixer-fader > div:first-child {
+  gap: 8px;
+}
+.embedded-mixer .mixer-fader label,
+.embedded-mixer .mixer-fader output {
+  font-size: 11px;
+  white-space: nowrap;
+}
+.embedded-mixer .mixer-fader > .mixer-blend {
+  flex: 1;
+  gap: 6px;
+}
+.embedded-mixer #two-deck-mixer input[type='range'] {
+  height: 28px;
+}
+@media (max-width: 620px) {
+  .embedded-mixer .deck-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+:root[data-theme='light'] .deck-expand {
+  color: #202020;
+}

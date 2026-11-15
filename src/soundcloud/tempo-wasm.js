@@ -3,6 +3,7 @@ import { createPitchOutput, pitchTiming } from '../audio/pitch-quality.mjs';
 export function createWasmAudio({
   audioModules,
   outputLevel,
+  seekOutput = () => null,
   createStretchNode,
   preservesKey,
   readKeyShift = () => 0,
@@ -471,7 +472,15 @@ export function createWasmAudio({
     }
   }
 
-  function beginCrossfade(audio, buffer, offset, rate, seconds, opening) {
+  function beginCrossfade(
+    audio,
+    buffer,
+    offset,
+    rate,
+    seconds,
+    opening,
+    bypassHostFade = false,
+  ) {
     const state = states.get(audio);
     if (
       !state ||
@@ -496,6 +505,9 @@ export function createWasmAudio({
         'The player audio connection is not ready for crossfade.',
       );
     const context = state.source.context;
+    const seekDestination =
+      bypassHostFade && seekOutput(audio, context, state.source);
+    const destination = seekDestination || state.output;
     const nativeFade = fadeNode(state);
     const tail = context.createBufferSource();
     const level = context.createGain();
@@ -566,7 +578,7 @@ export function createWasmAudio({
       if (head) head.buffer = opening.buffer;
       tail.playbackRate.value = rate;
       tail.connect(level);
-      envelope.connect(state.output);
+      envelope.connect(destination);
       followLevel(audio);
       // Both streams follow the same master volume, without double-applying the outgoing pitch processor.
       if (head) {
@@ -608,6 +620,12 @@ export function createWasmAudio({
       overlapEnd: now + seconds,
       startedAt: now,
       context,
+      valid() {
+        return (
+          !seekDestination ||
+          seekOutput(audio, context, state.source) === seekDestination
+        );
+      },
       silence(target) {
         const next = states.get(target);
         if (!next || closed) return false;

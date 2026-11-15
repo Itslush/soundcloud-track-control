@@ -2,7 +2,9 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const { test } = require('node:test');
 
-const source = require('./module-fixture.cjs')(['soundcloud/tempo-buffered.js']);
+const source = require('./module-fixture.cjs')([
+  'soundcloud/tempo-buffered.js',
+]);
 const create = vm.runInNewContext(`${source}\ncreateBufferedPlayback;`, {
   DOMException,
   WeakRef,
@@ -647,7 +649,6 @@ test('source association waits for proof, times out, and removes aborted listene
   const f = fixture();
   f.state.source = { status: 'unbound', sourceId: 1 };
   const controller = new AbortController();
-  assert.equal(f.api.resolveSource, f.owner.resolveSource);
   const resolving = f.api.resolveSource(f.audio, {
     signal: controller.signal,
   });
@@ -781,5 +782,44 @@ test('a pause during explicit error recovery cancels replay before another engin
   await playing;
   assert.equal(f.calls.uses.length, 1);
   assert.equal(f.audio.plays, 0);
+  await f.api.dispose();
+});
+
+test('crossfades can recover a cached HLS track without relaxing buffered playback identity', async () => {
+  const f = fixture();
+  const url = 'https://test.sndcdn.com/cached.m3u8';
+  f.calls.hostClocks[0].currentStreamUrl = (audio, key) =>
+    audio === f.audio && key === '/artist/track' ? url : null;
+  f.state.source = {
+    generation: 3,
+    sourceId: 7,
+    status: 'unbound',
+    reason: 'no-matching-playlist',
+  };
+  assert.equal(f.api.sourceFor(f.audio).playlistUrl, url);
+  const options = { signal: new AbortController().signal };
+  assert.equal(
+    (await f.api.resolveSource(f.audio, options)).proof,
+    'selected-player-controller',
+  );
+  const awaitingBytes = f.owner.resolveSource(f.audio, options);
+  assert.equal(f.tasks.size, 1);
+  f.binding.onChange(f.audio, {
+    status: 'bound',
+    playlistUrl: url,
+    proof: 'sha256-mdat-blocks',
+  });
+  assert.equal((await awaitingBytes).proof, 'sha256-mdat-blocks');
+  f.current.track = '/artist/next';
+  assert.equal(f.api.sourceFor(f.audio).status, 'unbound');
+  f.current.track = '/artist/track';
+  for (const reason of [
+    'source-invalidated',
+    'unsupported-source',
+    'multiple-playlists',
+  ]) {
+    f.state.source.reason = reason;
+    assert.equal(f.api.sourceFor(f.audio).playlistUrl, undefined);
+  }
   await f.api.dispose();
 });

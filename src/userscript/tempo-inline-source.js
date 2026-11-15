@@ -1,3 +1,4 @@
+import { createMixerShortcut } from '../soundcloud/mixer-shortcut.js';
 import { pitchSettingsKey } from '../controls/tempo-pitch-settings.js';
 import {
   peakProtectionKey,
@@ -715,7 +716,16 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
           'Theme applied for this tab. Could not save it.';
     },
   });
+  const mixerShortcut = createMixerShortcut({
+    parseTrack: parseTrackKey,
+    embeddedKey: (doc) => embeddedPages.key(doc),
+  });
+  for (const type of ['pointerover', 'focusin'])
+    document.addEventListener(type, mixerShortcut.pointer, true);
+  document.addEventListener('keydown', mixerShortcut.keydown, true);
   embeddedPages = createTempoEmbeddedPages({
+    mixerPointer: mixerShortcut.pointer,
+    mixerKeydown: mixerShortcut.keydown,
     parseTrack: parseTrackKey,
     playerClick: (event) => crossfadeClick(event),
     currentTrack: () => trackKey,
@@ -740,6 +750,8 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     audioModules,
     peakProtection: readPeakProtection(),
     outputLevel,
+    seekOutput: (audio, context, source) =>
+      bufferedAudio?.seekOutput(audio, context, source),
     createStretchNode,
     preservesKey,
     readKeyShift: () => timeline.keyShift() ?? keyShift,
@@ -789,6 +801,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
       bufferedAudio.resolveSource(audio, options),
     sourceStats: () => bufferedAudio.sourceStats(),
     preloadNext: (audio, options) => bufferedAudio.preloadNext(audio, options),
+    isCurrentTrack: (audio, track) => bufferedAudio.isCurrentTrack(audio, track),
     readNextSettings: (url) => {
       const key = parseTrackKey(url);
       if (!key) throw new Error('The next track identity is unavailable.');

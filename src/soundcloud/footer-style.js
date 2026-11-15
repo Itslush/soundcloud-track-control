@@ -167,8 +167,8 @@ export function installFooterStyle() {
 
       .playControls__elements.soundcloud-tempo-footer > #soundcloud-tempo-control {
         order: 10;
-        flex: 1 1 416px !important;
-        min-width: 292px !important;
+        flex: 1 1 450px !important;
+        min-width: 326px !important;
         margin: 0 4px 0 0;
       }
 
@@ -178,6 +178,9 @@ export function installFooterStyle() {
         width: auto;
         margin: 0 !important;
       }
+    }
+    @media (max-width: 340px) {
+      .playControls__elements.soundcloud-tempo-footer > #soundcloud-tempo-control { min-width: 0 !important; }
     }
   `;
   (document.head || document.documentElement).append(style);

@@ -159,6 +159,18 @@ export function createTempoControls({
         `${get('#crossfade-seconds').value} seconds`;
     });
     const refreshCrossfadeDebug = () => {
+      let nextPath = '';
+      try {
+        const url = new URL(services.crossfade.nextTrack());
+        if (
+          url.protocol === 'https:' &&
+          ['soundcloud.com', 'www.soundcloud.com'].includes(url.hostname)
+        )
+          nextPath = url.pathname;
+      } catch {}
+      get('#crossfade-next-track').textContent = nextPath
+        ? `Next queued: ${nextPath}`
+        : 'Next queued: unavailable';
       const report = JSON.stringify(
         { version: version, ...services.crossfade.diagnostics() },
         null,
@@ -431,7 +443,7 @@ export function createTempoControls({
         window.open(destination.href, '_blank', 'noopener,noreferrer');
       });
       get('.settings-actions').prepend(buildSet);
-      get('.crossfade-debug').after(mixerButton(website, playback));
+      get('.settings-button').before(mixerButton(website, playback));
     }
     ui.pitchToggle.setAttribute('aria-describedby', 'pitch-mode-help');
     ui.pitchToggle.disabled = !actions.supportsPitch();
@@ -670,9 +682,9 @@ export function createTempoControls({
     ui.root.querySelector('#show-key').checked = showKey;
     ui.root.querySelector('.controls').classList.toggle('hide-key', !showKey);
     const keySpace = showKey ? 0 : 136;
-    ui.host.style.flexBasis = `${(style === 'slider' ? 416 : 312) - keySpace}px`;
-    ui.host.style.minWidth = `${(style === 'slider' ? 320 : 312) - keySpace}px`;
-    ui.host.style.setProperty('--tempo-compact-width', `${308 - keySpace}px`);
+    ui.host.style.flexBasis = `${(style === 'slider' ? 450 : 346) - keySpace}px`;
+    ui.host.style.minWidth = `${(style === 'slider' ? 354 : 346) - keySpace}px`;
+    ui.host.style.setProperty('--tempo-compact-width', `${342 - keySpace}px`);
     ui.root.querySelector('.slider-wrap').dataset.style = style;
     ui.root.querySelector('#control-style').value = style;
     ui.slider.hidden = style === 'dial';

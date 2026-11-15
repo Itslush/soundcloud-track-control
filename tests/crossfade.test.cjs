@@ -34,6 +34,7 @@ function fixture(onVisual) {
     releases: 0,
     nextTrack: 'second',
     nextRate: 1,
+    preloadRequests: [],
   };
   const context = {
     currentTime: 0,
@@ -47,6 +48,8 @@ function fixture(onVisual) {
   const api = createCrossfade({
     onVisual,
     readNextRate: () => state.nextRate,
+    isCurrentTrack: (_audio, track) =>
+      (state.verifiedTrack ?? state.track) === track,
     readNextSettings: () => ({
       ...settings,
       rate: state.nextRate,
@@ -64,8 +67,10 @@ function fixture(onVisual) {
           code: 'SOUNDCLOUD_QUEUE_PENDING',
         });
       const next = state.nextTrack;
+      state.preloadRequests.push({ current: state.track, next });
       let released = false;
       return {
+        trackUrl: next,
         matches: () => next === state.nextTrack,
         ready: (seconds) => state.cached >= seconds,
         bufferedSeconds: () => state.cached,
@@ -84,14 +89,32 @@ function fixture(onVisual) {
         await state.openingWait;
         return { buffer, shifted: false };
       },
-      beginCrossfade(target, buffer, offset, rate, seconds, opening) {
-        state.start = { target, buffer, offset, rate, seconds, opening };
+      beginCrossfade(
+        target,
+        buffer,
+        offset,
+        rate,
+        seconds,
+        opening,
+        bypassHostFade = false,
+      ) {
+        state.start = {
+          target,
+          buffer,
+          offset,
+          rate,
+          seconds,
+          opening,
+          bypassHostFade,
+        };
         return {
           context,
+          startedAt: context.currentTime,
           overlapEnd: context.currentTime + seconds,
           endTime: context.currentTime + (opening?.buffer.duration ?? seconds),
           position: () => context.currentTime,
           nativePosition: (target) => target.currentTime,
+          valid: () => state.routeValid !== false,
           silence: () => true,
           fadeIn(target, duration) {
             state.fades.push({ target, duration });
@@ -125,14 +148,15 @@ function fixture(onVisual) {
       status: state.bound ? 'bound' : 'unbound',
       reason: state.bound ? undefined : 'waiting-for-payload-proof',
       sourceId: state.track,
-      playlistUrl: 'https://a.sndcdn.com/a.m3u8',
+      playlistUrl: state.currentUrl ?? 'https://a.sndcdn.com/a.m3u8',
+      proof: state.proof ?? null,
     }),
     resolveSource: async () => {
       await state.sourceWait;
       return {
         status: state.bound ? 'bound' : 'unbound',
         sourceId: state.track,
-        playlistUrl: 'https://a.sndcdn.com/a.m3u8',
+        playlistUrl: state.currentUrl ?? 'https://a.sndcdn.com/a.m3u8',
       };
     },
     sourceStats: () => ({ installed: true, playlists: 1 }),
@@ -229,6 +253,24 @@ test('crossfade is opt-in, overlaps once, then restores normal playback', async 
   assert.equal(f.state.stops, 1);
   assert.equal(f.state.releases, 1);
   assert.equal(visuals.at(-1), null);
+  f.api.dispose();
+});
+
+test('local queue identity is separate from copied diagnostic data', async () => {
+  const f = fixture();
+  f.state.proof = 'selected-player-controller';
+  f.state.nextTrack = 'https://soundcloud.com/artist/queued?s=private';
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  assert.equal(f.api.nextTrack(), f.state.nextTrack);
+  assert.equal(
+    f.api.diagnostics().player.sourceProof,
+    'selected-player-controller',
+  );
+  assert.ok(!JSON.stringify(f.api.diagnostics()).includes('artist/queued'));
+  f.state.nextTrack = 'https://soundcloud.com/artist/other';
+  assert.equal(f.api.nextTrack(), '');
   f.api.dispose();
 });
 
@@ -499,7 +541,6 @@ test('manual Play prepares a bounded outgoing tail and fades into the selected n
   f.api.warmManual();
   await settle();
   assert.equal(f.api.manualPlay('chosen'), true);
-  f.audio.dispatchEvent(new Event('pause'));
   f.state.track = 'chosen';
   f.audio.currentSrc = 'blob:chosen';
   f.audio.currentTime = 0;
@@ -507,8 +548,9 @@ test('manual Play prepares a bounded outgoing tail and fades into the selected n
   f.tick();
   await settle();
   assert.equal(f.state.clicks, 0);
-  assert.equal(f.state.start.buffer.duration, 4);
+  assert.equal(f.state.start.buffer.duration, 10);
   assert.equal(f.state.start.opening, null);
+  assert.equal(f.state.start.bypassHostFade, true);
   assert.equal(f.state.fades[0].duration, 2);
   assert.equal(
     f.state.preloads,
@@ -525,6 +567,180 @@ test('manual Play prepares a bounded outgoing tail and fades into the selected n
     1,
     'the following preparation reuses that preload',
   );
+  f.api.dispose();
+});
+
+test('a loading pause cannot keep the selected-track bridge alive indefinitely', async () => {
+  const f = fixture();
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.api.manualPlay('chosen'), true);
+  f.audio.paused = true;
+  f.audio.dispatchEvent(new Event('pause'));
+  assert.equal(f.state.stops, 0);
+  f.context.currentTime = 2.1;
+  f.tick();
+  assert.equal(f.state.stops, 1);
+  f.api.dispose();
+});
+
+test('pausing the started target cancels its selected-track bridge', async () => {
+  const f = fixture();
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.api.manualPlay('chosen'), true);
+  f.state.track = 'chosen';
+  f.audio.currentSrc = 'blob:chosen';
+  f.audio.currentTime = 0;
+  f.audio.dispatchEvent(new Event('playing'));
+  f.audio.paused = true;
+  f.audio.dispatchEvent(new Event('pause'));
+  assert.equal(f.state.stops, 1);
+  f.api.dispose();
+});
+
+test('a direct seek uses the rolling outgoing window without pointer intent', async () => {
+  const f = fixture();
+  f.audio.currentTime = 4;
+  f.state.cached = 30;
+  f.api.set(true, 2);
+  f.tick();
+  await settle();
+  f.tick();
+  await settle();
+  f.tick();
+  await settle();
+  assert.equal(f.api.manualPlay('first', true), true);
+  f.audio.dispatchEvent(new Event('seeking'));
+  f.audio.currentTime = 15;
+  f.audio.dispatchEvent(new Event('seeked'));
+  assert.equal(f.state.fades.length, 1);
+  assert.equal(f.audio.currentTime, 15);
+  f.api.dispose();
+});
+
+test('playing an earlier row preloads the next item from the new queue position', async () => {
+  const f = fixture();
+  f.state.track = 'middle';
+  f.state.nextTrack = 'later';
+  f.audio.currentTime = 4;
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.api.manualPlay('earlier'), true);
+  f.state.track = 'earlier';
+  f.state.nextTrack = 'middle';
+  f.audio.currentSrc = 'blob:earlier';
+  f.audio.currentTime = 0;
+  f.audio.dispatchEvent(new Event('playing'));
+  await settle();
+  assert.deepEqual(f.state.preloadRequests, [
+    { current: 'earlier', next: 'middle' },
+  ]);
+  f.api.dispose();
+});
+
+test('an earlier row reusing the same media source still starts the new next preload', async () => {
+  const f = fixture();
+  f.state.track = 'middle';
+  f.audio.currentTime = 4;
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.api.manualPlay('earlier'), true);
+  f.state.track = 'earlier';
+  f.state.nextTrack = 'middle';
+  f.audio.currentTime = 0;
+  f.audio.dispatchEvent(new Event('playing'));
+  await settle();
+  assert.deepEqual(f.state.preloadRequests, [
+    { current: 'earlier', next: 'middle' },
+  ]);
+  assert.equal(f.api.diagnostics().player.nextBufferedSeconds, 0);
+  f.api.dispose();
+});
+
+test('near-zero same-source selection waits for the verified current queue item', async () => {
+  const f = fixture();
+  f.state.track = 'middle';
+  f.audio.currentTime = 0.05;
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.api.manualPlay('earlier'), true);
+  f.state.track = 'earlier';
+  f.state.nextTrack = 'middle';
+  f.state.verifiedTrack = 'middle';
+  f.tick();
+  assert.equal(f.state.preloads, 0);
+  assert.equal(f.state.fades.length, 0);
+  f.state.verifiedTrack = 'earlier';
+  f.tick();
+  await settle();
+  assert.deepEqual(f.state.preloadRequests, [
+    { current: 'earlier', next: 'middle' },
+  ]);
+  assert.equal(f.state.fades.length, 1);
+  f.api.dispose();
+});
+
+test('the previous window remains usable while its replacement is decoding', async () => {
+  const f = fixture();
+  f.audio.currentTime = 4;
+  f.state.cached = 30;
+  f.api.set(true, 2);
+  f.tick();
+  await settle();
+  f.tick();
+  await settle();
+  f.tick();
+  await settle();
+  let finish;
+  f.state.decodeWait = new Promise((resolve) => {
+    finish = resolve;
+  });
+  f.audio.currentTime = 11;
+  f.tick();
+  assert.equal(f.api.manualPlay('first', true), true);
+  finish();
+  await settle();
+  f.api.dispose();
+});
+
+test('failed rolling preparation is not retried on every playback tick', async () => {
+  const f = fixture();
+  f.state.queuePending = true;
+  f.state.fail = true;
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  f.tick();
+  await settle();
+  const reads = f.state.reads;
+  assert.equal(reads, 1);
+  for (let i = 0; i < 20; i++) f.tick();
+  await settle();
+  assert.equal(f.state.reads, reads);
+  f.api.dispose();
+});
+
+test('manual intent does not start another decoder during next-track preparation', async () => {
+  const f = fixture();
+  let finish;
+  f.state.sourceWait = new Promise((resolve) => {
+    finish = resolve;
+  });
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  assert.equal(f.api.diagnostics().stage, 'identifying-source');
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.state.reads, 0);
+  finish();
+  await settle();
   f.api.dispose();
 });
 
@@ -593,6 +809,33 @@ test('a warmed same-track seek fades only after the native seek completes', asyn
   f.api.dispose();
 });
 
+test('a native pause cancels a same-track seek bridge before handoff', async () => {
+  const f = fixture();
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.api.manualPlay('first', true), true);
+  f.audio.paused = true;
+  f.audio.dispatchEvent(new Event('pause'));
+  assert.equal(f.state.stops, 1);
+  f.audio.dispatchEvent(new Event('seeked'));
+  assert.equal(f.state.fades.length, 0);
+  f.api.dispose();
+});
+
+test('a host pause fade invalidates a same-track seek bridge', async () => {
+  const f = fixture();
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  assert.equal(f.api.manualPlay('first', true), true);
+  f.state.routeValid = false;
+  f.tick();
+  assert.equal(f.state.stops, 1);
+  assert.match(f.api.label(), /player routing changed/);
+  f.api.dispose();
+});
+
 test('a repeated native seek cancels its old bridge', async () => {
   const f = fixture();
   f.api.set(true, 2);
@@ -619,6 +862,29 @@ test('a seek cannot hand off to a changed source', async () => {
   assert.equal(f.state.stops, 1);
   assert.equal(f.state.fades.length, 0);
   f.api.dispose();
+});
+
+test('a changed rendition URL invalidates an otherwise matching outgoing identity', async () => {
+  const f = fixture();
+  f.api.set(true, 2);
+  f.api.warmManual();
+  await settle();
+  f.state.currentUrl = 'https://a.sndcdn.com/replacement.m3u8';
+  assert.equal(f.api.manualPlay('first', true), false);
+  f.api.dispose();
+
+  const n = fixture();
+  n.state.cached = 30;
+  n.api.set(true, 5);
+  n.tick();
+  await settle();
+  await n.opening();
+  n.state.currentUrl = 'https://a.sndcdn.com/replacement.m3u8';
+  n.audio.currentTime = 25;
+  n.tick();
+  assert.equal(n.state.clicks, 0);
+  assert.equal(n.state.releases, 1);
+  n.api.dispose();
 });
 
 test('a pending payload hash at the fade boundary waits without dropping the prepared overlap', async () => {

@@ -1,4 +1,6 @@
 import { createHostClock } from './host-clock.mjs';
+import { soundCloudSeekOutput } from './soundcloud-seek-route.mjs';
+import { soundCloudStream } from './soundcloud-stream.mjs';
 import {
   legacyQueueMethods,
   queueProfiles,
@@ -192,6 +194,12 @@ function capture(queue, crypto) {
   }
   if (failure) throw unsupported('runtime capture failed', failure);
   return { runtime, factories, cache, push };
+}
+
+function call(target, key, ...args) {
+  const method = inherited(target, key).value;
+  if (typeof method !== 'function') throw unsupported(`missing ${key} method`);
+  return Reflect.apply(method, target, args);
 }
 
 export function createSoundCloudHostClock({
@@ -586,9 +594,29 @@ export function createSoundCloudHostClock({
     }
   }
 
-  async function preloadNext(audio, { signal } = {}) {
-    if (disposed || signal?.aborted) throw stale();
-    nativeSource(audio);
+  function mediaOf(sound) {
+    const wrapper = data(sound, 'player').value;
+    if (!wrapper) return null;
+    let player = data(wrapper, 'player').value;
+    const visited = new Set();
+    while (object(player) && visited.size < 8 && !visited.has(player)) {
+      visited.add(player);
+      const media = own(player, '_mediaElementAndState');
+      if (media) {
+        if (!('value' in media))
+          throw unsupported('unexpected media state accessor');
+        if (!media.value || data(media.value, 'state').value !== 'USABLE')
+          return null;
+        const element = data(media.value, 'element').value;
+        nativeSource(element);
+        return element;
+      }
+      player = data(player, '_player').value;
+    }
+    return null;
+  }
+
+  function queueAccess() {
     const queueRuntime = queueOf();
     if (!preloadRuntime || preloadRuntime.queue !== queueRuntime) {
       const captured = capture(queueRuntime, crypto);
@@ -604,32 +632,23 @@ export function createSoundCloudHostClock({
       if (!profile)
         throw unsupported('the native play queue was not recognized');
       const module = data(captured.cache, profile.id).value;
+      const manager = data(module, 'exports').value;
+      const methods = profile.methods.map(([key]) => ({
+        key,
+        descriptor: data(manager, key),
+      }));
       preloadRuntime = {
         ...captured,
         profile,
         queue: queueRuntime,
         module,
-        manager: data(module, 'exports').value,
+        manager,
+        methods,
       };
     }
     const value = preloadRuntime;
-    const manager = value.manager;
-    const methods = value.profile.methods.map(([key, expected]) => {
-      const descriptor = data(manager, key);
-      if (
-        typeof descriptor.value !== 'function' ||
-        source(descriptor.value) !== expected
-      )
-        throw unsupported(`the ${key} accessor changed`);
-      return { key, descriptor };
-    });
-    const call = (target, key, ...args) => {
-      const method = inherited(target, key).value;
-      if (typeof method !== 'function')
-        throw unsupported(`missing ${key} method`);
-      return Reflect.apply(method, target, args);
-    };
-    function check() {
+    const { manager, methods } = value;
+    function check(initial = false) {
       if (
         queueOf() !== value.queue ||
         !sameDescriptor(own(value.queue, 'push'), value.push) ||
@@ -638,31 +657,38 @@ export function createSoundCloudHostClock({
       )
         throw stale();
       for (const { key, descriptor } of methods)
-        if (!sameDescriptor(own(manager, key), descriptor)) throw stale();
+        if (!sameDescriptor(own(manager, key), descriptor))
+          throw initial ? unsupported(`the ${key} accessor changed`) : stale();
     }
     // Preloading does not patch SDK clocks, so it does not depend on their build fingerprints.
-    function mediaOf(sound) {
-      const wrapper = data(sound, 'player').value;
-      if (!wrapper) return null;
-      let player = data(wrapper, 'player').value;
-      const visited = new Set();
-      while (object(player) && visited.size < 8 && !visited.has(player)) {
-        visited.add(player);
-        const media = own(player, '_mediaElementAndState');
-        if (media) {
-          if (!('value' in media))
-            throw unsupported('unexpected media state accessor');
-          if (!media.value || data(media.value, 'state').value !== 'USABLE')
-            return null;
-          const element = data(media.value, 'element').value;
-          nativeSource(element);
-          return element;
-        }
-        player = data(player, '_player').value;
-      }
+    check(true);
+    return { manager, check };
+  }
+
+  function readCurrent(audio, track, read) {
+    if (disposed || !preloadRuntime || !track) return null;
+    try {
+      const { manager } = queueAccess();
+      if (call(manager, 'getState', 'globalPlayLock')) return null;
+      const sound = data(call(manager, 'getCurrentQueueItem'), 'sound').value;
+      if (
+        call(manager, 'getCurrentSound') !== sound ||
+        data(data(sound, 'attributes').value, 'permalink_url').value !==
+          'https://soundcloud.com' + track ||
+        mediaOf(sound) !== audio
+      )
+        return null;
+      return read(sound);
+    } catch {
       return null;
     }
-    check();
+  }
+
+  async function preloadNext(audio, { signal } = {}) {
+    if (disposed || signal?.aborted) throw stale();
+    nativeSource(audio);
+    const { manager, check } = queueAccess();
+    const value = preloadRuntime;
     const selected = call(manager, 'getCurrentQueueItem');
     const selectedSound = data(selected, 'sound').value;
     if (
@@ -877,28 +903,7 @@ export function createSoundCloudHostClock({
         bufferedSeconds,
         streamUrl() {
           if (released || disposed || next() !== item) throw stale();
-          const wrapper = data(sound, 'player').value;
-          let player = wrapper && data(wrapper, 'player').value;
-          for (let depth = 0; object(player) && depth < 8; depth++) {
-            const manager = own(player, '_controllerManager')?.value;
-            const entry =
-              manager && own(manager, '_controlledPlayerWithRendition')?.value;
-            const controller = entry && data(entry, 'controlledPlayer').value;
-            if (controller) {
-              const getUrl = inherited(controller, 'getUrl').value;
-              const getPlayer = inherited(controller, 'getPlayer').value;
-              if (
-                source(getUrl) !== 'function(){return this._currentUrl}' ||
-                source(getPlayer) !== 'function(){return this._player}' ||
-                call(controller, 'getPlayer') !== data(player, '_player').value
-              )
-                throw unsupported('the next HLS stream controller changed');
-              // Read only the controller owned by this exact queue item, never a global request.
-              return call(controller, 'getUrl');
-            }
-            player = own(player, '_player')?.value;
-          }
-          throw unsupported('the next HLS stream is not ready');
+          return soundCloudStream(sound, unsupported);
         },
         matches: () => !released && !disposed && next() === item,
         ready(seconds) {
@@ -957,5 +962,19 @@ export function createSoundCloudHostClock({
     return disposal;
   }
 
-  return Object.freeze({ prepare, preloadNext, dispose });
+  return Object.freeze({
+    prepare,
+    preloadNext,
+    currentStreamUrl: (audio, track) =>
+      readCurrent(audio, track, (sound) =>
+        soundCloudStream(sound, unsupported),
+      ),
+    isCurrentTrack: (audio, track) =>
+      Boolean(readCurrent(audio, track, () => true)),
+    seekOutput: (audio, track, context, source) =>
+      readCurrent(audio, track, (sound) =>
+        soundCloudSeekOutput(sound, audio, context, source, window),
+      ),
+    dispose,
+  });
 }

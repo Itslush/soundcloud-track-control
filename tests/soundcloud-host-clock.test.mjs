@@ -606,6 +606,132 @@ test('incoming stream URLs come only from the held queue item’s matching HLS c
   await p.adapter.dispose();
 });
 
+test('a cached outgoing stream belongs to the selected queue sound and exact media element', async () => {
+  const p = preloadFixture();
+  const track = '/artist/playing';
+  p.f.currentItem.sound.attributes = {
+    permalink_url: 'https://soundcloud.com' + track,
+  };
+  const controller = {
+    _player: p.outer._player,
+    _currentUrl: 'https://a.sndcdn.com/current.m3u8',
+    getPlayer: Function('return function(){return this._player}')(),
+    getUrl: Function('return function(){return this._currentUrl}')(),
+  };
+  p.outer._controllerManager = {
+    _controlledPlayerWithRendition: { controlledPlayer: controller },
+  };
+  const preload = await p.adapter.preloadNext(p.audio);
+  assert.equal(
+    p.adapter.currentStreamUrl(p.audio, track),
+    controller._currentUrl,
+  );
+  assert.equal(p.adapter.currentStreamUrl(p.nextAudio, track), null);
+  assert.equal(p.adapter.currentStreamUrl(p.audio, '/artist/earlier'), null);
+  p.state.locked = true;
+  assert.equal(p.adapter.currentStreamUrl(p.audio, track), null);
+  p.state.locked = false;
+  controller._player = p.leaf;
+  assert.equal(p.adapter.currentStreamUrl(p.audio, track), null);
+  preload.dispose();
+  await p.adapter.dispose();
+});
+
+test('post-seek output belongs to the verified current queue sound and media', async () => {
+  const p = preloadFixture();
+  const route = JSON.parse(
+    readFileSync(
+      new URL('./fixtures/soundcloud-seek-route.json', import.meta.url),
+    ),
+  );
+  class AudioContext {}
+  class AudioNode {
+    constructor(context) {
+      this._context = context;
+    }
+    get context() {
+      return this._context;
+    }
+  }
+  class AudioParam {
+    constructor(value = 1) {
+      this._value = value;
+    }
+    get value() {
+      return this._value;
+    }
+  }
+  class GainNode extends AudioNode {
+    constructor(context) {
+      super(context);
+      this._gain = new AudioParam();
+    }
+    get gain() {
+      return this._gain;
+    }
+  }
+  class MediaElementAudioSourceNode extends AudioNode {
+    constructor(context, mediaElement) {
+      super(context);
+      this._mediaElement = mediaElement;
+    }
+    get mediaElement() {
+      return this._mediaElement;
+    }
+  }
+  Object.assign(p.window, {
+    AudioContext,
+    AudioNode,
+    AudioParam,
+    GainNode,
+    MediaElementAudioSourceNode,
+  });
+  p.prototypes.HTML5PlayerBase._initWebAudio = Function(
+    `return (${route.init})`,
+  )();
+  p.prototypes.HTML5PlayerBase._createMediaElementSource = Function(
+    `return (${route.attach})`,
+  )();
+  const context = new AudioContext();
+  const source = new MediaElementAudioSourceNode(context, p.audio);
+  const gainNodes = Object.fromEntries(
+    ['pausePlay', 'seek', 'glitchCoverup'].map((key) => [
+      key,
+      new GainNode(context),
+    ]),
+  );
+  p.leaf._webAudioOrchestration = {
+    context,
+    mediaElementSource: source,
+    gainNodes,
+  };
+  const track = '/artist/playing';
+  p.currentItem.sound.attributes = {
+    permalink_url: 'https://soundcloud.com' + track,
+  };
+  const preload = await p.adapter.preloadNext(p.audio);
+  assert.equal(
+    p.adapter.seekOutput(p.audio, track, context, source),
+    gainNodes.glitchCoverup,
+  );
+  assert.equal(p.adapter.isCurrentTrack(p.audio, track), true);
+  assert.equal(p.adapter.isCurrentTrack(p.audio, '/artist/other'), false);
+  assert.equal(p.adapter.isCurrentTrack(p.nextAudio, track), false);
+  assert.equal(
+    p.adapter.seekOutput(p.audio, '/artist/other', context, source),
+    null,
+  );
+  assert.equal(p.adapter.seekOutput(p.nextAudio, track, context, source), null);
+  p.state.locked = true;
+  assert.equal(p.adapter.isCurrentTrack(p.audio, track), false);
+  assert.equal(p.adapter.seekOutput(p.audio, track, context, source), null);
+  p.state.locked = false;
+  p.f.currentItem = p.next;
+  assert.equal(p.adapter.seekOutput(p.audio, track, context, source), null);
+  preload.dispose();
+  await p.adapter.dispose();
+});
+
 test('preloading rejects unknown next tracks, repeat-one, ad locks and cancelled requests', async () => {
   for (const mode of ['empty', 'repeat', 'ad', 'abort']) {
     const p = preloadFixture();

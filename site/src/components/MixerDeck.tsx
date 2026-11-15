@@ -9,7 +9,11 @@ import {
 
 type Props = {
   name: 'A' | 'B';
+  embedded: boolean;
+  expanded: boolean;
+  onExpand: () => void;
   seed: string;
+  command: { track: string; id: number } | null;
   bus: () => { context: AudioContext; level: GainNode };
   onSound: () => void;
 };
@@ -30,7 +34,16 @@ function trackUrl(value: string) {
   return 'https://soundcloud.com' + url.pathname;
 }
 
-export function MixerDeck({ name, seed, bus, onSound }: Props) {
+export function MixerDeck({
+  name,
+  embedded,
+  expanded,
+  onExpand,
+  seed,
+  command,
+  bus,
+  onSound,
+}: Props) {
   const [url, setUrl] = useState(seed);
   const [song, setSong] = useState<{
     title: string;
@@ -105,16 +118,17 @@ export function MixerDeck({ name, seed, bus, onSound }: Props) {
     player.current?.apply(tempo, lock, shift);
   }, [tempo, lock, shift]);
 
-  async function load(file?: File) {
+  async function load(file?: File, requestedUrl?: string) {
     let link = '';
     if (!file) {
       try {
-        link = trackUrl(url.trim());
+        link = trackUrl((requestedUrl ?? url).trim());
       } catch {
         setStatus('Enter a public SoundCloud track URL.');
         return;
       }
     }
+    if (requestedUrl) setUrl(link);
     const request = ++generation.current;
     setLoading(true);
     setSong(null);
@@ -152,6 +166,14 @@ export function MixerDeck({ name, seed, bus, onSound }: Props) {
     }
   }
 
+  useEffect(() => {
+    if (command) void load(undefined, command.track);
+  }, [command]);
+
+  useEffect(() => {
+    if (seed && window.parent !== window) void load(undefined, seed);
+  }, []);
+
   function play() {
     const deck = player.current;
     if (!deck || !song) return;
@@ -164,9 +186,26 @@ export function MixerDeck({ name, seed, bus, onSound }: Props) {
 
   const filter = artworkFilter(tempo, shift, lock);
   return (
-    <section className="mixer-deck" aria-label={'Deck ' + name}>
+    <section
+      className="mixer-deck"
+      data-expanded={embedded && expanded}
+      aria-label={'Deck ' + name}
+    >
       <header className="deck-heading">
         <h2>Deck {name}</h2>
+        {embedded && (
+          <button
+            className="deck-expand"
+            type="button"
+            aria-expanded={expanded}
+            aria-label={
+              (expanded ? 'Hide' : 'Show') + ' deck ' + name + ' controls'
+            }
+            onClick={onExpand}
+          >
+            {expanded ? 'Less' : 'More'}
+          </button>
+        )}
         <span
           className="deck-light"
           data-playing={playing}

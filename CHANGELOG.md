@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.7.7
+
+- Crossfade can identify a playing track from SoundCloud's selected stream when its playlist was missed. The player prepares audio around the playhead for direct clicks on the footer timeline and Play buttons. Crossfade diagnostics show which track SoundCloud queued next.
+- On a supported SoundCloud player, the outgoing fade stays audible while SoundCloud briefly mutes its native stream during a seek or a switch to a selected track.
+- The footer's Mix button opens two compact decks. Hover or focus a track, then press Alt+Shift+1 for deck A or Alt+Shift+2 for deck B. Loading a track leaves it paused.
+- Downward pitch shifts now align waveform splices to detected bass attacks to reduce kick timing drift against the melody.
+
 ## 1.2.7.6
 
 - Changing semitones keeps playback audible as the pitch shifter warms up. Returning to zero during playback keeps the shifter ready for the next adjustment.

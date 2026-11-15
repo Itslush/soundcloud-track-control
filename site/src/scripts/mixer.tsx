@@ -9,9 +9,14 @@ function gains(position: number) {
 
 function Mixer() {
   const [position, setPosition] = useState(0);
+  const [expanded, setExpanded] = useState({ A: false, B: false });
+  const embedded = window.parent !== window;
   const engine = useRef<{ context: AudioContext; levels: GainNode[] } | null>(
     null,
   );
+  const [commands, setCommands] = useState<
+    Partial<Record<'A' | 'B', { deck: 'A' | 'B'; track: string; id: number }>>
+  >({});
   const seed = new URLSearchParams(location.hash.slice(1)).get('track') ?? '';
   const parentOrigin = new URLSearchParams(location.search).get('host');
 
@@ -43,7 +48,7 @@ function Mixer() {
       );
     });
   }
-  function notifyHost(message: string) {
+  function notifyHost(message: string | object) {
     if (
       window.parent !== window &&
       parentOrigin &&
@@ -64,13 +69,56 @@ function Mixer() {
       if (event.key === 'Escape' && !event.defaultPrevented)
         notifyHost('soundcloud-track-control:mixer-close');
     };
+    const receive = (event: MessageEvent) => {
+      if (
+        event.source !== window.parent ||
+        event.origin !== parentOrigin ||
+        ![
+          'https://soundcloud.com',
+          'https://m.soundcloud.com',
+          'https://www.soundcloud.com',
+        ].includes(event.origin) ||
+        ![
+          'soundcloud-track-control:mixer-load',
+          'soundcloud-track-control:mixer-theme',
+        ].includes(event.data?.type) ||
+        (event.data.type === 'soundcloud-track-control:mixer-load' &&
+          (!['A', 'B'].includes(event.data.deck) ||
+            typeof event.data.track !== 'string'))
+      )
+        return;
+      if (event.data.type === 'soundcloud-track-control:mixer-theme') {
+        if (['light', 'oled', 'charcoal'].includes(event.data.theme))
+          document.documentElement.dataset.theme = event.data.theme;
+        return;
+      }
+      setCommands((current) => ({
+        ...current,
+        [event.data.deck]: {
+          deck: event.data.deck,
+          track: event.data.track,
+          id: Date.now() + Math.random(),
+        },
+      }));
+    };
+    window.addEventListener('message', receive);
+    notifyHost('soundcloud-track-control:mixer-ready');
     window.addEventListener('pagehide', close);
     window.addEventListener('keydown', escape);
     return () => {
+      window.removeEventListener('message', receive);
       window.removeEventListener('pagehide', close);
       window.removeEventListener('keydown', escape);
     };
   }, []);
+  function toggleDeck(name: 'A' | 'B') {
+    const next = { ...expanded, [name]: !expanded[name] };
+    setExpanded(next);
+    notifyHost({
+      type: 'soundcloud-track-control:mixer-size',
+      expanded: next.A || next.B,
+    });
+  }
   const label =
     position === 0
       ? 'A only'
@@ -84,12 +132,20 @@ function Mixer() {
       <div className="deck-pair">
         <MixerDeck
           name="A"
+          embedded={embedded}
+          expanded={expanded.A}
+          onExpand={() => toggleDeck('A')}
+          command={commands.A ?? null}
           seed={seed}
           bus={() => bus(0)}
           onSound={() => notifyHost('soundcloud-track-control:mixer-playing')}
         />
         <MixerDeck
           name="B"
+          embedded={embedded}
+          expanded={expanded.B}
+          onExpand={() => toggleDeck('B')}
+          command={commands.B ?? null}
           seed=""
           bus={() => bus(1)}
           onSound={() => notifyHost('soundcloud-track-control:mixer-playing')}

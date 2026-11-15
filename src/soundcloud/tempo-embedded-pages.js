@@ -223,6 +223,9 @@ export function createTempoEmbeddedPages(api) {
       attributeFilter: ['href', 'src', 'srcset', 'alt', 'sizes', 'aria-label'],
     });
     installCopy(entry);
+    for (const type of ['pointerover', 'focusin'])
+      listen(entry, entry.doc, type, api.mixerPointer, true);
+    listen(entry, entry.doc, 'keydown', api.mixerKeydown, true);
     listen(entry, entry.doc, 'click', api.playerClick, true);
     listen(entry, entry.doc, 'pointerover', api.playerClick, true);
     listen(entry, entry.doc, 'pointerdown', api.playerClick, true);

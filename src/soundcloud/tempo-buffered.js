@@ -90,7 +90,29 @@ export function createBufferedPlayback({
     onState();
   }
 
-  function resolveSource(audio, { signal }) {
+  function crossfadeSource(audio, observed = binding.resolve(audio)) {
+    // Replaying a cached track may append audio without fetching its HLS manifest again.
+    if (
+      observed.reason !== 'no-matching-playlist' &&
+      observed.reason !== 'waiting-for-payload-proof'
+    )
+      return observed;
+    const playlistUrl = hostClock.currentStreamUrl?.(
+      audio,
+      readSettings(audio).track,
+    );
+    return playlistUrl
+      ? {
+          ...observed,
+          status: 'bound',
+          reason: undefined,
+          playlistUrl,
+          proof: 'selected-player-controller',
+        }
+      : observed;
+  }
+
+  function resolveSource(audio, { signal }, forCrossfade = false) {
     return new Promise((resolve, reject) => {
       let timer;
       let settled = false;
@@ -106,6 +128,7 @@ export function createBufferedPlayback({
       };
       const abort = () => finish(reject, abortError());
       const receive = (result) => {
+        if (forCrossfade) result = crossfadeSource(audio, result);
         if (result.status === 'bound') finish(resolve, result);
         else if (['ambiguous', 'unavailable'].includes(result.status))
           finish(
@@ -413,10 +436,13 @@ export function createBufferedPlayback({
   }
 
   return Object.freeze({
-    sourceFor: (audio) => binding.resolve(audio),
+    sourceFor: crossfadeSource,
     sourceStats: () => binding.stats(),
-    resolveSource,
+    resolveSource: (audio, options) => resolveSource(audio, options, true),
     preloadNext: (audio, options) => hostClock.preloadNext(audio, options),
+    isCurrentTrack: (audio, track) => hostClock.isCurrentTrack(audio, track),
+    seekOutput: (audio, context, source) =>
+      hostClock.seekOutput?.(audio, readSettings(audio).track, context, source),
     sync,
     play,
     pause,

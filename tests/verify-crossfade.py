@@ -25,6 +25,11 @@ with sync_playwright() as p:
           const energy = context.createAnalyser(); energy.fftSize=1024; analyser.connect(energy);
           const silent = context.createGain(); silent.gain.value = 0;
           analyser.connect(silent).connect(context.destination);
+          function tone(frequency, frame) {
+            // Mark the seek destination with a second tone so both sides of the overlap are observable.
+            const hz = seek && frequency === 440 && frame < 6 * 48000 ? 880 : frequency;
+            return .08 * Math.sin(2 * Math.PI * hz * frame / 48000);
+          }
           function wav(frequency) {
             const frames = 48000 * 12, bytes = new ArrayBuffer(44 + frames * 2), view = new DataView(bytes);
             const text = (at, value) => [...value].forEach((letter,i)=>view.setUint8(at+i, letter.charCodeAt(0)));
@@ -32,7 +37,7 @@ with sync_playwright() as p:
             view.setUint32(16,16,true); view.setUint16(20,1,true); view.setUint16(22,1,true);
             view.setUint32(24,48000,true); view.setUint32(28,96000,true); view.setUint16(32,2,true); view.setUint16(34,16,true);
             text(36,'data'); view.setUint32(40,frames*2,true);
-            for(let i=0;i<frames;i++) view.setInt16(44+i*2, Math.sin(2*Math.PI*frequency*i/48000)*.08*32767,true);
+            for(let i=0;i<frames;i++) view.setInt16(44+i*2, tone(frequency,i)*32767,true);
             return URL.createObjectURL(new Blob([bytes], {type:'audio/wav'}));
           }
           const urls = [wav(440), wav(880)];
@@ -53,7 +58,7 @@ with sync_playwright() as p:
           });
           context.createMediaElementSource(audio).connect(analyser);
           audio.addEventListener('playing', refresh);
-          await audio.play(); audio.currentTime = 5.5;
+          await audio.play(); audio.currentTime = seek ? 6.25 : 5.5;
           await new Promise(resolve => audio.addEventListener('seeked',resolve,{once:true}));
           refresh();
           const ready = () => graph.crossfadeReady(audio,{shift,preserve,rate:audio.playbackRate});
@@ -73,6 +78,7 @@ with sync_playwright() as p:
           const values = new Map();
           const crossfade = createCrossfade({graph, readSettings:()=>({rate:audio===outgoing?1:nextRate,preserve,shift,variable:false}),
             readNextRate:()=>nextRate,
+            isCurrentTrack:(_audio,key)=>track===key,
             readNextSettings:()=>({rate:nextRate,preserve,shift,variable:false}),
             readTrack:()=>track, sourceFor:()=>({status:'bound',sourceId:track,playlistUrl:'https://a.sndcdn.com/test.m3u8'}),
             preloadNext:async(_audio,{signal}={})=>{
@@ -94,12 +100,16 @@ with sync_playwright() as p:
             storage:{getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)},
             modules:{loadAudioDependencies:async()=>({}),createPcmSource:options=>options,createPcmWindow:({source})=>({
               info:async()=>({durationHint:12,sampleRate:48000}),
-              acquire:async(from,to)=>{const hz=source.url.includes('next')?880:440; const plane=Float32Array.from({length:to-from},(_,i)=>.08*Math.sin(2*Math.PI*hz*(from+i)/48000));return {channels:[plane,plane],release(){}};},
+              acquire:async(from,to)=>{const hz=source.url.includes('next')?880:440; const plane=Float32Array.from({length:to-from},(_,i)=>tone(hz,from+i));return {channels:[plane,plane],release(){}};},
               dispose:async()=>{},
             })},
           });
           crossfade.select(audio); crossfade.set(true,2);
-          if(manual) { crossfade.warmManual(); await wait(200); }
+          if(manual && !seek) { crossfade.warmManual(); await wait(200); }
+          if(seek) {
+            for(let i=0; i<70 && !(crossfade.diagnostics().player?.seekBridgeSeconds>0); i++) await wait(50);
+            if(!(crossfade.diagnostics().player?.seekBridgeSeconds>0)) throw new Error('Automatic seek bridge was not prepared');
+          }
           if(manual) { if(!crossfade.manualPlay(seek?'first':'second',seek)) throw new Error('Manual Play was declined'); startSecond(); }
           const spectrum = new Float32Array(analyser.frequencyBinCount);
           function measure() {
@@ -109,7 +119,9 @@ with sync_playwright() as p:
           }
           const readings=[];
           const levels=[], samples=new Float32Array(energy.fftSize);
-          for(let i=0;i<(seek?500:900);i++) {
+          const deadline = performance.now() + 16000;
+          // Finish while the incoming test tone is still playing, even if timers run late.
+          for(let i=0; performance.now()<deadline && (!clickedAt || performance.now()-clickedAt<4600); i++) {
             await wait(10);
             if(clicks && performance.now()-clickedAt>150) {
               energy.getFloatTimeDomainData(samples);
@@ -122,15 +134,12 @@ with sync_playwright() as p:
           crossfade.dispose(); audio.pause(); await context.close(); urls.forEach(URL.revokeObjectURL);
           return {shift,nextRate,preserve,clicks,simultaneous,final,readings,readyAtClick,minimumRms:Math.min(...levels),preloadLeadMs:clickedAt-requestedAt,diagnostics:crossfade.diagnostics()};
         }''', scenario)
-        assert result['clicks'] == 1 and (scenario.get('seek') or result['simultaneous']), result
+        assert result['clicks'] == 1 and result['simultaneous'], result
         if not scenario.get('manual'):
             assert result['readyAtClick'] and result['preloadLeadMs'] >= 1200, result
             assert any(row['clicks'] == 1 and not row['nativeStarted'] and row['next'] > -58 for row in result['readings']), result
         assert any(row['stage'] == 'handing-off' for row in result['readings']) or any(entry['message'] == 'Crossfade complete.' for entry in result['diagnostics']['history']), result
-        if scenario.get('seek'):
-            assert result['final']['old'] > -50, result
-        else:
-            assert result['final']['old'] < -65 and result['final']['next'] > -50, result
+        assert result['final']['old'] < -65 and result['final']['next'] > -50, result
         assert result['minimumRms'] > .004, result
         results.append({key:value for key,value in result.items() if key != 'readings'})
         page.close()

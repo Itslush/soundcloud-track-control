@@ -57,3 +57,62 @@ test('steady harmonics retain their level through waveform splices and resamplin
     }
   }
 });
+
+test('live downward steps keep distorted kick attacks on the melody clock', () => {
+  const length = rate * 10;
+  const hits = Array.from({ length: 27 }, (_, i) =>
+    Math.round((0.4 + i / 3) * rate),
+  );
+  const input = Float32Array.from(
+    { length },
+    (_, i) =>
+      0.2 * Math.sin((2 * Math.PI * 440 * i) / rate) +
+      0.2 * Math.sin((2 * Math.PI * 659.25 * i) / rate),
+  );
+  for (const hit of hits) {
+    for (let j = 0; j < 2200; j++) {
+      const t = j / rate;
+      input[hit + j] +=
+        0.6 *
+        Math.tanh(
+          5 *
+            Math.sin(
+              2 * Math.PI * (55 * t + 180 * 0.02 * (1 - Math.exp(-t / 0.02))),
+            ),
+        ) *
+        Math.exp(-t / 0.027);
+    }
+  }
+  for (const rightOnly of [false, true]) {
+    const processor = new WaveformPitch(rate, latency);
+    const output = new Float32Array(length);
+    const silent = new Float32Array(length);
+    const shifts = [-2.5, -3, -3.5, -4, -3.5, -3];
+    for (let i = 0; i < length; i += 128) {
+      const shift = shifts[Math.min(shifts.length - 1, Math.floor(i / rate))];
+      const signal = input.subarray(i, i + 128);
+      const zero = silent.subarray(i, i + 128);
+      const result = output.subarray(i, i + 128);
+      processor.process(
+        rightOnly ? [zero, signal] : [signal],
+        rightOnly ? [zero, result] : [result],
+        2 ** (shift / 12),
+      );
+    }
+    for (const hit of hits) {
+      let peak = 0;
+      let position = 0;
+      for (let i = hit + latency - 1440; i < hit + latency + 1440; i++) {
+        if (Math.abs(output[i]) > peak) {
+          peak = Math.abs(output[i]);
+          position = i;
+        }
+      }
+      const delayMs = (position - hit - latency) / (rate / 1000);
+      assert.ok(
+        peak > 0.4 && delayMs >= -2 && delayMs < 8,
+        `${hit / rate}s: peak ${peak}, delay ${delayMs}ms`,
+      );
+    }
+  }
+});

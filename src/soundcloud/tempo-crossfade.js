@@ -1,3 +1,5 @@
+import { decodeCrossfade } from './crossfade-pcm.js';
+
 export function createCrossfade({
   modules,
   graph,
@@ -5,6 +7,7 @@ export function createCrossfade({
   resolveSource = sourceFor,
   sourceStats = () => null,
   preloadNext,
+  isCurrentTrack = () => false,
   readNextRate = () => 4,
   readNextSettings,
   readSettings,
@@ -22,6 +25,8 @@ export function createCrossfade({
   let selected;
   let job;
   let warm;
+  let warming;
+  let warmRetry;
   let pendingNext;
   let staleIdentity;
   let staleRetries = 0;
@@ -77,7 +82,10 @@ export function createCrossfade({
 
   function clearWarm() {
     warm?.controller.abort();
+    warming?.controller.abort();
     warm = null;
+    warming = null;
+    warmRetry = null;
   }
 
   function startPreload(audio, track) {
@@ -144,55 +152,6 @@ export function createCrossfade({
       current.retryPosition = current.audio.currentTime + 2;
   }
 
-  async function decode(current, url, start, length = Infinity) {
-    const { signal } = current.controller;
-    const { Mediabunny } = await modules.loadAudioDependencies({ signal });
-    const provider = modules.createPcmWindow({
-      source: modules.createPcmSource({ library: Mediabunny, url }),
-    });
-    try {
-      const info = await provider.info({ signal });
-      const duration =
-        info.totalSourceFrames === undefined
-          ? info.durationHint
-          : info.totalSourceFrames / info.sampleRate;
-      if (!Number.isFinite(duration) || duration <= 0)
-        throw new Error('This stream’s duration is unavailable.');
-      const first = Math.floor(start * info.sampleRate);
-      const end = Math.floor(
-        Math.min(duration, start + length) * info.sampleRate,
-      );
-      const frames = end - first;
-      if (frames <= 0 || frames * 8 > 32 * 1024 * 1024)
-        throw new Error('This track’s crossfade buffer is too large.');
-      const buffer = graph
-        .contextFor(current.audio)
-        .createBuffer(2, frames, info.sampleRate);
-      for (let from = first; from < end; from += info.sampleRate) {
-        const to = Math.min(end, from + info.sampleRate);
-        const lease = await provider.acquire(from, to, { signal });
-        try {
-          if (
-            lease.channels.length !== 2 ||
-            lease.channels.some((channel) => channel.length !== to - from)
-          )
-            throw new Error('The crossfade audio buffer is incomplete.');
-          for (let channel = 0; channel < 2; channel++)
-            buffer.copyToChannel(
-              lease.channels[channel],
-              channel,
-              from - first,
-            );
-        } finally {
-          lease.release();
-        }
-      }
-      return { buffer, duration, start: first / info.sampleRate };
-    } finally {
-      await provider.dispose();
-    }
-  }
-
   async function prepareOpening(current) {
     current.decodingOpening = true;
     status('Preparing the next track’s opening…');
@@ -203,7 +162,9 @@ export function createCrossfade({
         throw new Error('The next track uses a tempo timeline.');
       }
       const url = current.next.streamUrl();
-      const decoded = await decode(
+      const decoded = await decodeCrossfade(
+        modules,
+        graph,
         current,
         url,
         0,
@@ -264,7 +225,10 @@ export function createCrossfade({
         throw new Error('This track’s audio could not be identified.');
       current.sourceId = source.sourceId;
       current.generation = source.generation;
-      const { buffer, duration, start } = await decode(
+      current.sourceUrl = source.playlistUrl;
+      const { buffer, duration, start } = await decodeCrossfade(
+        modules,
+        graph,
         current,
         source.playlistUrl,
         current.start,
@@ -281,7 +245,8 @@ export function createCrossfade({
       if (
         latest.status !== 'bound' ||
         latest.sourceId !== current.sourceId ||
-        latest.generation !== current.generation
+        latest.generation !== current.generation ||
+        latest.playlistUrl !== current.sourceUrl
       )
         throw new Error('The track changed while preparing crossfade.');
       current.start = start;
@@ -332,20 +297,21 @@ export function createCrossfade({
     if (!track || !Number.isFinite(audio.duration)) return;
     const settings = readSettings(audio);
     if (settings.variable || !graph.crossfadeReady(audio, settings)) return;
+    if (job && !job.failed && !job.opening) return;
     const start = audio.currentTime;
     if ((audio.duration - start) / settings.rate < 0.5) return;
     const sig = signature(audio);
+    if (warming?.signature === sig) return;
+    if (warmRetry?.signature === sig && start < warmRetry.position) return;
+    const end = warm?.tail && warm.tail.start + warm.tail.buffer.duration;
     if (
       warm?.signature === sig &&
-      (warm.tail
-        ? (warm.tail.start + warm.tail.buffer.duration - start) /
-            settings.rate >=
-          0.5
-        : start - warm.start < settings.rate)
+      (end >= audio.duration - 0.01 ||
+        (end - start) / settings.rate >= seconds + 2)
     )
       return;
-    clearWarm();
-    const current = (warm = {
+    warming?.controller.abort();
+    const current = (warming = {
       audio,
       track,
       start,
@@ -355,26 +321,39 @@ export function createCrossfade({
     void (async () => {
       try {
         const source = await resolveSource(audio, current.controller);
-        if (warm !== current || source.status !== 'bound') return;
-        const tail = await decode(
+        if (warming !== current || source.status !== 'bound') return;
+        const tail = await decodeCrossfade(
+          modules,
+          graph,
           current,
           source.playlistUrl,
           start,
-          (seconds + 2) * settings.rate,
+          (seconds + 8) * settings.rate,
         );
         const latest = sourceFor(audio);
         if (
-          warm !== current ||
+          warming !== current ||
           signature(audio) !== current.signature ||
           latest.status !== 'bound' ||
           latest.sourceId !== source.sourceId ||
           latest.generation !== source.generation ||
+          latest.playlistUrl !== source.playlistUrl ||
           Math.abs(tail.duration - audio.duration) > 0.25
         )
           return;
         current.tail = tail;
         current.source = source;
-      } catch {}
+        warm?.controller.abort();
+        warm = current;
+        warmRetry = null;
+      } catch {
+      } finally {
+        if (warming === current) {
+          warming = null;
+          if (warm !== current)
+            warmRetry = { signature: sig, position: start + 5 * settings.rate };
+        }
+      }
     })();
   }
 
@@ -403,11 +382,14 @@ export function createCrossfade({
       source.status !== 'bound' ||
       source.sourceId !== current.source.sourceId ||
       source.generation !== current.source.generation ||
+      source.playlistUrl !== current.source.playlistUrl ||
       offset < 0 ||
       overlap < 0.5
     )
       return false;
     warm = null;
+    warming?.controller.abort();
+    warming = null;
     cancel();
     current.target = target;
     current.seek = seek;
@@ -423,6 +405,7 @@ export function createCrossfade({
         settings.rate,
         overlap,
         null,
+        true,
       );
       current.tail = null;
       status('Crossfading into the selected track…');
@@ -439,16 +422,27 @@ export function createCrossfade({
     if (job?.target) {
       const current = job;
       if (!current.route) return;
+      if (current.seek && current.route.valid?.() === false) {
+        cancel('player routing changed');
+        return;
+      }
       const remaining =
         current.route.endTime - current.route.context.currentTime;
-      const track = readTrack();
       if (
-        !current.prefetch &&
+        current.loadingPause &&
+        audio.paused &&
+        current.route.context.currentTime - current.route.startedAt >= 2
+      ) {
+        cancel('player pause');
+        return;
+      }
+      if (!audio.paused) current.loadingPause = false;
+      const track = readTrack();
+      const targetIsCurrent =
         !current.seek &&
         track === current.target &&
-        !audio.paused &&
-        (audio !== current.audio || audio.currentSrc !== current.oldSrc)
-      ) {
+        isCurrentTrack(audio, current.target);
+      if (!current.prefetch && targetIsCurrent && !audio.paused) {
         current.prefetch = startPreload(audio, track);
       }
       if (
@@ -473,7 +467,8 @@ export function createCrossfade({
         if (
           audio !== current.audio ||
           source.sourceId !== current.source.sourceId ||
-          source.generation !== current.source.generation
+          source.generation !== current.source.generation ||
+          source.playlistUrl !== current.source.playlistUrl
         ) {
           cancel('seeked track changed');
           return;
@@ -485,11 +480,7 @@ export function createCrossfade({
         !audio.paused &&
         !audio.seeking &&
         audio.readyState >= 2 &&
-        (current.seek
-          ? current.seeked
-          : audio !== current.audio ||
-            audio.currentSrc !== current.oldSrc ||
-            audio.currentTime < current.position - 0.1) &&
+        (current.seek ? current.seeked : targetIsCurrent) &&
         graph.crossfadeReady(audio, readSettings(audio))
       ) {
         current.incomingTrack = track;
@@ -636,11 +627,15 @@ export function createCrossfade({
       status('Crossfade needs a ready player audio connection.');
       return;
     }
+    if (job?.failed) warmManual();
     if (audio.duration / settings.rate < seconds * 2 + 2 || remaining < 0.5) {
+      if (remaining >= 0.5) warmManual();
       status('Playing normally. Not enough track time for crossfade.');
       return;
     }
     if (!job) {
+      warming?.controller.abort();
+      warming = null;
       const prefetch = pendingNext;
       job = {
         audio,
@@ -666,7 +661,11 @@ export function createCrossfade({
       return;
     }
     if (!job.opening) {
-      if (!job.decodingOpening) void prepareOpening(job);
+      if (!job.decodingOpening) {
+        warming?.controller.abort();
+        warming = null;
+        void prepareOpening(job);
+      }
       return;
     }
     if (
@@ -678,6 +677,7 @@ export function createCrossfade({
       return;
     }
     status('Crossfade ready.');
+    if (remaining > seconds + 1) warmManual();
     if (remaining > seconds) return;
     const button = nextButton();
     if (!button) {
@@ -698,7 +698,8 @@ export function createCrossfade({
     if (
       source.status !== 'bound' ||
       source.sourceId !== current.sourceId ||
-      source.generation !== current.generation
+      source.generation !== current.generation ||
+      source.playlistUrl !== current.sourceUrl
     ) {
       cancel('stream identity changed');
       return;
@@ -715,6 +716,7 @@ export function createCrossfade({
         remaining,
         current.opening,
       );
+      clearWarm();
       current.buffer = null;
       current.opening = null;
       current.overlapSeconds = remaining;
@@ -783,26 +785,50 @@ export function createCrossfade({
     }
     if (event.type === 'seeked') return;
     if (event.type === 'playing') {
+      if (
+        job?.target &&
+        !job.seek &&
+        readTrack() === job.target &&
+        isCurrentTrack(selected, job.target)
+      )
+        job.targetStarted = true;
       safeTick();
       return;
     }
     // Loading the next track may pause/seek the reused element before it starts.
     if (
       job?.route &&
+      !job.seek &&
       !job.fading &&
-      (event.type === 'seeking' || !job.incomingTrack)
-    )
+      (event.type === 'seeking' ||
+        (!job.target && !job.incomingTrack) ||
+        (event.type === 'pause' &&
+          job.target &&
+          !job.targetStarted &&
+          job.route.context.currentTime - job.route.startedAt < 2))
+    ) {
+      if (event.type === 'pause' && job.target) job.loadingPause = true;
       return;
+    }
     if (event.type === 'pause') {
       staleIdentity = undefined;
       staleRetries = 0;
     }
+    clearWarm();
     cancel(`player ${event.type}`);
   }
 
   return {
     manualPlay,
     warmManual,
+    nextTrack() {
+      const next = job?.prefetch?.next ?? pendingNext?.next;
+      try {
+        return next?.matches() ? next.trackUrl : '';
+      } catch {
+        return '';
+      }
+    },
     enabled: () => enabled,
     seconds: () => seconds,
     label: () => message,
@@ -822,12 +848,26 @@ export function createCrossfade({
               duration: round(audio.duration),
               source: source.status,
               sourceReason: source.reason ?? null,
+              sourceProof: source.proof ?? null,
               sourceCapture: sourceStats(),
               graphReady: graph.crossfadeReady(audio, readSettings(audio)),
               rate: readSettings(audio).rate,
               nextBufferedSeconds: round(
-                (job?.next ?? pendingNext?.next)?.bufferedSeconds?.(),
+                (
+                  job?.prefetch?.next ??
+                  job?.next ??
+                  pendingNext?.next
+                )?.bufferedSeconds?.(),
               ),
+              seekBridgeSeconds:
+                warm?.audio === audio
+                  ? round(
+                      (warm.tail.start +
+                        warm.tail.buffer.duration -
+                        audio.currentTime) /
+                        readSettings(audio).rate,
+                    )
+                  : null,
               requiredSeconds: round(job?.requiredSeconds),
               handoffErrorSeconds: round(job?.handoffError),
               openingSecondsRemaining: job?.route

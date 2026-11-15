@@ -40,6 +40,20 @@ export class WaveformPitch {
       );
     this.mask = length - 1;
     this.history = [new Float32Array(length), new Float32Array(length)];
+    this.attacks = new Uint8Array(length);
+    this.fast = 0;
+    this.slow = 0;
+    this.lastLeft = 0;
+    this.lastRight = 0;
+    this.lowLeft = 0;
+    this.lowRight = 0;
+    this.bandLeft = 0;
+    this.bandRight = 0;
+    this.lowRate = 1 - Math.exp((-2 * Math.PI * 180) / rate);
+    this.nextAttack = 0;
+    this.fastRate = 1 - Math.exp(-1 / (rate * 0.002));
+    this.slowRate = 1 - Math.exp(-1 / (rate * 0.05));
+    this.attackGap = Math.round(rate * 0.06);
     this.fade = Float32Array.from(
       { length: this.overlap },
       (_, i) => 0.5 - 0.5 * Math.cos((Math.PI * i) / (this.overlap - 1)),
@@ -118,8 +132,35 @@ export class WaveformPitch {
       const index = this.frame & this.mask;
       this.history[0][index] = left?.[i] ?? 0;
       this.history[1][index] = right?.[i] ?? 0;
+      const currentLeft = this.history[0][index],
+        currentRight = this.history[1][index];
+      this.lowLeft += this.lowRate * (currentLeft - this.lowLeft);
+      this.lowRight += this.lowRate * (currentRight - this.lowRight);
+      this.bandLeft += this.lowRate * (this.lowLeft - this.bandLeft);
+      this.bandRight += this.lowRate * (this.lowRight - this.bandRight);
+      const power =
+        ((this.bandLeft - this.lastLeft) ** 2 +
+          (this.bandRight - this.lastRight) ** 2) /
+        2;
+      this.lastLeft = this.bandLeft;
+      this.lastRight = this.bandRight;
+      this.fast += this.fastRate * (power - this.fast);
+      this.slow += this.slowRate * (power - this.slow);
+      const attack =
+        this.frame >= this.nextAttack &&
+        this.fast > 0.0000001 &&
+        this.fast > 5 * this.slow;
+      this.attacks[index] = attack ? 1 : 0;
+      if (attack) this.nextAttack = this.frame + this.attackGap;
       if (ratio) {
-        if (this.phase === 0) {
+        if (
+          this.attacks[(this.frame - this.latency + this.overlap) & this.mask]
+        ) {
+          // Finish the splice at the detected attack's original time.
+          this.previous = this.head;
+          this.head = this.frame - this.latency + (1 - ratio) * this.overlap;
+          this.phase = 0;
+        } else if (this.phase === 0) {
           this.previous = this.head;
           this.head = this.align(this.frame - this.latency, ratio);
         }
