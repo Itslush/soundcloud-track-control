@@ -5,7 +5,7 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 from userscript_fixture import userscript_source, browser_options
 
@@ -122,7 +122,8 @@ def main():
                     await audio.play();
                     audio.currentTime=1;
                 }''', frequency)
-                page.wait_for_function("document.querySelector('#soundcloud-tempo-control').shadowRoot.querySelector('#wasm-status').textContent.includes('WASM active')", timeout=10000)
+                status = 'Original pitch at 1×.' if rate == 1 else 'Signalsmith WASM active.'
+                expect(page.locator('#wasm-status')).to_have_text(status, timeout=10000)
                 page.wait_for_timeout(1200)
                 result = page.evaluate('measure()')
                 assert abs(result['frequency']-frequency)<8 and 0<result['peak']<.2, (rate, frequency, result)
