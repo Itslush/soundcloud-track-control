@@ -1,5 +1,8 @@
 export const pitchTiming: Readonly<{ blockMs: number; intervalMs: number }>;
-export function protectedPitchInput(
+export const peakProtectionKey: string;
+export function readPeakProtection(storage?: Storage): boolean;
+export function createPitchOutput(
   context: BaseAudioContext,
   destination: AudioNode,
-): GainNode;
+  enabled: boolean,
+): { input: GainNode; setEnabled(enabled: boolean): void };

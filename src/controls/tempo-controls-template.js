@@ -195,6 +195,8 @@ export function controlsTemplate({
           >
           <p id="wasm-status" role="status"></p>
           <label class="random-label"><input id="use-wasm" type="checkbox" />Use WASM for Preserve key</label>
+          <label class="random-label"><input id="peak-protection" type="checkbox" aria-describedby="peak-protection-help" />Peak protection</label>
+          <p id="peak-protection-help">Softens loud peaks after pitch shifting. With this off, peaks can clip.</p>
           <label class="output-label" for="output-value">Output level <span class="output-entry"><input id="output-value" type="number" min="-24" step="any" value="-6" aria-describedby="output-help" /> dB</span></label>
           <input id="output-level" type="range" min="-24" max="12" step="0.1" value="-6" aria-label="Output level in dB" aria-describedby="output-help" />
           <p id="output-help">Above 0 dB can clip and become very loud. Start low.</p>

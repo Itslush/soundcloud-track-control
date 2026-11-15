@@ -72,14 +72,14 @@ function fixture(onVisual) {
       crossfadeReady: () => state.graphReady,
       prepareIncoming: async (audio, buffer) => {
         await state.openingWait;
-        return buffer;
+        return { buffer, shifted: false };
       },
       beginCrossfade(target, buffer, offset, rate, seconds, opening) {
         state.start = { target, buffer, offset, rate, seconds, opening };
         return {
           context,
           overlapEnd: context.currentTime + seconds,
-          endTime: context.currentTime + (opening?.duration ?? seconds),
+          endTime: context.currentTime + (opening?.buffer.duration ?? seconds),
           position: () => context.currentTime,
           nativePosition: (target) => target.currentTime,
           silence: () => true,

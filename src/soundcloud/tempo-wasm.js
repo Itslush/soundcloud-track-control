@@ -1,4 +1,4 @@
-import { pitchTiming, protectedPitchInput } from '../audio/pitch-quality.mjs';
+import { createPitchOutput, pitchTiming } from '../audio/pitch-quality.mjs';
 
 export function createWasmAudio({
   audioModules,
@@ -7,6 +7,7 @@ export function createWasmAudio({
   preservesKey,
   readKeyShift = () => 0,
   readUseWasm,
+  peakProtection = true,
   references,
   updateAll,
   apply,
@@ -16,6 +17,7 @@ export function createWasmAudio({
   if (!window.AudioContext || !window.AudioNode)
     return {
       sync: () => false,
+      setPeakProtection() {},
       active: () => false,
       hasGraph: () => false,
       crossfadeReady: () => false,
@@ -32,6 +34,7 @@ export function createWasmAudio({
   const disconnect = AudioNode.prototype.disconnect;
   const create = AudioContext.prototype.createMediaElementSource;
   const states = new WeakMap();
+  const overlapOutputs = new Set();
 
   function gains(state, wet) {
     if (state.active === wet) return;
@@ -173,8 +176,12 @@ export function createWasmAudio({
         state.needsReset = false;
         state.input.connect(node);
         state.connected = true;
-        state.pitchInput ??= protectedPitchInput(state.source.context, state.wet);
-        node.connect(state.pitchInput);
+        state.pitchOutput ??= createPitchOutput(
+          state.source.context,
+          state.wet,
+          peakProtection,
+        );
+        node.connect(state.pitchOutput.input);
       }
       await timed(node.schedule({ active: true, semitones }));
       if (
@@ -430,7 +437,7 @@ export function createWasmAudio({
         if (!Number.isFinite(latency) || latency < 0 || latency > 1)
           throw new Error('Unsupported pitch processor latency.');
         await timed(processor.schedule({ active: true, semitones }));
-        input.connect(processor).connect(protectedPitchInput(offline, offline.destination));
+        input.connect(processor).connect(offline.destination);
       } else input.connect(offline.destination);
       signal.throwIfAborted();
       input.start();
@@ -449,7 +456,7 @@ export function createWasmAudio({
             .subarray(start, start + result.length),
           channel,
         );
-      return result;
+      return { buffer: result, shifted: Boolean(processor) };
     } finally {
       input.disconnect();
       processor?.disconnect();
@@ -474,9 +481,9 @@ export function createWasmAudio({
       seconds <= 0 ||
       seconds > 10 ||
       (opening !== null &&
-        (!Number.isFinite(opening?.duration) ||
-          opening.duration < seconds ||
-          opening.duration > 19))
+        (!Number.isFinite(opening?.buffer?.duration) ||
+          opening.buffer.duration < seconds ||
+          opening.buffer.duration > 19))
     )
       throw new Error(
         'The player audio connection is not ready for crossfade.',
@@ -494,6 +501,13 @@ export function createWasmAudio({
     let levelAudio;
     let closed = false;
     const incoming = new Set([state]);
+    const outputs = [];
+    function pitchInput(destination) {
+      const output = createPitchOutput(context, destination, peakProtection);
+      outputs.push(output);
+      overlapOutputs.add(output);
+      return output.input;
+    }
     const now = context.currentTime;
     function followLevel(target) {
       if (target === levelAudio) return;
@@ -516,6 +530,7 @@ export function createWasmAudio({
     function dispose() {
       if (closed) return;
       closed = true;
+      for (const output of outputs) overlapOutputs.delete(output);
       unsubscribe?.();
       try {
         tail.stop();
@@ -541,20 +556,23 @@ export function createWasmAudio({
     }
     try {
       tail.buffer = buffer;
-      if (head) head.buffer = opening;
+      if (head) head.buffer = opening.buffer;
       tail.playbackRate.value = rate;
       tail.connect(level);
       envelope.connect(state.output);
       followLevel(audio);
       // Both streams follow the same master volume, without double-applying the outgoing pitch processor.
-      head?.connect(headEnvelope).connect(headLevel).connect(state.output);
+      if (head) {
+        head.connect(opening.shifted ? pitchInput(headEnvelope) : headEnvelope);
+        headEnvelope.connect(headLevel).connect(state.output);
+      }
       // Keep the outgoing processor's history while the native player loads a new track.
       if (state.active && state.node) {
         processor = state.node;
         disconnect.call(state.input, processor);
         disconnect.call(processor);
         level.connect(processor);
-        processor.connect(protectedPitchInput(context, envelope));
+        processor.connect(pitchInput(envelope));
         processor.addEventListener('processorerror', dispose, { once: true });
         state.node = null;
         state.connected = false;
@@ -579,7 +597,7 @@ export function createWasmAudio({
       throw error;
     }
     return {
-      endTime: now + (opening?.duration ?? seconds),
+      endTime: now + (opening?.buffer.duration ?? seconds),
       overlapEnd: now + seconds,
       startedAt: now,
       context,
@@ -696,6 +714,14 @@ export function createWasmAudio({
 
   return {
     sync,
+    setPeakProtection(enabled) {
+      if (peakProtection === enabled) return;
+      peakProtection = enabled;
+      for (const reference of references) {
+        states.get(reference.deref())?.pitchOutput?.setEnabled(enabled);
+      }
+      for (const output of overlapOutputs) output.setEnabled(enabled);
+    },
     crossfadeReady,
     beginCrossfade,
     prepareIncoming,

@@ -22,10 +22,17 @@ profile = {
     'pitchPoints': [{'t': 0, 'k': -5, 'd': 0, 'c': 'instant'},
                     {'t': 12, 'k': 3, 'd': 4, 'c': 'smooth'}],
 }
+def tone(frame):
+    value = math.sin(frame * 2 * math.pi * 440 / 24000)
+    if frame >= 16 * 24000:
+        return int(math.copysign(32000, value))
+    return round(6000 * value)
+
+
 sample = io.BytesIO()
 with wave.open(sample, 'wb') as audio:
     audio.setparams((1, 2, 24000, 24000 * 24, 'NONE', 'not compressed'))
-    audio.writeframes(b''.join(struct.pack('<h', round(6000 * math.sin(i * 2 * math.pi * 440 / 24000))) for i in range(24000 * 24)))
+    audio.writeframes(b''.join(struct.pack('<h', tone(i)) for i in range(24000 * 24)))
 
 server, base = serve_site()
 try:
@@ -57,6 +64,11 @@ try:
             }
             return frequency;
           };
+          window.peakOutput = () => Math.max(...meters.map(meter => {
+            const pcm = new Float32Array(meter.fftSize);
+            meter.getFloatTimeDomainData(pcm);
+            return pcm.reduce((peak, value) => Math.max(peak, Math.abs(value)), 0);
+          }));
         })();''')
         response = {'title': 'Shared song', 'artist': 'Listener', 'permalink': 'https://soundcloud.com' + profile['track'],
                     'duration': 24, 'stream': base + 'tone.wav', 'format': 'progressive', 'preview': False,
@@ -86,6 +98,8 @@ try:
         expect(page.locator('#preview-artwork')).to_be_hidden()
         assert page.locator('#preview-artwork').get_attribute('src') is None
         before_storage = page.evaluate('JSON.stringify(localStorage)')
+        protection = page.get_by_role('checkbox', name='Peak protection')
+        expect(protection).to_be_checked()
         page.locator('#preview-play').click()
         page.wait_for_function('Math.abs(frequency() - 440 * 2 ** (-5/12)) < 4')
         assert requests == ['https://soundcloud.com' + profile['track']], requests
@@ -125,6 +139,7 @@ try:
                 page.set_viewport_size({'width': width, 'height': 1000})
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, theme)
                 assert text_contrast(page.locator('#preview-pitch-notice')) >= 4.5
+                assert text_contrast(protection.locator('..')) >= 4.5
                 page.locator('.timeline-demo').screenshot(path=str(captures / f'shared-{width}-{theme}.png'))
 
         fixed = {**profile, 'points': [{'t': 0, 'r': .9, 'd': 0, 'c': 'instant'}], 'pitch': 'natural'}
@@ -132,9 +147,27 @@ try:
         page.goto(base + 'share/#sct=' + code(fixed))
         expect(page.locator('#demo-speed-number')).to_have_value('0.9')
         expect(page.locator('#demo-key-shift')).to_have_value('-5')
+        demo = context.new_page()
+        demo.goto(base)
+        other = demo.get_by_role('checkbox', name='Peak protection')
+        expect(other).to_be_checked()
         page.locator('#preview-play').click()
         page.wait_for_function('Math.abs(frequency() - 440 * .9 * 2 ** (-5/12)) < 4')
+        page.locator('audio').evaluate('audio => {audio.volume = 1; audio.currentTime = 17}')
+        page.wait_for_function('peakOutput() > .46 && peakOutput() < .5')
+        protection.uncheck()
+        page.wait_for_function('peakOutput() > .52')
+        expect(other).not_to_be_checked()
+        other.check()
+        expect(protection).to_be_checked()
+        page.wait_for_function('peakOutput() > .46 && peakOutput() < .5')
         page.locator('#preview-play').click()
+        other.uncheck()
+        page.reload()
+        expect(protection).not_to_be_checked()
+        demo.evaluate('localStorage.clear()')
+        expect(protection).to_be_checked()
+        demo.close()
         page.goto(base + 'share/#sct=' + code({**fixed, 'pitch': 'preserve'}))
         expect(page.locator('#demo-pitch').locator('..').locator('.select-value')).to_have_text('Preserve key')
         page.locator('#preview-play').click()
@@ -161,4 +194,4 @@ try:
         browser.close()
 finally:
     server.shutdown()
-print('PASS: plugin-free shared playback, rendered pitch capture, exact tempo/pitch points and fades, unchanged storage, original comparison, mobile layouts, excerpts and invalid/error states. Fixture audio only.')
+print('PASS: shared playback, rendered pitch, peak protection and live cross-tab bypass, saved preference, tempo links, original comparison, mobile layouts, excerpts and error states. Fixture audio only.')

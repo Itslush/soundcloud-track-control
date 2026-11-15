@@ -199,6 +199,24 @@ test('unity playback leaves the dry path open even with Preserve Key enabled', a
   assert.equal(value.api.label(), 'Original pitch at 1×.');
 });
 
+test('peak protection switches only the output route of an active pitch processor', async () => {
+  const value = fixture();
+  value.refresh();
+  await settle();
+  const [node] = value.nodes;
+  const [output] = node.connections;
+  const [shaper] = output.connections;
+  const [wet] = shaper.connections;
+  const schedules = node.schedules.length;
+  value.api.setPeakProtection(false);
+  assert.deepEqual([...output.connections], [wet]);
+  assert.equal(output.gain.value, 1);
+  value.api.setPeakProtection(true);
+  assert.deepEqual([...output.connections], [shaper]);
+  assert.equal(node.schedules.length, schedules);
+  assert.equal(value.api.active(value.audio), true);
+});
+
 test('pause, seek and mode changes reuse one node and the short pitch window', async () => {
   const value = fixture();
   value.refresh();

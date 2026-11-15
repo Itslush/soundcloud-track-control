@@ -22,7 +22,7 @@ s.STAGING.mkdir(parents=True, exist_ok=True)
 server, base = serve_site()
 
 
-def capture(page, name, theme, selectors):
+def capture(page, name, theme, selectors, top_margin=6):
     viewport = page.viewport_size
     narrow_width = viewport['width'] if name in ['player', 'dial', 'vertical'] else 390
     for width, suffix in [(viewport['width'], ''), (narrow_width, '-mobile')]:
@@ -37,7 +37,7 @@ def capture(page, name, theme, selectors):
         right = max(box['x'] + box['width'] for box in boxes)
         bottom = max(box['y'] + box['height'] for box in boxes)
         s.record_image(page, f'feature-{name}-{theme}{suffix}.png', evidence,
-                       clip={'x': max(0, x - 6), 'y': max(0, y - 6), 'width': right - x + 12, 'height': bottom - y + 12},
+                       clip={'x': max(0, x - 6), 'y': max(0, y - top_margin), 'width': right - x + 12, 'height': bottom - y + top_margin + 6},
                        state=f'{name} controls, {theme} variant at {width}px; playback paused or not started.')
     page.set_viewport_size(viewport)
     print(f'Captured {name}: {theme}', flush=True)
@@ -130,7 +130,7 @@ try:
             disclosure(page, '.pitch-customization')
             capture(page, 'semitones', name, ['.pitch-customization'])
             disclosure(page, '.pitch-customization', False)
-            capture(page, 'output', name, ['[for=output-value]', '#output-level', '#output-help'])
+            capture(page, 'output', name, ['label:has(#peak-protection)', '[for=output-value]', '#output-level', '#output-help'], top_margin=0)
             disclosure(page, '.advanced-audio', False)
             for feature, selector in [('shortcuts', '.shortcuts'), ('backup', '.library-backup')]:
                 disclosure(page, selector)

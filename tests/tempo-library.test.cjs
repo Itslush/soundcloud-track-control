@@ -84,6 +84,7 @@ function fixture(values = {}) {
 test('fractional pitch, automation and pitch preferences survive a backup round trip', () => {
   const input = backup();
   input.preferences.keyShift = -1.25;
+  input.preferences.peakProtection = false;
   input.preferences.tempoIncrement = 0.125;
   input.preferences.pitchControls = {
     min: -6,
@@ -104,6 +105,7 @@ test('fractional pitch, automation and pitch preferences survive a backup round 
   second.store.commit(second.store.prepare(exported));
   assert.equal(second.store.exportBackup(), exported);
   assert.equal(second.map.get('soundcloud.tempo.keyShift'), '-1.25');
+  assert.equal(second.map.get('soundcloud.tempo.peakProtection'), 'false');
   assert.equal(second.map.get('soundcloud.tempo.tempoIncrement'), '0.125');
   assert.deepEqual(
     JSON.parse(second.map.get('soundcloud.tempo.pitchControls')),
@@ -267,6 +269,7 @@ test('malformed, unsafe, duplicate, mixed and oversized backups never write', ()
     { ...backup(), preferences: { tempoIncrement: 1.1 } },
     { ...backup(), preferences: { tempoIncrement: '0.1' } },
     { ...backup(), preferences: { preserveKey: 'true' } },
+    { ...backup(), preferences: { peakProtection: 'false' } },
     { ...backup(), preferences: { unknown: false } },
     backup([
       {

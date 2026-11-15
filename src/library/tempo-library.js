@@ -23,6 +23,7 @@ export function createTempoStore(api) {
     copyLinks: false,
     preserveKey: false,
     useWasm: true,
+    peakProtection: true,
     outputDb: -6,
   };
   const storage = () => api.storage();

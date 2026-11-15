@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.7.4
+
+- Added a peak protection switch to Advanced audio and the website player. Turn it off to hear the pitch shifter’s full output. Each player remembers your choice.
+
 ## 1.2.7.3
 
 - Shortened the pitch shifter’s analysis window to reduce the sound that bleeds ahead of kick attacks. A soft ceiling catches peaks introduced by pitch shifting.

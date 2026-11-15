@@ -1,4 +1,8 @@
 import { pitchSettingsKey } from '../controls/tempo-pitch-settings.js';
+import {
+  peakProtectionKey,
+  readPeakProtection,
+} from '../audio/pitch-quality.mjs';
 import { tempoIncrementKey } from '../controls/tempo-increment.js';
 import * as audioModules from '../audio/index.mjs';
 import { syncTempoRange } from '../controls/tempo-range.js';
@@ -116,6 +120,11 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
   let keyShift = readKeyShift();
   let preserveKey = readPitchSetting();
   let useWasm = readWasmSetting();
+
+  function syncPeakProtection(enabled = readPeakProtection()) {
+    if (ui) ui.peakToggle.checked = enabled;
+    wasmAudio.setPeakProtection(enabled);
+  }
 
   function readWasmSetting() {
     try {
@@ -498,6 +507,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
       },
       actions: {
         setRate,
+        syncPeakProtection,
         currentTrackKey,
         updateAll,
         handleShortcut,
@@ -532,6 +542,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
           updateAll();
         },
         importSettings() {
+          syncPeakProtection();
           pageArtwork.refreshSaved();
           ui.syncPitchControls?.();
           applySaved = readSavedSetting();
@@ -727,6 +738,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
   const outputLevel = createOutputLevel({ references, readUI: () => ui });
   const wasmAudio = createWasmAudio({
     audioModules,
+    peakProtection: readPeakProtection(),
     outputLevel,
     createStretchNode,
     preservesKey,
@@ -888,6 +900,8 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     attributeFilter: ['href'],
   });
   window.addEventListener('storage', (event) => {
+    if (event.key === null || event.key === peakProtectionKey)
+      syncPeakProtection();
     if (
       event.key === null ||
       [

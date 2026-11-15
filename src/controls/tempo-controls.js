@@ -12,6 +12,10 @@ import {
   pitchSettingsKey,
 } from './tempo-pitch-settings.js';
 import { createTempoLibrary } from '../library/tempo-library.js';
+import {
+  peakProtectionKey,
+  readPeakProtection,
+} from '../audio/pitch-quality.mjs';
 
 export function createTempoControls({
   playback,
@@ -84,6 +88,7 @@ export function createTempoControls({
       outputValue: get('#output-value'),
       outputStatus: get('#output-status'),
       wasmToggle: get('#use-wasm'),
+      peakToggle: get('#peak-protection'),
     };
     Object.assign(ui, {
       render,
@@ -362,6 +367,15 @@ export function createTempoControls({
         ui.wasmToggle.checked = settings.useWasm;
         ui.settingsStatus.textContent = 'Audio setting could not be saved.';
       }
+    });
+    ui.peakToggle.checked = readPeakProtection();
+    ui.peakToggle.addEventListener('change', () => {
+      try {
+        localStorage.setItem(peakProtectionKey, String(ui.peakToggle.checked));
+      } catch {
+        ui.settingsStatus.textContent = 'Peak protection changed for this session. The preference could not be saved.';
+      }
+      actions.syncPeakProtection(ui.peakToggle.checked);
     });
     services.outputLevel.syncUI();
     const setOutput = (event) => {

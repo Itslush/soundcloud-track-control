@@ -432,13 +432,20 @@
   font-variant-numeric: tabular-nums;
   font-size: 14px;
 }
-.preview-volume {
-  margin-left: auto;
+.preview-volume,
+.preview-peak-protection {
   display: flex;
   align-items: center;
   gap: 8px;
   color: var(--muted);
   font-size: 14px;
+}
+.preview-volume {
+  margin-left: auto;
+}
+.preview-peak-protection {
+  min-height: 44px;
+  cursor: pointer;
 }
 .preview-volume input {
   width: 72px;

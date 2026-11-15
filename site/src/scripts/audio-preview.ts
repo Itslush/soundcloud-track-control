@@ -1,6 +1,6 @@
 import {
   pitchTiming,
-  protectedPitchInput,
+  createPitchOutput,
 } from '../../../src/audio/pitch-quality.mjs';
 
 type StretchNode = AudioWorkletNode & {
@@ -49,7 +49,8 @@ export class AudioPreview {
   private input?: GainNode;
   private dry?: GainNode;
   private wet?: GainNode;
-  private pitchInput?: GainNode;
+  private pitchOutput?: ReturnType<typeof createPitchOutput>;
+  private peakProtection = true;
   private node?: StretchNode;
   private hls?: import('hls.js').default;
   private localUrl = '';
@@ -213,8 +214,12 @@ export class AudioPreview {
       if (epoch !== this.epoch || this.disposed || this.failed) return;
       this.input!.connect(node);
       this.connected = true;
-      this.pitchInput ??= protectedPitchInput(this.context, this.wet!);
-      node.connect(this.pitchInput);
+      this.pitchOutput ??= createPitchOutput(
+        this.context,
+        this.wet!,
+        this.peakProtection,
+      );
+      node.connect(this.pitchOutput.input);
       this.needsReset = false;
     } catch {
       this.useBrowser();
@@ -229,6 +234,11 @@ export class AudioPreview {
       )
         this.apply(this.rate, this.preserve, this.keyShift);
     }
+  }
+
+  setPeakProtection(enabled: boolean) {
+    this.peakProtection = enabled;
+    this.pitchOutput?.setEnabled(enabled);
   }
 
   apply(rate: number, preserve: boolean, keyShift = this.keyShift) {

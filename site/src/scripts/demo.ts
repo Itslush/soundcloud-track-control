@@ -1,4 +1,8 @@
 import { tempoShareLink } from '../../../src/sharing/tempo-share.js';
+import {
+  peakProtectionKey,
+  readPeakProtection,
+} from '../../../src/audio/pitch-quality.mjs';
 import { formatPitchNotice } from '../../../src/sharing/tempo-pitch-notice.js';
 import { release } from '../lib/release';
 import { createTempoEditor } from '../../../src/timeline/tempo-editor.js';
@@ -23,6 +27,7 @@ export function initDemo(sharedProfile?: TempoProfile) {
   const play = get<HTMLButtonElement>('preview-play');
   const copy = get<HTMLButtonElement>('demo-copy');
   const compare = get<HTMLButtonElement>('preview-compare');
+  const peakProtection = get<HTMLInputElement>('preview-peak-protection');
   const slider = get<HTMLInputElement>('demo-speed');
   const exact = get<HTMLInputElement>('demo-speed-number');
   const loader = get<HTMLDetailsElement>('preview-loader');
@@ -40,6 +45,27 @@ export function initDemo(sharedProfile?: TempoProfile) {
     },
     (message) => failTrack(message),
   );
+  function syncPeakProtection() {
+    peakProtection.checked = readPeakProtection();
+    preview.setPeakProtection(peakProtection.checked);
+  }
+  syncPeakProtection();
+  peakProtection.addEventListener('change', () => {
+    preview.setPeakProtection(peakProtection.checked);
+    try {
+      localStorage.setItem(peakProtectionKey, String(peakProtection.checked));
+    } catch {
+      status.textContent =
+        'Changed for this visit. Your browser could not save the setting.';
+    }
+  });
+  window.addEventListener('storage', (event) => {
+    if (event.key === peakProtectionKey || event.key === null)
+      syncPeakProtection();
+  });
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) syncPeakProtection();
+  });
   let duration = sharedProfile?.duration ?? 24;
   let trackPath: string | null = null;
   let phase: 'idle' | 'loading' | 'ready' | 'error' = 'idle';

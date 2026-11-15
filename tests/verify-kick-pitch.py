@@ -14,6 +14,44 @@ with sync_playwright() as p:
     page.route('https://test.invalid/', lambda route: route.fulfill(body='<html></html>', content_type='text/html'))
     page.goto('https://test.invalid/')
     page.add_script_tag(content=bundle)
+    bypass = page.evaluate("""async () => {
+      const ctx = new OfflineAudioContext(2, 12288, 48000);
+      const source = ctx.createBufferSource();
+      const buffer = ctx.createBuffer(2, ctx.length, ctx.sampleRate);
+      for (const [channel, gain] of [[0, 1.6], [1, 0.5]]) {
+        const samples = buffer.getChannelData(channel);
+        for (let i = 0; i < samples.length; i++) samples[i] = gain * Math.sin(i / 23);
+      }
+      const output = createPitchOutput(ctx, ctx.destination, true);
+      source.buffer = buffer;
+      source.connect(output.input);
+      source.start();
+      const turnOff = ctx.suspend(4096 / ctx.sampleRate);
+      const turnOn = ctx.suspend(8192 / ctx.sampleRate);
+      const rendering = ctx.startRendering();
+      await turnOff;
+      output.setEnabled(false);
+      await ctx.resume();
+      await turnOn;
+      output.setEnabled(true);
+      await ctx.resume();
+      const rendered = await rendering;
+      return [0, 1].map(channel => {
+        const samples = rendered.getChannelData(channel);
+        const raw = buffer.getChannelData(channel);
+        const peak = values => Math.max(...values.map(Math.abs));
+        return {
+          before: peak(samples.subarray(0, 4096)),
+          bypass: peak(samples.subarray(4096, 8192)),
+          after: peak(samples.subarray(8192)),
+          maxBypassError: peak(samples.subarray(4096, 8192).map((v, i) => v - raw[i + 4096])),
+        };
+      });
+    }""")
+    hot, quiet = bypass
+    assert .98 < hot['before'] < .99 and .98 < hot['after'] < .99, hot
+    assert hot['bypass'] > 1.59 and quiet['bypass'] > .49, bypass
+    assert hot['maxBypassError'] == quiet['maxBypassError'] == 0, bypass
     results = page.evaluate("""async () => {
       const rate = 48000;
       const frames = rate * 8;
@@ -87,7 +125,7 @@ with sync_playwright() as p:
           source
             .connect(node)
             .connect(
-              legacy ? ctx.destination : protectedPitchInput(ctx, ctx.destination),
+              legacy ? ctx.destination : createPitchOutput(ctx, ctx.destination, true).input,
             );
           source.start();
           const rendered = await ctx.startRendering();

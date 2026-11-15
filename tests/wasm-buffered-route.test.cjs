@@ -249,7 +249,8 @@ test('crossfade keeps the outgoing processor alive and restores native gain on c
     true,
   );
   const overlap = f.api.beginCrossfade(f.audio, {}, 2, 0.5, 5, {
-    duration: 13,
+    buffer: { duration: 13 },
+    shifted: true,
   });
   const tail = f.context.nodes.find((node) => node.kind === 'tail');
   const head = f.context.nodes.filter((node) => node.kind === 'tail')[1];
@@ -261,6 +262,14 @@ test('crossfade keeps the outgoing processor alive and restores native gain on c
   );
   assert.equal(oldProcessor.port.closed, false);
   assert.equal(f.input.connections.has(oldProcessor), false);
+  const outputs = [[...oldProcessor.connections][0], [...head.connections][0]];
+  f.api.setPeakProtection(false);
+  for (const output of outputs) {
+    assert.equal(output.gain.value, 1);
+    assert.notEqual([...output.connections][0].kind, 'shaper');
+  }
+  f.api.setPeakProtection(true);
+  for (const output of outputs) assert.equal([...output.connections][0].kind, 'shaper');
   assert.equal(gainTo(f.mediaSource, f.output), 0);
   downstreamUnchanged(f);
   f.audio.dispatchEvent(new Event('emptied'));
@@ -287,18 +296,19 @@ test('crossfade keeps the outgoing processor alive and restores native gain on c
 test('crossfade works after buffered handback without duplicating or bypassing the native gate', async () => {
   const f = await fixture();
   const settings = { preserve: false, shift: 0, rate: 1 };
-  f.api.beginCrossfade(f.audio, {}, 0, 1, 5, { duration: 13 }).dispose();
+  const opening = { buffer: { duration: 13 }, shifted: false };
+  f.api.beginCrossfade(f.audio, {}, 0, 1, 5, opening).dispose();
   const lease = f.api.acquireBuffered(f.audio, f.hooks);
   await lease.ready;
   assert.equal(f.api.crossfadeReady(f.audio, settings), false);
   assert.throws(
-    () => f.api.beginCrossfade(f.audio, {}, 0, 1, 5, { duration: 13 }),
+    () => f.api.beginCrossfade(f.audio, {}, 0, 1, 5, opening),
     /not ready/,
   );
   await lease.release(12);
   f.audio.paused = false;
   assert.equal(f.api.crossfadeReady(f.audio, settings), true);
-  const overlap = f.api.beginCrossfade(f.audio, {}, 0, 1, 5, { duration: 13 });
+  const overlap = f.api.beginCrossfade(f.audio, {}, 0, 1, 5, opening);
   assert.equal(gainTo(f.mediaSource, f.output), 0);
   downstreamUnchanged(f);
   f.setLevel({ volume: 0.4, outputDb: 6 });
@@ -315,7 +325,7 @@ test('crossfade works after buffered handback without duplicating or bypassing t
   assert.equal(gainTo(f.mediaSource, f.output), 10 ** (6 / 20));
   assert.equal(tail.connections.size, 0);
   assert.equal(head.connections.size, 0);
-  const handoff = f.api.beginCrossfade(f.audio, {}, 0, 1, 5, { duration: 13 });
+  const handoff = f.api.beginCrossfade(f.audio, {}, 0, 1, 5, opening);
   assert.equal(gainTo(f.mediaSource, f.output), 0);
   handoff.fadeIn(f.audio);
   assert.equal(gainTo(f.mediaSource, f.output), 10 ** (6 / 20));

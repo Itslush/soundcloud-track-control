@@ -56,6 +56,15 @@ const { shared = false } = Astro.props;
           value="0.15"
         /></label
       >
+      <label class="preview-peak-protection">
+        <input
+          id="preview-peak-protection"
+          type="checkbox"
+          checked
+          title="Soften loud peaks in pitch-shifted audio"
+        />
+        Peak protection
+      </label>
     </div>
     <label class="preview-seek"
       ><span class="sr-only">Playback position</span><input
