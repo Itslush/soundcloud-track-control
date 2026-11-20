@@ -50,8 +50,8 @@ export function createTempoControls({
     host.style.cssText = `
       display: flex;
       align-items: center;
-      flex: 0 0 320px;
-      min-width: 320px;
+      flex: 0 0 314px;
+      min-width: 314px;
       margin-inline: 4px;
     `;
     const root = host.attachShadow({ mode: 'open' });
@@ -715,9 +715,9 @@ export function createTempoControls({
     ui.root.querySelector('#show-key').checked = showKey;
     ui.root.querySelector('.controls').classList.toggle('hide-key', !showKey);
     const keySpace = showKey ? 0 : 136;
-    ui.host.style.flexBasis = `${(style === 'slider' ? 420 : 316) - keySpace}px`;
-    ui.host.style.minWidth = `${(style === 'slider' ? 324 : 316) - keySpace}px`;
-    ui.host.style.setProperty('--tempo-compact-width', `${312 - keySpace}px`);
+    ui.host.style.flexBasis = `${(style === 'slider' ? 416 : 312) - keySpace}px`;
+    ui.host.style.minWidth = `${(style === 'slider' ? 320 : 312) - keySpace}px`;
+    ui.host.style.setProperty('--tempo-compact-width', `${308 - keySpace}px`);
     ui.root.querySelector('.slider-wrap').dataset.style = style;
     ui.root.querySelector('#control-style').value = style;
     ui.slider.hidden = style === 'dial';
