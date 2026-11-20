@@ -63,6 +63,7 @@ export class AudioPreview {
   private pending = false;
   private stopping?: Promise<void>;
   private latency = 0;
+  private flushAt = -Infinity;
   private rate = 1;
   private preserve = false;
   private keyShift = 0;
@@ -86,14 +87,19 @@ export class AudioPreview {
     this.audio.volume = mixer ? 1 : 0.15;
     this.audio.hidden = true;
     document.querySelector('.timeline-demo')?.append(this.audio);
-    for (const name of ['pause', 'seeking', 'emptied', 'ended'])
-      this.audio.addEventListener(name, () => this.reset());
+    this.audio.addEventListener('pause', () => this.reset());
+    for (const name of ['seeking', 'emptied', 'ended'])
+      this.audio.addEventListener(name, () => {
+        if (this.context) this.flushAt = this.context.currentTime;
+        this.reset();
+      });
     this.audio.addEventListener('playing', () =>
       this.apply(this.rate, this.preserve, this.keyShift),
     );
-    this.audio.addEventListener('seeked', () =>
-      this.apply(this.rate, this.preserve, this.keyShift),
-    );
+    this.audio.addEventListener('seeked', () => {
+      if (this.context) this.flushAt = this.context.currentTime;
+      this.apply(this.rate, this.preserve, this.keyShift);
+    });
     this.audio.addEventListener('error', () => {
       if (this.audio.error)
         this.fail('Audio could not be loaded. Retry or choose another track.');
@@ -254,14 +260,15 @@ export class AudioPreview {
     if (
       (!preserve || rate === 1) &&
       !keyShift &&
-      (!this.connected || changedPreserve)
+      (!this.connected || (changedPreserve && !preserve))
     ) {
       if (this.loading || this.connected || changedMode) this.reset();
       this.audio.preservesPitch = preserve;
       return;
     }
     this.audio.preservesPitch =
-      !this.connected || this.loading || !Number.isFinite(this.applied);
+      preserve &&
+      (!this.connected || this.loading || !Number.isFinite(this.applied));
     if (this.audio.paused || this.audio.seeking) return;
     if (this.needsReset || !this.node) {
       void this.prepare();
@@ -286,20 +293,24 @@ export class AudioPreview {
         this.audio.preservesPitch = false;
         if (starting) {
           const now = this.context!.currentTime;
+          const inputDelay = Math.max(0, this.latency - (now - this.flushAt));
+          const wetDelay = inputDelay + this.latency;
+          const fade = Math.min(0.005, this.latency);
           const dry = this.dry!.gain;
           dry.cancelScheduledValues(now);
           dry.setValueAtTime(0.5, now);
-          dry.setValueAtTime(0.5, now + this.latency * 2);
-          dry.linearRampToValueAtTime(0, now + this.latency * 2 + 0.01);
+          dry.setValueAtTime(0.5, now + wetDelay);
+          dry.linearRampToValueAtTime(0, now + wetDelay + 0.01);
           const input = this.input!.gain;
           input.cancelScheduledValues(now);
           input.setValueAtTime(0, now);
-          input.setValueAtTime(1, now + this.latency);
+          if (inputDelay > 0) input.setValueAtTime(0, now + inputDelay);
+          input.linearRampToValueAtTime(1, now + inputDelay + fade);
           const gain = this.wet!.gain;
           gain.cancelScheduledValues(now);
           gain.setValueAtTime(0, now);
-          gain.setValueAtTime(0, now + this.latency * 2);
-          gain.linearRampToValueAtTime(0.5, now + this.latency * 2 + 0.01);
+          gain.setValueAtTime(0, now + wetDelay);
+          gain.linearRampToValueAtTime(0.5, now + wetDelay + 0.01);
         }
       })
       .catch(() => {

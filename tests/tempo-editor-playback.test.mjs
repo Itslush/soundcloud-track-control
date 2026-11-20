@@ -592,3 +592,28 @@ test('each pitch curve reaches fractional nodes precisely without changing tempo
     assert.equal(editor.keyShift(), -1.5);
   }
 });
+
+test('clearKeyOverride restores automated pitch lane without erasing saved pitchPoints', () => {
+  const data = {
+    ...profile(),
+    keyShift: -1,
+    pitchPoints: [
+      { t: 0, k: -1, d: 0, c: 'instant' },
+      { t: 20, k: 3, d: 10, c: 'linear' },
+    ],
+  };
+  const { editor } = fixture(data);
+  const audio = media(false);
+  editor.changeTrack(track);
+  editor.observe(audio);
+  audio.currentTime = 15;
+  assert.equal(editor.keyShift(), 1);
+  editor.setKeyShift(-4);
+  assert.equal(editor.keyShift(), -4);
+  editor.clearKeyOverride();
+  assert.equal(editor.keyShift(), 1);
+  const shared = sharedProfile(
+    editor.shareLink('https://soundcloud.com' + track),
+  );
+  assert.deepEqual(shared.pitchPoints, data.pitchPoints);
+});

@@ -23,9 +23,14 @@ export class WaveformPitch {
     this.kernel = this.constructor.kernel ??=
       this.constructor.interpolationTable();
     this.latency = latency;
-    this.hop = Math.round(rate * 0.074);
+    this.minHop = Math.round(rate * 0.042);
     this.overlap = Math.round(rate * 0.022);
-    this.search = Math.round(rate * 0.026);
+    this.deferStep = Math.round(rate * 0.004);
+    this.triggerLag = Math.round(rate * 0.009);
+    this.maxDeferLag = Math.round(rate * 0.016);
+    this.minJump = Math.round(rate * 0.004);
+    this.maxJump = Math.round(rate * 0.025);
+    this.maxLead = Math.round(rate * 0.015);
     this.stride = Math.max(1, Math.round(rate / 6000));
     // Stagger the correlation samples so a steady harmonic cannot fall between them.
     const step = this.stride * 2;
@@ -36,11 +41,12 @@ export class WaveformPitch {
     const length =
       2 **
       Math.ceil(
-        Math.log2(latency + this.hop + this.overlap + this.search + 256),
+        Math.log2(latency + this.minHop + this.overlap + this.maxJump + 512),
       );
     this.mask = length - 1;
     this.history = [new Float32Array(length), new Float32Array(length)];
     this.attacks = new Uint8Array(length);
+    this.transients = new Uint8Array(length);
     this.fast = 0;
     this.slow = 0;
     this.lastLeft = 0;
@@ -49,6 +55,10 @@ export class WaveformPitch {
     this.lowRight = 0;
     this.bandLeft = 0;
     this.bandRight = 0;
+    this.prevLeft = 0;
+    this.prevRight = 0;
+    this.hpFast = 0;
+    this.hpSlow = 0;
     this.lowRate = 1 - Math.exp((-2 * Math.PI * 180) / rate);
     this.nextAttack = 0;
     this.fastRate = 1 - Math.exp(-1 / (rate * 0.002));
@@ -58,8 +68,9 @@ export class WaveformPitch {
       { length: this.overlap },
       (_, i) => 0.5 - 0.5 * Math.cos((Math.PI * i) / (this.overlap - 1)),
     );
+    this.fadeLength = this.overlap;
     this.frame = 0;
-    this.phase = 0;
+    this.phase = this.minHop;
     this.head = -latency;
     this.previous = this.head;
   }
@@ -84,34 +95,43 @@ export class WaveformPitch {
   align(target, ratio) {
     const reference = Math.round(this.head);
     const span = Math.round(this.overlap * ratio);
-    // Prefer the nearest matching bass cycle to keep drum attacks on the beat.
-    const timeBias =
-      (0.01 * this.score(reference, reference, span)) / this.search;
-    let best = target,
-      score = this.score(target, reference, span);
-    for (let delta = -this.search; delta <= this.search; delta += this.stride) {
-      const next =
-        this.score(target + delta, reference, span) -
-        timeBias * Math.abs(delta);
-      if (next > score) {
-        best = target + delta;
-        score = next;
+    // Search strictly ahead of the current head to avoid lag-0 self-match stalls.
+    const low = reference + this.minJump;
+    const high = Math.min(reference + this.maxJump, target + this.maxLead);
+    if (low >= high) return target + (this.head - reference);
+    const bias = (0.15 * this.score(reference, reference, span)) / (high - low);
+    let best = Math.min(high, Math.max(low, target)),
+      bestScore =
+        this.score(best, reference, span) - bias * Math.abs(best - target);
+    for (let c = low; c <= high; c += this.stride) {
+      const next = this.score(c, reference, span) - bias * Math.abs(c - target);
+      if (next > bestScore) {
+        best = c;
+        bestScore = next;
       }
     }
     const coarse = best;
     for (
-      let i = Math.max(coarse - this.stride + 1, target - this.search);
-      i <= Math.min(coarse + this.stride - 1, target + this.search);
-      ++i
+      let c = Math.max(low, coarse - this.stride + 1);
+      c <= Math.min(high, coarse + this.stride - 1);
+      ++c
     ) {
-      const next =
-        this.score(i, reference, span) - timeBias * Math.abs(i - target);
-      if (next > score) {
-        best = i;
-        score = next;
+      const next = this.score(c, reference, span) - bias * Math.abs(c - target);
+      if (next > bestScore) {
+        best = c;
+        bestScore = next;
       }
     }
     return best + (this.head - reference);
+  }
+
+  hasTransient(start, end) {
+    const begin = Math.floor(start),
+      finish = Math.ceil(end);
+    for (let p = begin; p <= finish; p += this.stride) {
+      if (p >= 0 && this.transients[p & this.mask]) return true;
+    }
+    return false;
   }
 
   sample(channel, position) {
@@ -152,19 +172,82 @@ export class WaveformPitch {
         this.fast > 5 * this.slow;
       this.attacks[index] = attack ? 1 : 0;
       if (attack) this.nextAttack = this.frame + this.attackGap;
+      const dl = currentLeft - this.prevLeft,
+        dr = currentRight - this.prevRight;
+      this.prevLeft = currentLeft;
+      this.prevRight = currentRight;
+      const hpPower = (dl * dl + dr * dr) / 2;
+      this.hpFast += this.fastRate * (hpPower - this.hpFast);
+      this.hpSlow += this.slowRate * (hpPower - this.hpSlow);
+      this.transients[index] =
+        this.hpFast > 0.0000001 && this.hpFast > 9 * this.hpSlow ? 1 : 0;
       if (ratio) {
-        if (
-          this.attacks[(this.frame - this.latency + this.overlap) & this.mask]
-        ) {
-          // Finish the splice at the detected attack's original time.
-          this.previous = this.head;
-          this.head = this.frame - this.latency + (1 - ratio) * this.overlap;
-          this.phase = 0;
-        } else if (this.phase === 0) {
-          this.previous = this.head;
-          this.head = this.align(this.frame - this.latency, ratio);
+        const target = this.frame - this.latency;
+        const attackPos = target + this.overlap;
+        if (attackPos >= 0 && this.attacks[attackPos & this.mask]) {
+          // Finish the splice at the detected attack's original time without flamming.
+          const desired = target + (1 - ratio) * this.overlap;
+          if (Math.abs(desired - this.head) >= 1) {
+            this.previous = this.head;
+            if (this.head > desired) {
+              const safe = Math.floor((attackPos - this.head) / ratio);
+              this.fadeLength = Math.max(2, Math.min(this.overlap, safe));
+            } else {
+              this.fadeLength = this.overlap;
+            }
+            this.head = desired;
+            this.phase = 0;
+          }
+        } else if (this.phase >= this.minHop) {
+          const lag = target - this.head;
+          if (lag >= this.triggerLag) {
+            const lookahead = Math.min(
+              this.overlap,
+              Math.max(0, this.latency - this.overlap),
+            );
+            let upcoming = false;
+            for (let offset = 1; offset < lookahead; ++offset) {
+              if (
+                attackPos + offset >= 0 &&
+                this.attacks[(attackPos + offset) & this.mask]
+              ) {
+                upcoming = true;
+                break;
+              }
+            }
+            if (upcoming) {
+              // Defer regular hop splice so the upcoming attack starts a clean crossfade.
+              this.phase = this.minHop - this.deferStep;
+            } else {
+              const candidate = this.align(target, ratio);
+              const span = this.overlap * ratio;
+              if (
+                lag < this.maxDeferLag &&
+                this.hasTransient(
+                  this.head + 0.32 * span,
+                  candidate + 0.68 * span,
+                )
+              ) {
+                this.phase = this.minHop - this.deferStep;
+              } else {
+                this.previous = this.head;
+                this.fadeLength = this.overlap;
+                this.head = candidate;
+                this.phase = 0;
+              }
+            }
+          }
         }
-        const fade = this.fade[this.phase];
+        const fade =
+          this.phase < this.fadeLength
+            ? this.fadeLength === this.overlap
+              ? this.fade[this.phase]
+              : this.fade[
+                  Math.round(
+                    (this.phase * (this.overlap - 1)) / (this.fadeLength - 1),
+                  )
+                ]
+            : undefined;
         for (let c = 0; c < output.length; ++c) {
           const next = this.sample(c, this.head);
           const value =
@@ -175,10 +258,11 @@ export class WaveformPitch {
         }
         this.head += ratio;
         this.previous += ratio;
-        if (++this.phase === this.hop) this.phase = 0;
+        if (this.phase < this.minHop) this.phase++;
       } else {
         this.head = this.frame + 1 - this.latency;
-        this.phase = 0;
+        this.fadeLength = this.overlap;
+        this.phase = this.minHop;
       }
       this.frame++;
     }

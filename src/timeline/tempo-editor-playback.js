@@ -318,6 +318,9 @@ export function createTempoEditorPlayback(api, view) {
       if (!validKeyShift(value)) throw new RangeError('Invalid key shift');
       keyOverride = value;
     },
+    clearKeyOverride() {
+      keyOverride = null;
+    },
     suspend() {
       suspended = true;
       view.syncControls();

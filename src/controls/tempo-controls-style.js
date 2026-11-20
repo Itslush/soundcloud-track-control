@@ -18,7 +18,7 @@ export const controlsStyle = `
 
         .controls {
           display: grid;
-          grid-template-columns: 56px 20px minmax(0, 1fr) 132px 24px 30px 24px;
+          grid-template-columns: 56px 20px minmax(0, 1fr) 132px 24px 24px;
           align-items: center;
           gap: 4px;
           width: 100%;
@@ -27,7 +27,7 @@ export const controlsStyle = `
           font-size: 12px;
         }
 
-        .controls.hide-key { grid-template-columns: 56px 20px minmax(0, 1fr) 24px 30px 24px; }
+        .controls.hide-key { grid-template-columns: 56px 20px minmax(0, 1fr) 24px 24px; }
 
         button,
         input,
@@ -77,10 +77,10 @@ export const controlsStyle = `
           transform: translateY(var(--tempo-rail-offset, 0px));
         }
         .controls:has(.slider-wrap:not([data-style='slider'])) {
-          grid-template-columns: 56px 20px 36px 132px 24px 30px 24px;
+          grid-template-columns: 56px 20px 36px 132px 24px 24px;
         }
         .controls.hide-key:has(.slider-wrap:not([data-style='slider'])) {
-          grid-template-columns: 56px 20px 36px 24px 30px 24px;
+          grid-template-columns: 56px 20px 36px 24px 24px;
         }
         .quick-key {
           display: grid;
@@ -92,9 +92,9 @@ export const controlsStyle = `
           line-height: 24px;
         }
         @media (max-width: 340px) {
-          .controls { grid-template-columns: 38px 12px minmax(24px, 1fr) 132px 24px 26px 24px; gap: 2px; }
-          .controls:has(.slider-wrap:not([data-style='slider'])) { grid-template-columns: 34px 12px 32px 132px 24px 26px 24px; }
-          .controls.hide-key, .controls.hide-key:has(.slider-wrap:not([data-style='slider'])) { grid-template-columns: 38px 12px minmax(24px, 1fr) 24px 26px 24px; }
+          .controls { grid-template-columns: 38px 12px minmax(24px, 1fr) 132px 24px 24px; gap: 2px; }
+          .controls:has(.slider-wrap:not([data-style='slider'])) { grid-template-columns: 34px 12px 32px 132px 24px 24px; }
+          .controls.hide-key, .controls.hide-key:has(.slider-wrap:not([data-style='slider'])) { grid-template-columns: 38px 12px minmax(24px, 1fr) 24px 24px; }
         }
         .fader-value, .fader-reset, .fader-normal, .fader-limit, .fader-level, .fader-ticks { display: none; }
         #tempo-fader[popover] .fader-value {
@@ -671,7 +671,6 @@ export const controlsStyle = `
 
 
         .memory,
-        .mixer-button,
         .settings-button {
           display: grid;
           place-items: center;
@@ -684,7 +683,6 @@ export const controlsStyle = `
         }
 
         .memory:hover,
-        .mixer-button:hover,
         .settings-button:hover {
           background: color-mix(in srgb, var(--tempo-fg) 8%, transparent);
         }

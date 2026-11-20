@@ -158,6 +158,7 @@ export function controlsTemplate({
         <details class="appearance-settings">
           <summary>Appearance</summary>
           <label class="random-label"><input id="show-key" type="checkbox" checked />Show semitone adjustment in player</label>
+          <label class="random-label show-mixer-label"><input id="show-mixer" type="checkbox" />Show two-deck mixer</label>
           <label class="control-style-label">Tempo control <select id="control-style"><option value="slider">Slider</option><option value="dial">Dial</option><option value="vertical">Vertical slider</option></select></label>
           <label class="increment-label">Default tempo increment <input id="tempo-increment" type="number" min="0.001" max="1" step="0.001" value="0.025" aria-label="Default tempo increment"> ×</label>
           <fieldset class="appearance-options" aria-label="SoundCloud theme">

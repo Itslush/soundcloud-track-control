@@ -229,7 +229,11 @@ export function initDemo(sharedProfile?: TempoProfile) {
     preview.apply(
       original ? 1 : (draft?.rate ?? fixedRate),
       !original && (draft?.pitch ?? pitchInput.value) === 'preserve',
-      original ? 0 : (draft?.keyShift ?? (Number(keyInput.value) || 0)),
+      original
+        ? 0
+        : follow.checked
+          ? (draft?.keyShift ?? 0)
+          : Number(keyInput.value) || 0,
     );
     if (labels) renderPlayback();
   }

@@ -47,13 +47,17 @@ export function registerLivePitch(Module, Waveform, name) {
       this.blend = 0;
       this.warmup = 0;
       this.ratio = 1;
+      this.semitones = 0;
+      this.wasmIdle = false;
       this.fadeFrames = Math.round(sampleRate * 0.012);
     }
 
     schedule({ active, semitones = 0 }) {
       // Larger intervals and upward shifts retain the spectral engine's anti-aliasing.
+      this.semitones = semitones;
       this.target = active && semitones <= -1 && semitones >= -4 ? 1 : 0;
-      if (this.target) this.ratio = 2 ** (semitones / 12);
+      if (this.target || (active && this.blend > 0))
+        this.ratio = 2 ** (Math.min(0, semitones) / 12);
       this.wasm._setTransposeSemitones(semitones, 8000 / sampleRate);
       if (!this.active) this.blend = this.target;
       this.active = active;
@@ -67,8 +71,14 @@ export function registerLivePitch(Module, Waveform, name) {
       const needWave = this.target || this.blend > 0;
       this.wave.process(input, out, needWave ? this.ratio : 0);
       if (this.target && this.blend === 1) {
+        this.wasmIdle = true;
         this.warmup = this.delay;
         return true;
+      }
+      if (this.wasmIdle) {
+        this.wasm._reset();
+        this.wasm._setTransposeSemitones(this.semitones, 8000 / sampleRate);
+        this.wasmIdle = false;
       }
       for (let c = 0; c < this.channels; c++) {
         const source = input[c] ?? input[0];
@@ -81,9 +91,22 @@ export function registerLivePitch(Module, Waveform, name) {
         else if (this.target)
           this.blend = Math.min(1, this.blend + 1 / this.fadeFrames);
         else this.blend = Math.max(0, this.blend - 1 / this.fadeFrames);
+        const waveGain =
+          this.blend === 0
+            ? 0
+            : this.blend === 1
+              ? 1
+              : Math.sin((this.blend * Math.PI) / 2);
+        const spectralGain =
+          this.blend === 0
+            ? 1
+            : this.blend === 1
+              ? 0
+              : Math.cos((this.blend * Math.PI) / 2);
         for (let c = 0; c < this.channels; c++) {
-          const spectral = this.buffers[c + this.channels][i];
-          out[c][i] = spectral + this.blend * (out[c][i] - spectral);
+          out[c][i] =
+            spectralGain * this.buffers[c + this.channels][i] +
+            waveGain * out[c][i];
         }
       }
       return true;

@@ -86,6 +86,7 @@ test('fractional pitch, automation and pitch preferences survive a backup round 
   input.preferences.keyShift = -1.25;
   input.preferences.peakProtection = false;
   input.preferences.tempoIncrement = 0.125;
+  input.preferences.showMixer = true;
   input.preferences.pitchControls = {
     min: -6,
     max: 6,
@@ -107,6 +108,7 @@ test('fractional pitch, automation and pitch preferences survive a backup round 
   assert.equal(second.map.get('soundcloud.tempo.keyShift'), '-1.25');
   assert.equal(second.map.get('soundcloud.tempo.peakProtection'), 'false');
   assert.equal(second.map.get('soundcloud.tempo.tempoIncrement'), '0.125');
+  assert.equal(second.map.get('soundcloud.tempo.showMixer'), 'true');
   assert.deepEqual(
     JSON.parse(second.map.get('soundcloud.tempo.pitchControls')),
     input.preferences.pitchControls,

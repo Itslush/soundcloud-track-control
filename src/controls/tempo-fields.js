@@ -66,6 +66,11 @@ export function enhanceTempoFields(root) {
       });
     }
     input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        return;
+      }
       if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
       event.preventDefault();
       nudge(event.key === 'ArrowUp' ? 1 : -1);

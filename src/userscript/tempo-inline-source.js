@@ -548,6 +548,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
           ui.syncPitchControls?.();
           applySaved = readSavedSetting();
           keyShift = readKeyShift();
+          timeline.clearKeyOverride();
           syncControlStyle();
           preserveKey = readPitchSetting();
           useWasm = readWasmSetting();
@@ -823,6 +824,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
       return applySaved ? (readSavedRate(key) ?? 1) : 1;
     },
     readTrack: () => currentTrackKey(),
+    applySyncRate: applyNative,
     readSettings: (audio) => ({
       rate,
       preserve: preservesKey(),
@@ -921,23 +923,20 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     if (event.key === null || event.key === WASM_STORAGE) {
       useWasm = readWasmSetting();
       if (ui) ui.wasmToggle.checked = useWasm;
+      crossfade.settingsChanged();
       updateAll();
     }
     if (event.key === null || event.key === PITCH_STORAGE) {
       preserveKey = readPitchSetting();
-      if (ui) {
-        ui.pitchToggle.checked = preserveKey;
-      }
+      if (ui) ui.pitchToggle.checked = preserveKey;
+      crossfade.settingsChanged();
       updateAll();
     }
-    if (event.key === null || event.key?.startsWith(TRACK_STORAGE)) {
+    if (event.key === null || event.key?.startsWith(TRACK_STORAGE))
       pageArtwork.schedule();
-    }
     if (event.key === null || event.key === SAVED_STORAGE) {
       applySaved = readSavedSetting();
-      if (ui) {
-        ui.savedToggle.checked = applySaved;
-      }
+      if (ui) ui.savedToggle.checked = applySaved;
       timeline.changeTrack('');
       timeline.changeTrack(trackKey);
       rate = applySaved ? clamp(savedRate ?? 1) : 1;
@@ -956,7 +955,8 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
       syncControlStyle();
     if (event.key === null || event.key === KEY_SHIFT_STORAGE) {
       keyShift = readKeyShift();
-      timeline.setKeyShift(keyShift);
+      timeline.clearKeyOverride();
+      crossfade.settingsChanged();
       if (ui) ui.root.querySelector('#key-shift').value = String(keyShift);
       updateAll();
     }

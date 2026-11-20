@@ -16,6 +16,7 @@ export function createTempoStore(api) {
     controlStyle: 'slider',
     tempoIncrement: defaultTempoIncrement,
     showKey: true,
+    showMixer: false,
     crossfade: false,
     crossfadeSeconds: 5,
     keyShift: 0,

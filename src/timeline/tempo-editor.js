@@ -876,6 +876,7 @@ export function createTempoEditor(api) {
       if (target === playback.track && playback.keyOverride !== null) {
         draft.keyShift = playback.keyOverride;
         delete draft.pitchPoints;
+        if (stored?.data) dirty = true;
       }
       lane = 'tempo';
       [speedBottom, speedTop] = laneViews.tempo;
@@ -941,6 +942,7 @@ export function createTempoEditor(api) {
     pitchMode: playback.pitchMode,
     shareLink: playback.shareLink,
     keyShift: playback.keyShift,
+    clearKeyOverride: playback.clearKeyOverride,
     setKeyShift(value) {
       playback.setKeyShift(value);
       if (draft?.track === playback.track) {

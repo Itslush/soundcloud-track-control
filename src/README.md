@@ -5,7 +5,7 @@ The build still produces one installable userscript and one soundcloud-rpc plugi
 | Folder        | Owns                                                                            |
 | ------------- | ------------------------------------------------------------------------------- |
 | `userscript/` | Startup and component wiring for SoundCloud                                     |
-| `controls/`   | Desktop controls, touch player and fields                                       |
+| `controls/`   | Desktop controls, docked two-deck mixer, touch player and fields                |
 | `timeline/`   | Profile validation, timeline editing, graph rendering and playback coordination |
 | `library/`    | Saved-track library and its interface                                           |
 | `sharing/`    | Shared-track/set formats, clipboard behavior and pitch notices                  |

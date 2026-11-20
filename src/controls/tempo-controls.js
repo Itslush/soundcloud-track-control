@@ -1,4 +1,9 @@
-import { mixerButton } from './tempo-mixer.js';
+import {
+  initMixerDock,
+  isMixerVisible,
+  readShowMixer,
+  setMixerVisible,
+} from './tempo-mixer.js';
 import { controlsTemplate } from './tempo-controls-template.js';
 import { enhanceTempoFields } from './tempo-fields.js';
 import { syncTempoRange } from './tempo-range.js';
@@ -45,8 +50,8 @@ export function createTempoControls({
     host.style.cssText = `
       display: flex;
       align-items: center;
-      flex: 0 0 348px;
-      min-width: 348px;
+      flex: 0 0 320px;
+      min-width: 320px;
       margin-inline: 4px;
     `;
     const root = host.attachShadow({ mode: 'open' });
@@ -208,10 +213,12 @@ export function createTempoControls({
     for (const input of [shiftInput, get('#quick-key-shift')])
       input.addEventListener('change', () => {
         const next = Number(input.value);
+        const bounds = readPitchSettings();
         if (
           input.value === '' ||
           !Number.isFinite(next) ||
-          Math.abs(next) > 12
+          next < bounds.min ||
+          next > bounds.max
         ) {
           input.value = String(
             services.timeline.keyShift() ?? playback.keyShift,
@@ -228,6 +235,7 @@ export function createTempoControls({
           ui.status.textContent = 'Key shift could not be saved.';
           return;
         }
+        actions.syncTrack();
         actions.keyShiftChanged(next);
         services.crossfade?.settingsChanged();
         services.timeline.setKeyShift(next);
@@ -280,6 +288,7 @@ export function createTempoControls({
         }
         try {
           localStorage.setItem(pitchSettingsKey, JSON.stringify(settings));
+          ui.settingsStatus.textContent = '';
         } catch {
           ui.settingsStatus.textContent = 'Pitch controls could not be saved.';
         }
@@ -368,6 +377,7 @@ export function createTempoControls({
       imported: () => {
         actions.importSettings();
         shiftInput.value = String(playback.keyShift);
+        if (website) setMixerVisible(readShowMixer(), false);
       },
     });
     ui.wasmToggle.checked = settings.useWasm;
@@ -375,6 +385,7 @@ export function createTempoControls({
       try {
         localStorage.setItem(WASM_STORAGE, String(ui.wasmToggle.checked));
         actions.wasmChanged(ui.wasmToggle.checked);
+        services.crossfade?.settingsChanged();
         actions.updateAll();
       } catch {
         ui.wasmToggle.checked = settings.useWasm;
@@ -428,6 +439,8 @@ export function createTempoControls({
     get('.open-editor').addEventListener('click', () =>
       services.timeline.open(),
     );
+    const showMixerLabel = get('.show-mixer-label');
+    const showMixerInput = get('#show-mixer');
     if (website) {
       const buildSet = document.createElement('button');
       buildSet.type = 'button';
@@ -443,7 +456,18 @@ export function createTempoControls({
         window.open(destination.href, '_blank', 'noopener,noreferrer');
       });
       get('.settings-actions').prepend(buildSet);
-      get('.settings-button').before(mixerButton(website, playback));
+      showMixerInput.checked = initMixerDock(website, playback, (visible) => {
+        showMixerInput.checked = Boolean(visible);
+      });
+      showMixerInput.addEventListener('change', () => {
+        const saved = setMixerVisible(showMixerInput.checked, true);
+        if (!saved) {
+          ui.settingsStatus.textContent =
+            'Mixer preference changed for this session. Allow site storage to remember it.';
+        }
+      });
+    } else {
+      showMixerLabel.hidden = true;
     }
     ui.pitchToggle.setAttribute('aria-describedby', 'pitch-mode-help');
     ui.pitchToggle.disabled = !actions.supportsPitch();
@@ -455,10 +479,12 @@ export function createTempoControls({
       try {
         localStorage.setItem(PITCH_STORAGE, String(ui.pitchToggle.checked));
         actions.pitchChanged(ui.pitchToggle.checked);
+        services.crossfade?.settingsChanged();
         actions.updateAll();
         ui.settingsStatus.textContent = services.timeline.pitchMode()
           ? 'Default saved. This timeline keeps its own pitch mode.'
-          : settings.preserveKey
+          : settings.preserveKey ||
+              (services.timeline.keyShift() ?? playback.keyShift)
             ? services.wasmAudio.label()
             : 'Natural pitch restored.';
       } catch {
@@ -654,6 +680,13 @@ export function createTempoControls({
       if (event.key === 'Escape') {
         event.preventDefault();
         ui.rateNumber.value = String(playback.rate);
+        const quickShift = ui.root.querySelector('#quick-key-shift');
+        if (quickShift)
+          quickShift.value = String(
+            Math.round(
+              (services.timeline.keyShift() ?? playback.keyShift) * 1000,
+            ) / 1000,
+          );
         ui.root.activeElement?.blur();
       }
       event.stopPropagation();
@@ -682,9 +715,9 @@ export function createTempoControls({
     ui.root.querySelector('#show-key').checked = showKey;
     ui.root.querySelector('.controls').classList.toggle('hide-key', !showKey);
     const keySpace = showKey ? 0 : 136;
-    ui.host.style.flexBasis = `${(style === 'slider' ? 450 : 346) - keySpace}px`;
-    ui.host.style.minWidth = `${(style === 'slider' ? 354 : 346) - keySpace}px`;
-    ui.host.style.setProperty('--tempo-compact-width', `${342 - keySpace}px`);
+    ui.host.style.flexBasis = `${(style === 'slider' ? 420 : 316) - keySpace}px`;
+    ui.host.style.minWidth = `${(style === 'slider' ? 324 : 316) - keySpace}px`;
+    ui.host.style.setProperty('--tempo-compact-width', `${312 - keySpace}px`);
     ui.root.querySelector('.slider-wrap').dataset.style = style;
     ui.root.querySelector('#control-style').value = style;
     ui.slider.hidden = style === 'dial';
@@ -753,6 +786,8 @@ export function createTempoControls({
     ui.settingsButton.setAttribute('aria-expanded', 'true');
     ui.savedToggle.checked = settings.applySaved;
     ui.pitchToggle.checked = settings.preserveKey;
+    const showMixerInput = ui.root.querySelector('#show-mixer');
+    if (website && showMixerInput) showMixerInput.checked = isMixerVisible();
     ui.settingsStatus.textContent = '';
     ui.savedFilter.value = '';
     ui.library.clearPreview();

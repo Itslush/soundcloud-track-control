@@ -105,6 +105,15 @@ export function installFooterStyle() {
         mask-image: none;
         opacity: var(--tempo-artwork-progress);
       }
+      .playControls[data-tempo-mixer-active="true"] :is(.playbackTimeline__progressWrapper, .playbackSoundBadge__avatar) {
+        transition: none;
+      }
+    }
+
+    .playControls[data-tempo-mixer-active="true"] :is(.playbackTimeline__progressWrapper, .playbackSoundBadge__avatar) {
+      opacity: 0.6;
+      filter: saturate(0.2);
+      transition: opacity 120ms ease, filter 120ms ease;
     }
 
     .soundcloud-tempo-page-position {
@@ -167,8 +176,8 @@ export function installFooterStyle() {
 
       .playControls__elements.soundcloud-tempo-footer > #soundcloud-tempo-control {
         order: 10;
-        flex: 1 1 450px !important;
-        min-width: 326px !important;
+        flex: 1 1 420px !important;
+        min-width: 296px !important;
         margin: 0 4px 0 0;
       }
 

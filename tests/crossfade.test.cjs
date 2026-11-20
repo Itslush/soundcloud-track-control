@@ -9,7 +9,7 @@ const { createCrossfade } = vm.runInNewContext(source + '\nfixtureModule;', {
 });
 const settle = () => new Promise(setImmediate);
 
-function fixture(onVisual) {
+function fixture(onVisual, applySyncRate = null) {
   const values = new Map();
   const audio = Object.assign(new EventTarget(), {
     currentTime: 20,
@@ -47,6 +47,7 @@ function fixture(onVisual) {
   let tick;
   const api = createCrossfade({
     onVisual,
+    applySyncRate,
     readNextRate: () => state.nextRate,
     isCurrentTrack: (_audio, track) =>
       (state.verifiedTrack ?? state.track) === track,
@@ -1132,4 +1133,96 @@ test('opening cancellation, changed stream and exhausted handoff restore safely'
     f.api.dispose();
     assert.equal(f.state.releases, action === 'queue' ? 2 : 1);
   }
+});
+
+test('adaptive seek lead compensates repeated undershot seeks without changing initial exact seek', async () => {
+  const f = fixture();
+  f.state.cached = 24;
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  await f.opening();
+  f.audio.currentTime = 25;
+  f.tick();
+  f.state.track = 'second';
+  f.audio.currentTime = 0;
+  f.context.currentTime = 1;
+  f.tick();
+  assert.equal(f.audio.currentTime, 1, 'initial seek uses zero lead');
+  // Simulate undershot seek landing 300ms behind desired (2.0) when context advances by 1s.
+  f.context.currentTime = 2.0;
+  f.audio.currentTime = 1.7;
+  f.tick();
+  assert.ok(f.audio.currentTime > 2.1, `Expected adaptive lead past 2.0, got ${f.audio.currentTime}`);
+  f.api.dispose();
+});
+
+test('muted rate pull tightens sub-5ms handoff without seeking and resets to 1 before fadeIn and cancel', async () => {
+  const pullCalls = [];
+  let f;
+  f = fixture(undefined, (audio) => {
+    pullCalls.push({ audio, factor: f.api.syncRate(audio) });
+  });
+  f.state.cached = 24;
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  await f.opening();
+  f.audio.currentTime = 25;
+  f.tick();
+  f.state.track = 'second';
+  f.audio.currentTime = 1;
+  f.context.currentTime = 1;
+  f.tick();
+  // Introduce a 100ms native lag (< 180ms threshold) -> pulls playbackRate faster without seeking.
+  f.context.currentTime = 2.0;
+  f.audio.currentTime = 1.9;
+  f.tick();
+  assert.equal(f.audio.currentTime, 1.9, 'small error uses rate pull rather than seek');
+  assert.ok(f.api.syncRate(f.audio) > 1.01 && f.api.syncRate(f.audio) <= 1.04);
+  assert.ok(pullCalls.length >= 1);
+
+  // Once caught up within 5ms at overlapEnd, rate resets to 1 and fadeIn engages.
+  f.context.currentTime = 5.0;
+  f.audio.currentTime = 4.998;
+  f.tick();
+  assert.equal(f.api.syncRate(f.audio), 1);
+  assert.equal(f.state.fades.length, 1);
+
+  f.api.cancel();
+  assert.equal(f.api.syncRate(f.audio), 1);
+  f.api.dispose();
+});
+
+test('manualNext launches full buffered overlap when opening is ready and falls back to warm tail otherwise', async () => {
+  // 1. Full overlap when job.opening + job.buffer are ready before auto end-of-track threshold.
+  const f = fixture();
+  f.state.cached = 24;
+  f.api.set(true, 5);
+  f.tick();
+  await settle();
+  await f.opening();
+  f.audio.currentTime = 23.5; // past job.start (23), before auto trigger (25)
+  assert.equal(f.api.manualNext(), true);
+  assert.equal(f.state.start.offset, 0.5);
+  assert.ok(f.state.start.opening);
+  f.api.dispose();
+
+  // 2. Fallback to manualPlay bridge when only warm.tail is prepared.
+  const b = fixture();
+  b.state.cached = 0;
+  b.api.set(true, 5);
+  b.tick();
+  await settle();
+  b.audio.currentTime = 10;
+  b.api.warmManual();
+  await settle();
+  assert.equal(b.api.manualNext(), true);
+  assert.equal(b.state.start.opening, null);
+  assert.equal(b.state.start.bypassHostFade, true);
+  b.state.track = 'second';
+  b.audio.currentTime = 0.2;
+  b.tick();
+  assert.equal(b.state.fades.length, 1, 'wildcard next target accepts next playing track');
+  b.api.dispose();
 });

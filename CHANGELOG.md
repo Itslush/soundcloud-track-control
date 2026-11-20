@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.8
+
+- Moved the two-deck mixer out of the footer button into a full-width console docked above SoundCloud's player. Toggle "Show two-deck mixer" under Appearance in settings, or press Alt+Shift+1 for deck A or Alt+Shift+2 for deck B while hovering or focusing a track.
+- Added per-deck 3-band EQ (Low, Mid, High) and a bipolar low-pass/high-pass DJ filter under More A and More B and on `/mixer/`, plus mobile A/B deck tabs and contrast-safe active-mixer footer dimming.
+- Eliminated next-track transition hitches and dry-flash artifacts with silent background rate-pull synchronization, muted dry warmup on track start/seek, and manual Next crossfade support.
+- Reworked downward pitch-shift waveform splicing to strictly forward-only lag triggers with a high-pass transient guard and anti-flam kick protection.
+
 ## 1.2.7.7
 
 - Crossfade can identify a playing track from SoundCloud's selected stream when its playlist was missed. The player prepares audio around the playhead for direct clicks on the footer timeline and Play buttons. Crossfade diagnostics show which track SoundCloud queued next.

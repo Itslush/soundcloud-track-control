@@ -238,7 +238,7 @@ def main():
                 assert abs(slider_box['y'] + slider_box['height']/2 - (gear_box['y'] + gear_box['height']/2)) < .6
                 if width > 850:
                     assert abs(slider_box['y'] + slider_box['height']/2 - (timeline_box['y'] + timeline_box['height']/2)) < 1
-                assert slider_box['width'] >= (68 if width <= 850 else 140)
+                assert slider_box['width'] >= (68 if width <= 850 else 140), (width, theme, slider_box)
                 artwork_box = page.locator('.playbackSoundBadge__avatar').bounding_box()
                 badge_box = indicator.bounding_box()
                 assert badge_box['width'] == 18 and badge_box['height'] == 18

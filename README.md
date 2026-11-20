@@ -10,6 +10,7 @@ Adjust playback speed, save a tempo for each track, and draw speed changes over 
 - Let pitch change with speed, or switch on **Preserve key**.
 - Remember your preferred tempo for individual tracks.
 - Build a timeline with gradual fades and instant speed changes.
+- Dock the two-deck mixer above the player to blend tracks with per-deck speed, pitch, 3-band EQ and filter controls.
 - Share a tempo or timeline with a link.
 - Back up saved speeds and timelines, or move them to another browser.
 
@@ -37,7 +38,7 @@ See the [guide](https://itslush.github.io/soundcloud-track-control/guide/) for c
 
 ## For contributors
 
-[Development setup](docs/DEVELOPMENT.md) · [Architecture](docs/ARCHITECTURE.md) · [Testing](docs/TESTING.md) · [Known limitations and audit](docs/MAINTAINABILITY.md)
+[Development setup](docs/DEVELOPMENT.md) · [Architecture](docs/ARCHITECTURE.md) · [Testing](docs/TESTING.md) · [Releasing](docs/RELEASING.md)
 
 The mobile player needs SoundCloud's desktop-site player in a userscript-capable Android browser; it is not a native Android app. [Source ownership](src/README.md) describes the feature folders and shared playback contracts.
 

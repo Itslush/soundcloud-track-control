@@ -51,17 +51,23 @@ export function createMediaGuards({
   }
 
   function applyNative(audio) {
-    const { wasmAudio } = readServices();
+    const { wasmAudio, crossfade } = readServices();
     const { preserve, useWasm, keyShift, rate } = readPlayback();
     const wasmActive = wasmAudio.sync(
       audio,
-      (preserve && useWasm) || keyShift !== 0,
+      (preserve && useWasm) ||
+        keyShift !== 0 ||
+        (!preserve && wasmAudio.keepsZero?.(audio)),
       rate,
     );
     for (const name of pitchNames)
       setNative(audio, name, preserve && !wasmActive);
     setNative(audio, 'defaultPlaybackRate', rate);
-    setNative(audio, 'playbackRate', rate);
+    setNative(
+      audio,
+      'playbackRate',
+      rate * (crossfade?.syncRate?.(audio) ?? 1),
+    );
   }
 
   function installGuards() {

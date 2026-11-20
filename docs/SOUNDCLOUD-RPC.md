@@ -35,4 +35,4 @@ node tests/rpc-host-injection.cjs "PATH/TO/soundcloud-rpc/resources/app.asar"
 python tests/verify-rpc.py
 ```
 
-The browser fixture checks tempo, saved state, the pitch field and notice, opening settings, repeated injection, and disabling with a reload. It does not prove live desktop audio, crossfading or Widevine playback. See [the integration QA record](SOUNDCLOUD-RPC-QA.md).
+The browser fixture checks tempo, saved state, the pitch field and notice, opening settings, repeated injection, and disabling with a reload. It does not prove live desktop audio, crossfading or Widevine playback.

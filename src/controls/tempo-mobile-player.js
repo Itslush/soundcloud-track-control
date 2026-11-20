@@ -1,4 +1,5 @@
 import { enhanceTempoFields } from './tempo-fields.js';
+import { toggleMixer } from './tempo-mixer.js';
 import { syncTempoRange } from './tempo-range.js';
 import { readTrackArtwork } from '../soundcloud/tempo-track-visuals.js';
 import { createMobileLayout } from '../soundcloud/mobile-layout.js';
@@ -145,7 +146,7 @@ export function createMobilePlayer({
   adjustments.innerHTML = `<label>Tempo <span class="touch-number-row"><input id="touch-rate" type="number" min="0.25" max="4" step="0.025" value="1" aria-label="Exact playback speed on mobile"><span>×</span></span></label><input id="touch-rate-slider" type="range" min="0.25" max="4" step="0.001" value="1" aria-label="Playback speed on mobile"><label class="touch-pitch">Pitch <span class="touch-number-row"><input id="touch-pitch" type="number" min="-12" max="12" step="0.5" value="0" aria-label="Key shift in semitones on mobile"><span>st</span></span></label><input id="touch-pitch-slider" type="range" min="-12" max="12" step="0.001" value="0" aria-label="Key shift on mobile"><label>Volume <input id="touch-volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume on mobile"></label><div class="touch-tools"><button type="button" data-action="previous">Previous</button><button type="button" data-action="reset">Reset tempo</button><button type="button" data-action="pitch-reset">Reset pitch</button><button type="button" data-action="save">Save tempo</button><button type="button" data-action="mixer">Mix</button></div>`;
   root.append(sheet, transport, adjustments);
   on(adjustments.querySelector('[data-action=mixer]'), 'click', () =>
-    root.querySelector('.mixer-button')?.click(),
+    toggleMixer(),
   );
   const feedback = document.createElement('p');
   feedback.className = 'touch-feedback';
@@ -223,7 +224,11 @@ export function createMobilePlayer({
     refresh();
   });
   on(pitch, 'change', () => forward(pitch, '#quick-key-shift'));
-  on(pitchSlider, 'input', () => forward(pitchSlider, '#quick-key-shift'));
+  on(pitchSlider, 'input', () => {
+    pitch.value = pitchSlider.value;
+    syncTempoRange(pitchSlider);
+  });
+  on(pitchSlider, 'change', () => forward(pitchSlider, '#quick-key-shift'));
   on(volume, 'input', () => {
     const audio = readPlayback().audio;
     if (audio) {

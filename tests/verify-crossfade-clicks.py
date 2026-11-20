@@ -21,11 +21,11 @@ with sync_playwright() as p:
       <a class="soundTitle__title" href="/artist/earlier">Earlier</a>
       <button class="playButton">Play</button>
       <div class="sound__waveform"><div class="waveform" style="width:300px;height:60px"><canvas width="300" height="60"></canvas></div></div>
-    </div></div><div class="sound"><a class="soundTitle__title" href="/artist/current">Current</a><div class="sound__waveform"><div class="waveform" style="width:300px;height:60px"></div></div></div><div class="playbackTimeline"><div class="playbackTimeline__progressWrapper" style="width:300px;height:20px"></div></div>""")
+    </div></div><div class="sound"><a class="soundTitle__title" href="/artist/current">Current</a><div class="sound__waveform"><div class="waveform" style="width:300px;height:60px"></div></div></div><div class="playbackTimeline"><div class="playbackTimeline__progressWrapper" style="width:300px;height:20px"></div></div><button class="playControls__next">Next</button>""")
     page.add_script_tag(content=source)
     page.evaluate("""() => {
-      window.calls=[]; window.native=[]; window.allowBridge=true;
-      const crossfade={warmManual(){calls.push('warm')},manualPlay(track,seek){calls.push(seek ? 'seek:'+track : track);return allowBridge},cancel(){calls.push('cancel')}};
+      window.calls=[]; window.native=[]; window.allowBridge=true; window.allowNext=true;
+      const crossfade={warmManual(){calls.push('warm')},manualPlay(track,seek){calls.push(seek ? 'seek:'+track : track);return allowBridge},manualNext(){calls.push('next');return allowNext},cancel(){calls.push('cancel')}};
       const handler=createCrossfadeClickHandler({crossfade,
         parseTrack:href=>href ? new URL(href,'https://soundcloud.com').pathname : '',
         currentTrack:()=>'/artist/current', embeddedKey:()=>''
@@ -55,6 +55,13 @@ with sync_playwright() as p:
     page.locator('.playbackTimeline__progressWrapper').click(
         position={'x': 100, 'y': 10}
     )
+    assert page.evaluate("calls.filter(x=>x==='cancel').length") == 1
+    page.evaluate('calls=[]; native=[]')
+    page.locator('.playControls__next').click()
+    assert page.evaluate("calls.includes('warm') && calls.includes('next') && !calls.includes('cancel')")
+    assert len(page.evaluate('native')) == 1 and page.evaluate('native[0].trusted && !native[0].prevented')
+    page.evaluate('allowNext=false; calls=[]')
+    page.locator('.playControls__next').click()
     assert page.evaluate("calls.filter(x=>x==='cancel').length") == 1
     browser.close()
     print(

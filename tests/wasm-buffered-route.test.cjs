@@ -246,6 +246,11 @@ test('crossfade keeps the outgoing processor alive and restores native gain on c
   const oldProcessor = f.nodes[0];
   assert.equal(
     f.api.crossfadeReady(f.audio, { preserve: true, shift: 0, rate: 0.5 }),
+    false,
+  );
+  f.context.currentTime = 0.12;
+  assert.equal(
+    f.api.crossfadeReady(f.audio, { preserve: true, shift: 0, rate: 0.5 }),
     true,
   );
   const overlap = f.api.beginCrossfade(f.audio, {}, 2, 0.5, 5, {
@@ -254,7 +259,7 @@ test('crossfade keeps the outgoing processor alive and restores native gain on c
   });
   const tail = f.context.nodes.find((node) => node.kind === 'tail');
   const head = f.context.nodes.filter((node) => node.kind === 'tail')[1];
-  assert.deepEqual(tail.started, { time: 0, offset: 2 });
+  assert.deepEqual(tail.started, { time: 0.12, offset: 2 });
   assert.equal(
     head.started.time,
     tail.started.time,

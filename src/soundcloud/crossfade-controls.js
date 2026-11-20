@@ -2,6 +2,7 @@ import { cardTrack } from './page-artwork.js';
 
 const hero = 'section[aria-label="Track header"]';
 const playSelector = `.playButton, .sc-button-play, ${hero} button[aria-label="Play"], ${hero} button[aria-label="Pause"]`;
+const nextSelector = '.playControls__next';
 const waveformSelector = '.sound__waveform .waveform';
 const timelineSelector = '.playbackTimeline__progressWrapper';
 
@@ -25,6 +26,12 @@ export function createCrossfadeClickHandler({
 
   return (event) => {
     if (!event.isTrusted || !event.target?.closest) return;
+    const nextBtn = event.target.closest(nextSelector);
+    const nextEnabled = Boolean(
+      nextBtn &&
+        !nextBtn.disabled &&
+        nextBtn.getAttribute('aria-disabled') !== 'true',
+    );
     const play = event.target.closest(playSelector);
     const waveform = event.target.closest(waveformSelector);
     const timeline = event.target.closest(timelineSelector);
@@ -33,12 +40,12 @@ export function createCrossfadeClickHandler({
       ? currentTrack()
       : targetElement && trackFor(targetElement);
     if (event.type !== 'click') {
-      if (target && (!play || target !== currentTrack()))
+      if (nextEnabled || (target && (!play || target !== currentTrack())))
         crossfade.warmManual();
       return;
     }
     if (
-      targetElement &&
+      (targetElement || nextEnabled) &&
       event.cancelable &&
       !event.defaultPrevented &&
       event.button === 0 &&
@@ -47,6 +54,7 @@ export function createCrossfadeClickHandler({
       !event.ctrlKey &&
       !event.metaKey
     ) {
+      if (nextEnabled && crossfade.manualNext?.()) return;
       if (
         target &&
         play?.getAttribute('aria-label') !== 'Pause' &&

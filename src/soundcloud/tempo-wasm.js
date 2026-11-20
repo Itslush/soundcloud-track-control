@@ -18,6 +18,7 @@ export function createWasmAudio({
   if (!window.AudioContext || !window.AudioNode)
     return {
       sync: () => false,
+      keepsZero: () => false,
       setPeakProtection() {},
       active: () => false,
       hasGraph: () => false,
@@ -36,6 +37,21 @@ export function createWasmAudio({
   const create = AudioContext.prototype.createMediaElementSource;
   const states = new WeakMap();
   const overlapOutputs = new Set();
+  const fadeOutCurve = Float32Array.from({ length: 65 }, (_, i) =>
+    i === 64 ? 0 : Math.cos((i / 64) * Math.PI * 0.5),
+  );
+  const fadeInCurve = Float32Array.from({ length: 65 }, (_, i) =>
+    i === 64 ? 1 : Math.sin((i / 64) * Math.PI * 0.5),
+  );
+
+  function rampCurve(param, curve, start, duration) {
+    if (duration > 0 && typeof param.setValueCurveAtTime === 'function') {
+      param.setValueCurveAtTime(curve, start, duration);
+      return;
+    }
+    param.setValueAtTime(curve[0], start);
+    param.linearRampToValueAtTime(curve[curve.length - 1], start + duration);
+  }
 
   function gains(state, wet) {
     if (state.active === wet) return;
@@ -45,17 +61,28 @@ export function createWasmAudio({
     state.dry.gain.cancelScheduledValues(state.source.context.currentTime);
     if (starting) {
       const now = state.source.context.currentTime;
-      state.dry.gain.setValueAtTime(1, now);
-      state.dry.gain.setValueAtTime(1, now + state.latency * 2);
-      state.dry.gain.linearRampToValueAtTime(0, now + state.latency * 2 + 0.01);
+      const inputDelay = Math.max(0, state.latency - (now - state.flushAt));
+      const wetDelay = inputDelay + state.latency;
+      const fade = Math.min(0.005, state.latency);
+      state.activeAt = now + wetDelay;
+      if (state.muteDry) {
+        state.dry.gain.setValueAtTime(0, now);
+        state.muteDry = false;
+      } else {
+        state.dry.gain.setValueAtTime(1, now);
+        state.dry.gain.setValueAtTime(1, now + wetDelay);
+        state.dry.gain.linearRampToValueAtTime(0, now + wetDelay + 0.01);
+      }
       state.input.gain.cancelScheduledValues(now);
       state.input.gain.setValueAtTime(0, now);
-      state.input.gain.setValueAtTime(1, now + state.latency);
+      if (inputDelay > 0) state.input.gain.setValueAtTime(0, now + inputDelay);
+      state.input.gain.linearRampToValueAtTime(1, now + inputDelay + fade);
       state.wet.gain.setValueAtTime(0, now);
-      state.wet.gain.setValueAtTime(0, now + state.latency * 2);
-      state.wet.gain.linearRampToValueAtTime(1, now + state.latency * 2 + 0.01);
+      state.wet.gain.setValueAtTime(0, now + wetDelay);
+      state.wet.gain.linearRampToValueAtTime(1, now + wetDelay + 0.01);
     } else {
-      state.dry.gain.value = 1;
+      state.activeAt = 0;
+      state.dry.gain.value = state.muteDry ? 0 : 1;
       state.wet.gain.value = 0;
     }
   }
@@ -64,6 +91,13 @@ export function createWasmAudio({
     const connected = state.connected;
     state.epoch++;
     gains(state, false);
+    if (state.muteDry) {
+      state.dry.gain.cancelScheduledValues(state.source.context.currentTime);
+      state.dry.gain.value = 0;
+    } else if (!state.active && state.dry.gain.value !== 1) {
+      state.dry.gain.cancelScheduledValues(state.source.context.currentTime);
+      state.dry.gain.value = 1;
+    }
     state.input.gain.cancelScheduledValues(state.source.context.currentTime);
     state.input.gain.value = 0;
     state.needsReset = true;
@@ -89,6 +123,7 @@ export function createWasmAudio({
 
   function retire(state) {
     state.failed = true;
+    state.muteDry = false;
     clear(state);
     if (!state.node) return;
     state.node.disconnect();
@@ -141,9 +176,6 @@ export function createWasmAudio({
     if (state.loading || state.failed || state.buffered) return;
     state.loading = true;
     const epoch = state.epoch;
-    const speed = state.speed;
-    const semitones =
-      readKeyShift() - (preservesKey() ? 12 * Math.log2(speed) : 0);
     try {
       if (!state.node) {
         const pending = createStretchNode(state.source.context, {
@@ -190,15 +222,16 @@ export function createWasmAudio({
         );
         node.connect(state.pitchOutput.input);
       }
-      await timed(node.schedule({ active: true, semitones }));
-      if (
-        !ready(state, epoch) ||
-        speed !== state.speed ||
-        semitones !== state.semitones
-      )
+      while (ready(state, epoch)) {
+        const speed = state.speed;
+        const semitones = state.semitones;
+        await timed(node.schedule({ active: true, semitones }));
+        if (!ready(state, epoch)) return;
+        if (speed !== state.speed || semitones !== state.semitones) continue;
+        state.applied = semitones;
+        gains(state, true);
         return;
-      state.applied = semitones;
-      gains(state, true);
+      }
     } catch (error) {
       fail(state, error);
     } finally {
@@ -211,18 +244,37 @@ export function createWasmAudio({
     const state = states.get(audio);
     if (!state) return false;
     state.speed = speed;
+    state.preserve = preservesKey();
     state.semitones =
-      readKeyShift() - (preservesKey() ? 12 * Math.log2(speed) : 0);
+      readKeyShift() - (state.preserve ? 12 * Math.log2(speed) : 0);
     const wanted =
       enabled && (speed !== 1 || state.semitones !== 0 || state.connected);
     const changed = state.wanted !== wanted;
     state.wanted = wanted;
     if (state.buffered) return false;
     if (!wanted || audio.seeking || audio.paused) {
-      if (changed || state.connected || state.active) clear(state);
+      if (!wanted) state.muteDry = false;
+      if (
+        changed ||
+        state.connected ||
+        state.active ||
+        (!wanted && state.dry.gain.value !== 1)
+      )
+        clear(state);
       return false;
     }
     if (state.failed || state.source.context.state === 'closed') return false;
+    if (
+      !state.active &&
+      state.needsReset &&
+      !state.muteDry &&
+      Number.isFinite(audio.currentTime) &&
+      audio.currentTime < 0.25
+    ) {
+      state.muteDry = true;
+      state.dry.gain.cancelScheduledValues(state.source.context.currentTime);
+      state.dry.gain.value = 0;
+    }
     if (state.needsReset || state.applied !== state.semitones) prepare(state);
     return state.active;
   }
@@ -335,6 +387,7 @@ export function createWasmAudio({
       if (!state.gate) created = makeGate(state);
       const gate = state.gate || created.gate;
       lease = gate.acquire();
+      state.muteDry = false;
       clear(state);
       if (created) {
         moveNative(state, created.nativeMix);
@@ -383,7 +436,9 @@ export function createWasmAudio({
         !state.buffered &&
         !state.loading &&
         !state.stopping &&
-        (!(shift || (preserve && rate !== 1)) || state.active),
+        (!(shift || (preserve && rate !== 1)) ||
+          (state.active &&
+            state.source.context.currentTime >= (state.activeAt || 0))),
     );
   }
 
@@ -596,18 +651,21 @@ export function createWasmAudio({
         state.node = null;
         state.connected = false;
         state.active = false;
+        state.activeAt = 0;
         state.applied = null;
         state.needsReset = true;
+        state.input.gain.cancelScheduledValues(now);
+        state.input.gain.value = 0;
         state.wet.gain.cancelScheduledValues(now);
         state.wet.gain.value = 0;
+        state.dry.gain.cancelScheduledValues(now);
         state.dry.gain.value = 1;
       } else level.connect(envelope);
       nativeFade.gain.cancelScheduledValues(now);
-      nativeFade.gain.setValueAtTime(0, now);
-      envelope.gain.setValueAtTime(1, now);
-      envelope.gain.linearRampToValueAtTime(0, now + seconds);
-      headEnvelope?.gain.setValueAtTime(0, now);
-      headEnvelope?.gain.linearRampToValueAtTime(1, now + seconds);
+      nativeFade.gain.setValueAtTime(nativeFade.gain.value, now);
+      nativeFade.gain.linearRampToValueAtTime(0, now + 0.008);
+      rampCurve(envelope.gain, fadeOutCurve, now, seconds);
+      if (headEnvelope) rampCurve(headEnvelope.gain, fadeInCurve, now, seconds);
       tail.start(now, offset);
       tail.stop(now + seconds);
       head?.start(now);
@@ -644,23 +702,26 @@ export function createWasmAudio({
       },
       nativePosition(target) {
         const next = states.get(target);
+        const compensating =
+          next?.active &&
+          next.source.context.currentTime >= (next.activeAt || 0);
         return (
           target.currentTime -
-          (next?.active ? next.latency * target.playbackRate : 0)
+          (compensating ? next.latency * target.playbackRate : 0)
         );
       },
-      fadeIn(target, duration = 0.08) {
+      fadeIn(target, duration = 0.04) {
         if (!this.silence(target)) return false;
         const next = states.get(target);
         const at = next.source.context.currentTime;
         const fade = fadeNode(next);
         fade.gain.cancelScheduledValues(at);
-        fade.gain.setValueAtTime(0, at);
-        fade.gain.linearRampToValueAtTime(1, at + duration);
+        rampCurve(fade.gain, fadeInCurve, at, duration);
         const time = context.currentTime;
-        headEnvelope?.gain.cancelScheduledValues(time);
-        headEnvelope?.gain.setValueAtTime(1, time);
-        headEnvelope?.gain.linearRampToValueAtTime(0, time + duration);
+        if (headEnvelope) {
+          headEnvelope.gain.cancelScheduledValues(time);
+          rampCurve(headEnvelope.gain, fadeOutCurve, time, duration);
+        }
         this.endTime = time + duration;
         return true;
       },
@@ -695,6 +756,8 @@ export function createWasmAudio({
       audio: new WeakRef(audio),
       epoch: 0,
       latency: 0,
+      flushAt: -Infinity,
+      muteDry: false,
       active: false,
       failed: false,
       connected: false,
@@ -703,8 +766,11 @@ export function createWasmAudio({
     };
     states.set(audio, state);
     routes.set(source, output);
-    for (const event of ['seeking', 'emptied', 'loadstart', 'pause', 'ended']) {
+    audio.addEventListener('pause', () => clear(state));
+    for (const event of ['seeking', 'emptied', 'loadstart', 'ended']) {
       audio.addEventListener(event, () => {
+        state.flushAt = state.source.context.currentTime;
+        state.muteDry = Boolean(state.wanted && !state.failed && !state.buffered);
         clear(state);
       });
     }
@@ -725,7 +791,10 @@ export function createWasmAudio({
       this.removeEventListener('statechange', close);
     };
     this.addEventListener('statechange', close);
-    audio.addEventListener('seeked', () => apply(audio));
+    audio.addEventListener('seeked', () => {
+      state.flushAt = state.source.context.currentTime;
+      apply(audio);
+    });
     discover(audio);
     onGraphReady(audio);
     return source;
@@ -757,6 +826,8 @@ export function createWasmAudio({
       return Boolean(state && state.source.context.state !== 'closed');
     },
     active: (audio) => Boolean(states.get(audio)?.active),
+    keepsZero: (audio) =>
+      Boolean(states.get(audio)?.connected && !states.get(audio)?.preserve),
     label: () => {
       const shift = readKeyShift();
       if (!preservesKey() && !shift) return 'Natural pitch follows speed.';
@@ -776,7 +847,9 @@ export function createWasmAudio({
             ? `Key shift ${shift > 0 ? '+' : ''}${shift} semitones.`
             : 'Pitch preservation active.';
         if (state?.loading)
-          return 'Loading WASM · browser correction until ready.';
+          return preservesKey()
+            ? 'Loading WASM · browser correction until ready.'
+            : 'Loading WASM pitch shifter…';
         if (state?.failed)
           return shift
             ? 'Key shift unavailable. Reload to retry.'
