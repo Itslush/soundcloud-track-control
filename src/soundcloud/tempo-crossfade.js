@@ -21,8 +21,12 @@ export function createCrossfade({
 }) {
   const enabledKey = 'soundcloud.tempo.crossfade';
   const secondsKey = 'soundcloud.tempo.crossfadeSeconds';
+  const bassSwapKey = 'soundcloud.tempo.crossfadeBassSwap';
+  const cueEntryKey = 'soundcloud.tempo.crossfadeCueEntry';
   let enabled = false;
   let seconds = 5;
+  let bassSwap = false;
+  let cueEntry = false;
   let selected;
   let job;
   let warm;
@@ -171,15 +175,20 @@ export function createCrossfade({
         throw new Error('The next track uses a tempo timeline.');
       }
       const url = current.next.streamUrl();
+      const cueStart =
+        cueEntry && Number.isFinite(settings.cue) && settings.cue > 0
+          ? settings.cue
+          : 0;
       const decoded = await decodeCrossfade(
         modules,
         graph,
         current,
         url,
-        0,
+        cueStart,
         (seconds + 8) * settings.rate,
       );
-      if (decoded.duration / settings.rate < seconds + 2)
+      const actualCue = Number.isFinite(decoded.start) ? decoded.start : cueStart;
+      if ((decoded.duration - actualCue) / settings.rate < seconds + 2)
         throw new Error('The next track is too short for this crossfade.');
       const opening = await graph.prepareIncoming(
         current.audio,
@@ -199,6 +208,7 @@ export function createCrossfade({
       current.opening = opening;
       current.openingUrl = url;
       current.nextSettings = settings;
+      current.nextCue = actualCue;
       staleRetries = 0;
       status('Crossfade ready.');
     } catch (error) {
@@ -394,13 +404,14 @@ export function createCrossfade({
       overlapSeconds: overlap,
     });
     current.route = graph.beginCrossfade(
-      audio, buffer, offset, rate, overlap, current.opening,
+      audio, buffer, offset, rate, overlap, current.opening, false, { bassSwap },
     );
     clearWarm();
+    const startCue = current.nextCue ?? 0;
     current.buffer = current.opening = null;
     visual({
       track: current.track, position: current.position, duration: current.duration,
-      paused: false, nextTrack: current.next.trackUrl, nextPosition: 0, progress: 0,
+      paused: false, nextTrack: current.next.trackUrl, nextPosition: startCue, progress: 0,
     });
     status('Crossfading buffered audio…');
   }
@@ -544,7 +555,7 @@ export function createCrossfade({
         duration: current.duration,
         paused: current.route.context.state !== 'running',
         nextTrack: current.next.trackUrl,
-        nextPosition: current.route.position() * current.nextSettings.rate,
+        nextPosition: (current.nextCue ?? 0) + current.route.position() * current.nextSettings.rate,
         progress,
       });
       const remaining = current.route.endTime - current.route.context.currentTime;
@@ -594,7 +605,7 @@ export function createCrossfade({
           return;
         }
         const now = current.route.context.currentTime;
-        const desired = current.route.position() * expected.rate;
+        const desired = (current.nextCue ?? 0) + current.route.position() * expected.rate;
         const audible = current.route.nativePosition(audio);
         current.handoffError = audible - desired;
         const absErr = Math.abs(current.handoffError);
@@ -777,8 +788,12 @@ export function createCrossfade({
       const value = Number(storage.getItem(secondsKey));
       seconds =
         Number.isInteger(value) && value >= 1 && value <= 10 ? value : 5;
+      bassSwap = storage.getItem(bassSwapKey) === 'true';
+      cueEntry = storage.getItem(cueEntryKey) === 'true';
     } catch {
       enabled = false;
+      bassSwap = false;
+      cueEntry = false;
     }
     timers.clearInterval(timer);
     timer = enabled ? timers.setInterval(safeTick, 100) : undefined;
@@ -871,6 +886,8 @@ export function createCrossfade({
     nextTrack,
     enabled: () => enabled,
     seconds: () => seconds,
+    bassSwap: () => bassSwap,
+    cueEntry: () => cueEntry,
     label: () => message,
     diagnostics() {
       const audio = selected;
@@ -915,7 +932,7 @@ export function createCrossfade({
       };
     },
     reload,
-    set(nextEnabled, nextSeconds) {
+    set(nextEnabled, nextSeconds, nextOptions) {
       if (
         typeof nextEnabled !== 'boolean' ||
         !Number.isInteger(nextSeconds) ||
@@ -925,6 +942,10 @@ export function createCrossfade({
         throw new TypeError('Choose a crossfade between 1 and 10 seconds.');
       storage.setItem(secondsKey, String(nextSeconds));
       storage.setItem(enabledKey, String(nextEnabled));
+      if (nextOptions && typeof nextOptions.bassSwap === 'boolean')
+        storage.setItem(bassSwapKey, String(nextOptions.bassSwap));
+      if (nextOptions && typeof nextOptions.cueEntry === 'boolean')
+        storage.setItem(cueEntryKey, String(nextOptions.cueEntry));
       reload();
     },
     select(audio) {

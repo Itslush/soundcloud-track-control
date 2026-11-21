@@ -212,6 +212,8 @@ export function createTempoEmbeddedPages(api) {
     entry.style = style;
     const releaseAppearance = api.appearance?.(entry.doc);
     if (releaseAppearance) entry.cleanup.push(releaseAppearance);
+    const releaseDj = api.djMode?.(entry.doc);
+    if (releaseDj) entry.cleanup.push(releaseDj);
     entry.observer = new MutationObserver((mutations) => {
       if (!current(entry)) return sync();
       if (mutations.some(relevantMutation)) api.changed();

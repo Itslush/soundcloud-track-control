@@ -53,6 +53,7 @@ jobs:
           python tests/verify-site-polish.py
           python tests/verify-shared-player.py
           python tests/verify-mixer.py
+          python tests/verify-dj-mode.py
           python tests/verify-apple-notice.py
           python tests/verify-site-presentation.py
           python tests/verify-star-motion.py

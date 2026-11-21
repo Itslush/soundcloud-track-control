@@ -10,7 +10,8 @@ Adjust playback speed, save a tempo for each track, and draw speed changes over 
 - Let pitch change with speed, or switch on **Preserve key**.
 - Remember your preferred tempo for individual tracks.
 - Build a timeline with gradual fades and instant speed changes.
-- Dock the two-deck mixer above the player to blend tracks with per-deck speed, pitch, 3-band EQ and filter controls.
+- Dock the two-deck mixer above the player to blend tracks with per-deck speed, pitch, gain/cap, 3-band EQ, filter and BPM Sync controls, or toggle DJ click-to-deck mode (`Alt+Shift+D`) to load tracks straight to Deck A or B.
+- Customize keyboard shortcuts, Master FX & Space, custom presets, A-B loops, 4 per-track hot cues, custom output Volume cap, and local WAV export inside settings.
 - Share a tempo or timeline with a link.
 - Back up saved speeds and timelines, or move them to another browser.
 

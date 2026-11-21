@@ -390,3 +390,62 @@ test('rollback failure is reported without claiming all previous values were res
     /some settings could not be restored/,
   );
 });
+
+test('per-track pitch shift, hot cues and new preferences roundtrip while rejecting invalid values', () => {
+  const first = fixture();
+  first.store.set(track, 'speed', {
+    rate: 0.85,
+    enabled: true,
+    keyShift: -2.5,
+    preserve: true,
+  });
+  first.store.set(track, 'cues', [12.5, 45.25, null, null]);
+  first.map.set('soundcloud.tempo.outputMaxDb', '48');
+  first.map.set('soundcloud.tempo.pitchEngine', JSON.stringify('punch'));
+  first.map.set('soundcloud.tempo.crossfadeBassSwap', 'true');
+  first.map.set('soundcloud.tempo.crossfadeCueEntry', 'true');
+  first.map.set(
+    'soundcloud.tempo.fx',
+    JSON.stringify({ bassDb: 5, filter: -0.4, space: 0.5, room: 'cavern', softClip: true }),
+  );
+  first.map.set(
+    'soundcloud.tempo.keybinds',
+    JSON.stringify({ djMode: 'Alt+Shift+KeyM' }),
+  );
+  first.map.set(
+    'soundcloud.tempo.presets',
+    JSON.stringify([{ name: 'Custom1', rate: 0.9, keyShift: -1, preserve: true }]),
+  );
+
+  const exported = first.store.exportBackup();
+  const second = fixture();
+  second.store.commit(second.store.prepare(exported));
+  assert.equal(second.store.exportBackup(), exported);
+  assert.deepEqual(JSON.parse(JSON.stringify(second.store.speed(track))), {
+    rate: 0.85,
+    enabled: true,
+    keyShift: -2.5,
+    preserve: true,
+  });
+  assert.deepEqual(JSON.parse(JSON.stringify(second.store.cues(track))), [12.5, 45.25, null, null]);
+
+  // Legacy plain rate entries remain bare numbers cleanly.
+  second.store.set('/other/legacy', 'speed', { rate: 1.25, enabled: true });
+  assert.equal(
+    second.map.get('soundcloud.tempo.track.%2Fother%2Flegacy'),
+    '1.25',
+  );
+
+  // Invalid new preferences and cues reject before any write.
+  const base = JSON.parse(exported);
+  const bad = [
+    { ...base, preferences: { ...base.preferences, outputMaxDb: -20 } },
+    { ...base, preferences: { ...base.preferences, outputMaxDb: 10000 } },
+    { ...base, preferences: { ...base.preferences, pitchEngine: 'broken' } },
+    { ...base, preferences: { ...base.preferences, fx: { bassDb: 99, filter: 0, space: 0, room: 'room', softClip: false } } },
+    { ...base, tracks: [{ track, cues: [1, 2, 3, 4, 5] }] },
+    { ...base, tracks: [{ track, cues: [null, null, null, null] }] },
+  ];
+  for (const item of bad)
+    assert.throws(() => second.store.prepare(JSON.stringify(item)));
+});

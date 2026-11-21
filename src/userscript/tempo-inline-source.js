@@ -1,10 +1,14 @@
 import { createMixerShortcut } from '../soundcloud/mixer-shortcut.js';
-import { pitchSettingsKey } from '../controls/tempo-pitch-settings.js';
 import {
-  peakProtectionKey,
-  readPeakProtection,
-} from '../audio/pitch-quality.mjs';
-import { tempoIncrementKey } from '../controls/tempo-increment.js';
+  buildSliderTicks,
+  clampRate,
+  createInlineExtras,
+  formatRate,
+  migrateTrackStorage,
+  parseTrackKey,
+  readCrossfadeNextSettings,
+} from './inline-extras.js';
+import { readPeakProtection } from '../audio/pitch-quality.mjs';
 import * as audioModules from '../audio/index.mjs';
 import { syncTempoRange } from '../controls/tempo-range.js';
 import { createTempoAppearance } from '../appearance/tempo-appearance.js';
@@ -52,6 +56,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
   let clipboardSharing = null;
   let bufferedAudio = null;
   let crossfade = null;
+  let extras = null;
   const trackVisuals = createTrackVisuals({
     document,
     readTrack: () => currentTrackKey(),
@@ -65,20 +70,6 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
   const SLIDER_STEPS = Math.round((SLIDER_MAX - MIN) / SLIDER_STEP);
   const TRACK_STORAGE = 'soundcloud.tempo.track.';
   migrateTrackStorage();
-
-  function migrateTrackStorage() {
-    try {
-      for (const key of Object.keys(localStorage)) {
-        const match = key.match(/^[^.]+\.(soundcloud\.tempo\.track\..+)$/);
-        if (!match) continue;
-        const destination = match[1];
-        if (localStorage.getItem(destination) === null) {
-          localStorage.setItem(destination, localStorage.getItem(key));
-        }
-        localStorage.removeItem(key);
-      }
-    } catch {}
-  }
   const SAVED_STORAGE = 'soundcloud.tempo.applySaved';
   const STYLE_STORAGE = 'soundcloud.tempo.controlStyle';
   const SHOW_KEY_STORAGE = 'soundcloud.tempo.showKey';
@@ -93,7 +84,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     supportsPitch,
   } = createMediaGuards({
     apply,
-    handleShortcut,
+    handleShortcut: (event) => extras?.handleShortcut(event) ?? false,
     readUI: () => ui,
     readServices: () => ({ outputLevel, wasmAudio, bufferedAudio, crossfade }),
     readPlayback: () => ({
@@ -178,21 +169,8 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     }
   }
 
-  function clamp(value) {
-    return Math.round(Math.max(MIN, Math.min(MAX, value)) * 1000) / 1000;
-  }
-
-  function formatRate(value) {
-    return `${value.toFixed(3).replace(/(\.\d{2})0$/, '$1')}×`;
-  }
-
-  function sliderTicks() {
-    return Array.from({ length: SLIDER_STEPS + 1 }, (_, index) => {
-      const units = Math.round(MIN / SLIDER_STEP) + index;
-      const height = units % 10 === 0 ? 5 : units % 2 === 0 ? 3 : 1.5;
-      return `M${index} 0v${height}`;
-    }).join('');
-  }
+  const clamp = (value) => clampRate(value, MIN, MAX);
+  const sliderTicks = () => buildSliderTicks(SLIDER_STEPS, MIN, SLIDER_STEP);
 
   const footerVisuals = createFooterVisuals({
     readUI: () => ui,
@@ -209,60 +187,23 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     return parseTrackKey(clipboardSharing?.originalLink(anchor) ?? href);
   }
 
-  function parseTrackKey(href) {
-    if (!href) {
-      return '';
-    }
-    try {
-      const url = new URL(href, 'https://soundcloud.com');
-      if (
-        !['soundcloud.com', 'www.soundcloud.com', 'm.soundcloud.com'].includes(
-          url.hostname,
-        ) ||
-        url.protocol !== 'https:'
-      ) {
-        return '';
-      }
-      const parts = url.pathname.split('/').filter(Boolean);
-      if (
-        parts.length < 2 ||
-        parts.length > 3 ||
-        (parts.length === 3 && !/^s-[\w-]+$/.test(parts[2]))
-      ) {
-        return '';
-      }
-      if (
-        [
-          'sets',
-          'tracks',
-          'albums',
-          'likes',
-          'reposts',
-          'followers',
-          'following',
-        ].includes(parts[1])
-      ) {
-        return '';
-      }
-      return `/${parts[0]}/${parts[1]}`;
-    } catch {
-      return '';
-    }
-  }
-
   function storageKey(key) {
     return TRACK_STORAGE + encodeURIComponent(key);
   }
 
-  function readSavedRate(key) {
+  function readSavedEntry(key) {
     try {
       const saved = tempoStore.speed(key);
-      return saved?.enabled ? saved.rate : null;
+      return saved?.enabled ? saved : null;
     } catch {
       storageFailure =
         'Track memory is unavailable. Allow site storage and reload.';
       return null;
     }
+  }
+
+  function readSavedRate(key) {
+    return readSavedEntry(key)?.rate ?? null;
   }
 
   function announce(message) {
@@ -298,23 +239,28 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     }
     trackKey = next;
     timeline?.changeTrack(next);
+    extras?.deckTools?.syncTrack();
     if (!next) {
       savedRate = null;
       render();
       return false;
     }
     storageFailure = '';
-    savedRate = readSavedRate(next);
+    const saved = readSavedEntry(next);
+    savedRate = saved?.rate ?? null;
     if (next === lastTrackKey) {
       render();
       return false;
     }
     lastTrackKey = next;
     rate = applySaved ? clamp(savedRate ?? 1) : 1;
+    keyShift = applySaved && saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
+    preserveKey = applySaved && saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
     if (ui) {
       delete ui.memory.dataset.feedback;
       ui.editTrack = next;
       ui.rateNumber.value = String(rate);
+      ui.pitchToggle.checked = preserveKey;
     }
     announce(
       savedRate === null
@@ -336,13 +282,29 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     if (!trackKey) {
       return;
     }
-    const remove = savedRate !== null && (forget || savedRate === rate);
+    const currentShift = timeline.keyShift() ?? keyShift;
+    const currentPreserve = preservesKey();
+    const existing = tempoStore.speed(trackKey);
+    const matchesPitch =
+      (existing?.keyShift ?? readKeyShift()) === currentShift &&
+      (existing?.preserve ?? readPitchSetting()) === currentPreserve;
+    const remove =
+      savedRate !== null && (forget || (savedRate === rate && matchesPitch));
     try {
-      if (remove) {
-        localStorage.removeItem(storageKey(trackKey));
-      } else {
-        localStorage.setItem(storageKey(trackKey), String(rate));
-      }
+      tempoStore.set(
+        trackKey,
+        'speed',
+        remove
+          ? null
+          : {
+              rate,
+              enabled: true,
+              ...(currentShift !== readKeyShift() && { keyShift: currentShift }),
+              ...(currentPreserve !== readPitchSetting() && {
+                preserve: currentPreserve,
+              }),
+            },
+      );
       savedRate = remove ? null : rate;
       pageArtwork.refreshSaved(trackKey);
       clearTimeout(ui.feedbackTimer);
@@ -433,28 +395,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     if (!failure) announce(`Playback speed ${formatRate(rate)}.`);
   }
 
-  function handleShortcut(event) {
-    if (
-      !event.altKey ||
-      !event.shiftKey ||
-      event.ctrlKey ||
-      event.metaKey ||
-      event.isComposing
-    ) {
-      return false;
-    }
-    if (!['ArrowLeft', 'ArrowRight', 'ArrowDown'].includes(event.key)) {
-      return false;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    setRate(
-      event.key === 'ArrowDown'
-        ? 1
-        : rate + (event.key === 'ArrowLeft' ? -0.05 : 0.05),
-    );
-    return true;
-  }
+  const handleShortcut = (event) => extras?.handleShortcut(event) ?? false;
 
   function createUi() {
     ui = createTempoControls({
@@ -499,6 +440,15 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
         tempoStore,
         references,
         trackVisuals,
+        get keybinds() {
+          return extras?.keybinds;
+        },
+        get djMode() {
+          return extras?.djMode;
+        },
+        get deckTools() {
+          return extras?.deckTools;
+        },
       },
       limits: { MIN, MAX, SLIDER_MAX, SLIDER_STEP, SLIDER_STEPS, sliderTicks },
       version: VERSION,
@@ -520,6 +470,8 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
         clamp,
         announce,
         supportsPitch,
+        applyPreset: (preset) => extras?.applyPreset(preset),
+        exportWav: (signal, onProgress) => extras?.exportWav(signal, onProgress),
         keyShiftChanged(value) {
           keyShift = value;
         },
@@ -531,14 +483,23 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
         },
         savedPreferenceChanged(value) {
           applySaved = value;
-          rate = applySaved ? clamp(savedRate ?? 1) : 1;
+          const saved = trackKey ? readSavedEntry(trackKey) : null;
+          rate = applySaved ? clamp(saved?.rate ?? 1) : 1;
+          keyShift = applySaved && saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
+          preserveKey = applySaved && saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
         },
         savedTrackChanged(track, type) {
           pageArtwork.refreshSaved(track);
           if (type === 'timeline') timeline.refreshSaved(track);
           if (track === trackKey) {
-            savedRate = readSavedRate(trackKey);
-            if (type === 'speed' && applySaved) rate = clamp(savedRate ?? 1);
+            const saved = readSavedEntry(trackKey);
+            savedRate = saved?.rate ?? null;
+            if (type === 'speed' && applySaved) {
+              rate = clamp(savedRate ?? 1);
+              keyShift = saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
+              preserveKey = saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
+              if (ui) ui.pitchToggle.checked = preserveKey;
+            }
           }
           updateAll();
         },
@@ -547,18 +508,20 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
           pageArtwork.refreshSaved();
           ui.syncPitchControls?.();
           applySaved = readSavedSetting();
-          keyShift = readKeyShift();
+          const saved = trackKey ? readSavedEntry(trackKey) : null;
+          savedRate = saved?.rate ?? null;
+          keyShift = applySaved && saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
+          preserveKey = applySaved && saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
           timeline.clearKeyOverride();
           syncControlStyle();
-          preserveKey = readPitchSetting();
           useWasm = readWasmSetting();
-          savedRate = readSavedRate(trackKey);
           ui.savedToggle.checked = applySaved;
           ui.pitchToggle.checked = preserveKey;
           ui.wasmToggle.checked = useWasm;
           ui.copyToggle.checked = copyLinksEnabled();
           outputLevel.reload();
           crossfade.reload();
+          extras?.importSettings();
           timeline.refreshSaved(trackKey);
           rate = applySaved ? clamp(savedRate ?? 1) : 1;
           updateAll();
@@ -720,6 +683,11 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
   const mixerShortcut = createMixerShortcut({
     parseTrack: parseTrackKey,
     embeddedKey: (doc) => embeddedPages.key(doc),
+    keybinds: {
+      matchAction: (event, action) =>
+        extras?.keybinds?.matchAction(event, action) ?? false,
+      get: (action) => extras?.keybinds?.get(action) ?? '',
+    },
   });
   for (const type of ['pointerover', 'focusin'])
     document.addEventListener(type, mixerShortcut.pointer, true);
@@ -732,6 +700,10 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     currentTrack: () => trackKey,
     copyLinks: copyLinksEnabled,
     shareLink: (text) => timeline.shareLink(text),
+    djMode(doc) {
+      extras?.djMode?.attachDocument(doc);
+      return () => extras?.djMode?.detachDocument(doc);
+    },
     appearance(doc) {
       try {
         return appearance.attachDocument(doc);
@@ -803,16 +775,15 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     sourceStats: () => bufferedAudio.sourceStats(),
     preloadNext: (audio, options) => bufferedAudio.preloadNext(audio, options),
     isCurrentTrack: (audio, track) => bufferedAudio.isCurrentTrack(audio, track),
-    readNextSettings: (url) => {
-      const key = parseTrackKey(url);
-      if (!key) throw new Error('The next track identity is unavailable.');
-      return {
-        rate: applySaved ? (readSavedRate(key) ?? 1) : 1,
-        preserve: preserveKey,
-        shift: keyShift,
-        variable: Boolean(tempoStore.timeline(key)?.enabled),
-      };
-    },
+    readNextSettings: (url) =>
+      readCrossfadeNextSettings(url, {
+        parseTrackKey,
+        tempoStore,
+        applySaved,
+        readSavedEntry,
+        readPitchSetting,
+        readKeyShift,
+      }),
     readNextRate: (url) => {
       const key = parseTrackKey(url);
       if (!key) return 4;
@@ -857,7 +828,101 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     embeddedKey: (doc) => embeddedPages.key(doc),
   });
   installCrossfadeControls(document, crossfadeClick, crossfade);
-  window.addEventListener('pagehide', () => crossfade.dispose());
+  extras = createInlineExtras({
+    tempoStore,
+    outputLevel,
+    wasmAudio,
+    bufferedAudio,
+    getCrossfade: () => crossfade,
+    timeline,
+    audioModules,
+    createStretchNode,
+    parseTrackKey,
+    getEmbeddedPages: () => embeddedPages,
+    currentTrackKey,
+    references,
+    readState: () => ({
+      rate,
+      keyShift: () => timeline.keyShift() ?? keyShift,
+      preservesKey,
+    }),
+    mutations: {
+      setRate,
+      setPresetState(next) {
+        rate = clamp(next.rate);
+        keyShift = next.keyShift;
+        preserveKey = next.preserve;
+        if (ui) ui.pitchToggle.checked = preserveKey;
+      },
+      updateAll,
+      announce,
+      render,
+    },
+    storageKeys: {
+      KEY_SHIFT_STORAGE,
+      PITCH_STORAGE,
+      TRACK_STORAGE,
+      WASM_STORAGE,
+      SAVED_STORAGE,
+      STYLE_STORAGE,
+      SHOW_KEY_STORAGE,
+      syncPeakProtection,
+      scheduleSavedTracks,
+      scheduleArtwork: () => pageArtwork.schedule(),
+      syncControlStyle,
+      trackStorageKey: () => storageKey(trackKey),
+      reloadWasm: () => {
+        useWasm = readWasmSetting();
+        if (ui) ui.wasmToggle.checked = useWasm;
+        crossfade.settingsChanged();
+        updateAll();
+      },
+      reloadPitch: () => {
+        preserveKey = readPitchSetting();
+        if (ui) ui.pitchToggle.checked = preserveKey;
+        crossfade.settingsChanged();
+        updateAll();
+      },
+      reloadSaved: () => {
+        applySaved = readSavedSetting();
+        if (ui) ui.savedToggle.checked = applySaved;
+        timeline.changeTrack('');
+        timeline.changeTrack(trackKey);
+        const saved = trackKey ? readSavedEntry(trackKey) : null;
+        rate = applySaved ? clamp(saved?.rate ?? 1) : 1;
+        keyShift = applySaved && saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
+        preserveKey = applySaved && saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
+        updateAll();
+      },
+      reloadPitchUi: () => {
+        ui?.syncPitchControls?.();
+        mobilePlayer?.refresh();
+      },
+      reloadKeyShift: () => {
+        keyShift = readKeyShift();
+        timeline.clearKeyOverride();
+        crossfade.settingsChanged();
+        if (ui) ui.root.querySelector('#key-shift').value = String(keyShift);
+        updateAll();
+      },
+      reloadTrack: () => {
+        storageFailure = '';
+        const saved = trackKey ? readSavedEntry(trackKey) : null;
+        savedRate = saved?.rate ?? null;
+        if (applySaved) {
+          rate = clamp(savedRate ?? 1);
+          keyShift = saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
+          preserveKey = saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
+          if (ui) ui.pitchToggle.checked = preserveKey;
+        }
+        updateAll();
+      },
+    },
+  });
+  window.addEventListener('pagehide', () => {
+    crossfade.dispose();
+    extras?.dispose();
+  });
   installGuards();
   clipboardSharing = installClipboardSharing({
     copyLinksEnabled,
@@ -866,7 +931,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
   const relevantNodes =
     'a[href], audio, .image, .playControls, .playControls__elements, .playableTile, .sound, .queueItemView, .soundBadge, .trackItem';
   const ownedNodes =
-    '#soundcloud-tempo-control, #soundcloud-tempo-artwork-indicator, .soundcloud-tempo-page-indicator';
+    '#soundcloud-tempo-control, #soundcloud-tempo-artwork-indicator, .soundcloud-tempo-page-indicator, .tempo-dj-pills, #soundcloud-tempo-dj-style';
 
   function relevantMutation(mutation) {
     if (mutation.type === 'attributes') return true;
@@ -903,70 +968,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     attributes: true,
     attributeFilter: ['href'],
   });
-  window.addEventListener('storage', (event) => {
-    if (event.key === null || event.key === peakProtectionKey)
-      syncPeakProtection();
-    if (
-      event.key === null ||
-      [
-        'soundcloud.tempo.crossfade',
-        'soundcloud.tempo.crossfadeSeconds',
-      ].includes(event.key)
-    )
-      crossfade.reload();
-    if (
-      event.key === null ||
-      event.key?.startsWith(TRACK_STORAGE) ||
-      event.key?.startsWith('soundcloud.tempo.timeline.')
-    )
-      scheduleSavedTracks();
-    if (event.key === null || event.key === WASM_STORAGE) {
-      useWasm = readWasmSetting();
-      if (ui) ui.wasmToggle.checked = useWasm;
-      crossfade.settingsChanged();
-      updateAll();
-    }
-    if (event.key === null || event.key === PITCH_STORAGE) {
-      preserveKey = readPitchSetting();
-      if (ui) ui.pitchToggle.checked = preserveKey;
-      crossfade.settingsChanged();
-      updateAll();
-    }
-    if (event.key === null || event.key?.startsWith(TRACK_STORAGE))
-      pageArtwork.schedule();
-    if (event.key === null || event.key === SAVED_STORAGE) {
-      applySaved = readSavedSetting();
-      if (ui) ui.savedToggle.checked = applySaved;
-      timeline.changeTrack('');
-      timeline.changeTrack(trackKey);
-      rate = applySaved ? clamp(savedRate ?? 1) : 1;
-      updateAll();
-    }
-    if (event.key === null || event.key === pitchSettingsKey) {
-      ui?.syncPitchControls?.();
-      mobilePlayer?.refresh();
-    }
-    if (event.key === null || event.key === tempoIncrementKey) render();
-    if (
-      event.key === null ||
-      event.key === STYLE_STORAGE ||
-      event.key === SHOW_KEY_STORAGE
-    )
-      syncControlStyle();
-    if (event.key === null || event.key === KEY_SHIFT_STORAGE) {
-      keyShift = readKeyShift();
-      timeline.clearKeyOverride();
-      crossfade.settingsChanged();
-      if (ui) ui.root.querySelector('#key-shift').value = String(keyShift);
-      updateAll();
-    }
-    if (event.key === null || event.key === storageKey(trackKey)) {
-      storageFailure = '';
-      savedRate = trackKey ? readSavedRate(trackKey) : null;
-      if (applySaved) rate = clamp(savedRate ?? 1);
-      updateAll();
-    }
-  });
+  window.addEventListener('storage', (event) => extras?.handleStorage(event));
   window.addEventListener('resize', syncTheme);
   window.addEventListener('resize', positionSettings);
   document.addEventListener('visibilitychange', () => {

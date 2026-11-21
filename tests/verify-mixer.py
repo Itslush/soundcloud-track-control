@@ -124,6 +124,32 @@ try:
         b.get_by_role('slider', name='Deck B pitch').press('ArrowLeft')
         b.get_by_role('slider', name='Deck B pitch').press('ArrowLeft')
         expect(b.get_by_role('button', name='Pause deck B')).to_be_visible()
+
+        # Verify per-deck user Gain (dB) + Volume Cap and Tap BPM / Sync.
+        cap_a = a.get_by_label('Deck A volume cap dB')
+        gain_a = a.get_by_label('Deck A gain dB')
+        cap_a.fill('24')
+        cap_a.press('Enter')
+        expect(a.get_by_role('slider', name='Deck A gain')).to_have_attribute('max', '24')
+        gain_a.fill('18')
+        gain_a.press('Enter')
+        expect(gain_a).to_have_value('18')
+        gain_a.fill('10000')
+        gain_a.press('Enter')
+        expect(gain_a).to_have_value('18')
+        expect(a.locator('.deck-status')).to_contain_text('Enter a dB')
+
+        for _ in range(3):
+            a.get_by_role('button', name='Tap BPM').click()
+            page.wait_for_timeout(320)
+        for _ in range(3):
+            b.get_by_role('button', name='Tap BPM').click()
+            page.wait_for_timeout(420)
+        sync_a = a.get_by_role('button', name='Sync BPM')
+        expect(sync_a).to_be_enabled()
+        sync_a.click()
+        assert float(a.get_by_role('slider', name='Deck A tempo').input_value()) < 1.0
+
         for width in [360, 620, 768, 1200]:
             page.set_viewport_size({'width': width, 'height': 800})
             assert page.evaluate(
@@ -251,6 +277,12 @@ try:
         frame.get_by_role('button', name='Hide deck B controls').click()
         expect(frame.get_by_role('slider', name='Deck B tempo')).to_be_hidden()
         expect(deck.get_by_role('button', name='Pause deck B')).to_be_visible()
+        dock_dj = frame.get_by_role('button', name='DJ', exact=True)
+        expect(dock_dj).to_have_attribute('aria-pressed', 'false')
+        dock_dj.click()
+        expect(dock_dj).to_have_attribute('aria-pressed', 'true')
+        dock_dj.click()
+        expect(dock_dj).to_have_attribute('aria-pressed', 'false')
         page.screenshot(path=str(ROOT / 'test-results/mixer-dock-oled.png'))
 
         page.locator('body').evaluate("el => {document.querySelector('.playControls').style.background=''; el.classList.add('light')}")

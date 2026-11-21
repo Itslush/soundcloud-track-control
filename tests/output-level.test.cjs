@@ -424,3 +424,21 @@ test('subscriber errors and reentrant changes cannot prevent current notificatio
   assert.equal(warnings.length, 3);
   throwing();
 });
+
+test('outputMaxDb persists user volume cap, dynamically expands on higher dB, clamps when lowered and rejects invalid caps', () => {
+  const f = fixture();
+  const slider = f.ui?.outputSlider ?? f.outputSlider;
+  assert.equal(f.api.max(), 12);
+  f.api.setMax(60);
+  assert.equal(f.api.max(), 60);
+  if (slider) assert.equal(slider.max, '60');
+  f.api.set(48);
+  assert.equal(f.api.value(), 48);
+  f.api.setMax(24);
+  assert.equal(f.api.max(), 24);
+  assert.equal(f.api.value(), 24);
+  if (slider) assert.equal(slider.max, '24');
+  assert.throws(() => f.api.setMax(10000), /Enter a dB cap/);
+  assert.throws(() => f.api.setMax(-20), /Enter a dB cap/);
+  assert.throws(() => f.api.setMax(''), /Enter a dB cap/);
+});

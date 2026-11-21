@@ -6,10 +6,12 @@ import {
   type CSSProperties,
 } from 'react';
 import { createRoot } from 'react-dom/client';
+import { validOutputDb } from '../../../src/audio/output-level.mjs';
 import { MixerDeck, type EqBand } from '../components/MixerDeck';
 
 type DeckBusNodes = {
   input: GainNode;
+  deckGain: GainNode;
   low: BiquadFilterNode;
   mid: BiquadFilterNode;
   high: BiquadFilterNode;
@@ -52,6 +54,15 @@ function Mixer() {
   const [expanded, setExpanded] = useState({ A: false, B: false });
   const [activeDeck, setActiveDeck] = useState<'A' | 'B'>('A');
   const [pauseSignal, setPauseSignal] = useState(0);
+  const [bpmMap, setBpmMap] = useState<{ A: number | null; B: number | null }>({
+    A: null,
+    B: null,
+  });
+  const [djState, setDjState] = useState({
+    enabled: false,
+    target: 'auto',
+    nextDeck: 'A',
+  });
   const embedded = window.parent !== window;
   const engine = useRef<Engine | null>(null);
   const consoleRef = useRef<HTMLDivElement>(null);
@@ -72,6 +83,8 @@ function Mixer() {
       const decks = gains(position).map((value) => {
         const input = context.createGain();
         input.gain.value = 1;
+        const deckGain = context.createGain();
+        deckGain.gain.value = 1;
         const low = createFilterNode(context, 'lowshelf', 200);
         const mid = createFilterNode(context, 'peaking', 1000, 1);
         const high = createFilterNode(context, 'highshelf', 4000);
@@ -79,13 +92,14 @@ function Mixer() {
         const crossfade = context.createGain();
         crossfade.gain.value = value;
         input
+          .connect(deckGain)
           .connect(low)
           .connect(mid)
           .connect(high)
           .connect(djFilter)
           .connect(crossfade)
           .connect(context.destination);
-        return { input, low, mid, high, djFilter, crossfade };
+        return { input, deckGain, low, mid, high, djFilter, crossfade };
       });
       engine.current = { context, decks };
     }
@@ -94,6 +108,14 @@ function Mixer() {
     return {
       context,
       level: deck.input,
+      setGain(db: number) {
+        const valid = validOutputDb(db) ? db : 0;
+        deck.deckGain.gain.setTargetAtTime(
+          10 ** (valid / 20),
+          context.currentTime,
+          0.012,
+        );
+      },
       setEq(band: EqBand, db: number) {
         const clamped = Number.isFinite(db) ? Math.max(-24, Math.min(6, db)) : 0;
         deck[band].gain.setTargetAtTime(clamped, context.currentTime, 0.012);
@@ -205,6 +227,7 @@ function Mixer() {
           'soundcloud-track-control:mixer-load',
           'soundcloud-track-control:mixer-theme',
           'soundcloud-track-control:mixer-pause',
+          'soundcloud-track-control:mixer-dj-state',
         ].includes(event.data?.type) ||
         (event.data.type === 'soundcloud-track-control:mixer-load' &&
           (!['A', 'B'].includes(event.data.deck) ||
@@ -213,6 +236,15 @@ function Mixer() {
         return;
       if (event.data.type === 'soundcloud-track-control:mixer-pause') {
         setPauseSignal((count) => count + 1);
+        return;
+      }
+      if (event.data.type === 'soundcloud-track-control:mixer-dj-state') {
+        setDjState({
+          enabled: Boolean(event.data.enabled),
+          target:
+            typeof event.data.target === 'string' ? event.data.target : 'auto',
+          nextDeck: event.data.nextDeck === 'B' ? 'B' : 'A',
+        });
         return;
       }
       if (event.data.type === 'soundcloud-track-control:mixer-theme') {
@@ -297,6 +329,12 @@ function Mixer() {
           seed={seed}
           bus={() => bus(0)}
           pauseSignal={pauseSignal}
+          otherBpm={bpmMap.B}
+          onBpmChange={(bpm) =>
+            setBpmMap((current) =>
+              current.A === bpm ? current : { ...current, A: bpm },
+            )
+          }
           onPlayingChange={(isPlaying) => handlePlayingChange('A', isPlaying)}
           onNotice={(message) =>
             notifyHost({
@@ -315,6 +353,12 @@ function Mixer() {
           seed=""
           bus={() => bus(1)}
           pauseSignal={pauseSignal}
+          otherBpm={bpmMap.A}
+          onBpmChange={(bpm) =>
+            setBpmMap((current) =>
+              current.B === bpm ? current : { ...current, B: bpm },
+            )
+          }
           onPlayingChange={(isPlaying) => handlePlayingChange('B', isPlaying)}
           onNotice={(message) =>
             notifyHost({
@@ -369,6 +413,27 @@ function Mixer() {
       </div>
       {embedded && (
         <div className="mixer-dock-actions">
+          <button
+            type="button"
+            className="mixer-dj-button"
+            aria-pressed={djState.enabled}
+            title={
+              djState.enabled
+                ? `DJ mode on (${djState.target === 'auto' ? 'next ' + djState.nextDeck : 'Deck ' + djState.target}). Click to toggle, Shift+click to change target`
+                : 'DJ mode off. Click to send SoundCloud play clicks straight to decks'
+            }
+            onClick={(event) =>
+              notifyHost(
+                event.shiftKey
+                  ? 'soundcloud-track-control:mixer-dj-target'
+                  : 'soundcloud-track-control:mixer-dj-toggle',
+              )
+            }
+          >
+            {djState.enabled && djState.target !== 'auto'
+              ? `DJ ${djState.target}`
+              : 'DJ'}
+          </button>
           <a
             href={location.origin + location.pathname}
             target="_blank"

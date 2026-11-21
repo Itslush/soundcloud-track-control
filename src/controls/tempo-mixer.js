@@ -245,8 +245,17 @@ function createDock() {
       clearTimeout(timeout);
       hideNotice();
       position();
+      if (config?.djHooks?.getState)
+        dock.send({
+          type: 'soundcloud-track-control:mixer-dj-state',
+          ...config.djHooks.getState(),
+        });
       for (const message of pending) dock.send(message);
       pending = [];
+    } else if (event.data === 'soundcloud-track-control:mixer-dj-toggle') {
+      config?.djHooks?.onToggle?.();
+    } else if (event.data === 'soundcloud-track-control:mixer-dj-target') {
+      config?.djHooks?.onCycleTarget?.();
     } else if (event.data?.type === 'soundcloud-track-control:mixer-size') {
       if (typeof event.data.expanded === 'boolean')
         expanded = event.data.expanded;
@@ -319,8 +328,8 @@ export function toggleMixer() {
   return setMixerVisible(!isMixerVisible(), true);
 }
 
-export function initMixerDock(website, playback, onVisibilityChange) {
-  config = { website, playback, onVisibilityChange };
+export function initMixerDock(website, playback, onVisibilityChange, djHooks) {
+  config = { website, playback, onVisibilityChange, djHooks };
   if (!storageBound) {
     storageBound = true;
     window.addEventListener('storage', (event) => {
@@ -360,4 +369,11 @@ export function mixerMessage(message) {
   if (!config?.website) return;
   setMixerVisible(true, true);
   dock?.message(message);
+}
+
+export function syncMixerDjState(state) {
+  dock?.send({
+    type: 'soundcloud-track-control:mixer-dj-state',
+    ...state,
+  });
 }

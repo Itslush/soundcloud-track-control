@@ -3,6 +3,17 @@ import { validOutputDb } from '../audio/output-level.mjs';
 
 export function createOutputLevel({ references, readUI }) {
   const key = 'soundcloud.tempo.outputDb';
+  const maxKey = 'soundcloud.tempo.outputMaxDb';
+  const validMaxDb = (value) => validOutputDb(value) && value >= -12;
+  const readMax = () => {
+    try {
+      const raw = localStorage.getItem(maxKey);
+      const value = raw === null ? 12 : Number(raw);
+      return validMaxDb(value) ? value : 12;
+    } catch {
+      return 12;
+    }
+  };
   const volume = Object.getOwnPropertyDescriptor(
     HTMLMediaElement.prototype,
     'volume',
@@ -15,6 +26,7 @@ export function createOutputLevel({ references, readUI }) {
   const subscriptions = new WeakMap();
   const subscribed = new Set();
   let db = read();
+  let maxDb = Math.max(readMax(), db);
 
   function read() {
     try {
@@ -138,12 +150,13 @@ export function createOutputLevel({ references, readUI }) {
   function syncUI() {
     const ui = readUI();
     if (ui?.outputSlider) {
-      ui.outputSlider.max = String(Math.max(12, Number(ui.outputSlider.max), db));
+      ui.outputSlider.max = String(maxDb);
       ui.outputSlider.value = String(db);
       ui.outputSlider.setAttribute?.('aria-valuetext', `${db} dB`);
       ui.outputValue.value = String(db);
       syncTempoRange(ui.outputSlider);
     }
+    if (ui?.outputMaxInput) ui.outputMaxInput.value = String(maxDb);
   }
 
   if (volume?.configurable && volume.set && volume.get) {
@@ -179,8 +192,9 @@ export function createOutputLevel({ references, readUI }) {
   }
 
   window.addEventListener('storage', (event) => {
-    if (event.key !== key && event.key !== null) return;
+    if (event.key !== key && event.key !== maxKey && event.key !== null) return;
     db = read();
+    maxDb = Math.max(readMax(), db);
     apply();
   });
 
@@ -190,8 +204,31 @@ export function createOutputLevel({ references, readUI }) {
     subscribeLevel,
     syncUI,
     value: () => db,
+    max: () => maxDb,
     reload() {
       db = read();
+      maxDb = Math.max(readMax(), db);
+      apply();
+    },
+    setMax(value) {
+      const next = Number(value);
+      if (String(value).trim() === '' || !validMaxDb(next))
+        throw new RangeError(
+          'Enter a dB cap of -12 or higher that Web Audio can represent.',
+        );
+      const previousMax = maxDb;
+      const previousDb = db;
+      maxDb = next;
+      if (db > maxDb) db = maxDb;
+      try {
+        localStorage.setItem(maxKey, String(maxDb));
+        if (db !== previousDb) localStorage.setItem(key, String(db));
+      } catch {
+        maxDb = previousMax;
+        db = previousDb;
+        apply();
+        throw new Error('Volume cap could not be saved.');
+      }
       apply();
     },
     set(value) {
@@ -201,11 +238,15 @@ export function createOutputLevel({ references, readUI }) {
           'Enter a dB value of -24 or higher that Web Audio can represent.',
         );
       const previous = db;
+      const previousMax = maxDb;
       db = next;
+      if (db > maxDb) maxDb = db;
       try {
         localStorage.setItem(key, String(db));
+        if (maxDb !== previousMax) localStorage.setItem(maxKey, String(maxDb));
       } catch {
         db = previous;
+        maxDb = previousMax;
         apply();
         throw new Error('Output level could not be saved.');
       }

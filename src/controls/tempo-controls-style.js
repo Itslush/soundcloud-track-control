@@ -1,3 +1,4 @@
+import { tempoExtrasStyle } from './tempo-extras-style.js';
 import { tempoFieldStyle } from './tempo-fields.js';
 import { tempoRangeStyle } from './tempo-range.js';
 
@@ -766,4 +767,5 @@ export const controlsStyle = `
 .increment-label{margin:12px 0}
 .pitch-bounds .tempo-number,.increment-label .tempo-number{border:1px solid var(--tempo-track);border-radius:3px;min-height:36px}
 .pitch-bounds .tempo-number input,.increment-label .tempo-number input{width:64px;text-align:center}
+${tempoExtrasStyle}
 `;

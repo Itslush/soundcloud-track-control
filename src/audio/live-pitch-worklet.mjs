@@ -52,10 +52,17 @@ export function registerLivePitch(Module, Waveform, name) {
       this.fadeFrames = Math.round(sampleRate * 0.012);
     }
 
-    schedule({ active, semitones = 0 }) {
+    schedule({ active, semitones = 0, engine = 'auto' }) {
       // Larger intervals and upward shifts retain the spectral engine's anti-aliasing.
       this.semitones = semitones;
-      this.target = active && semitones <= -1 && semitones >= -4 ? 1 : 0;
+      this.engine = engine;
+      const usePunch =
+        engine === 'smooth'
+          ? false
+          : engine === 'punch'
+            ? semitones <= -0.25 && semitones >= -6
+            : semitones <= -1 && semitones >= -4;
+      this.target = active && usePunch ? 1 : 0;
       if (this.target || (active && this.blend > 0))
         this.ratio = 2 ** (Math.min(0, semitones) / 12);
       this.wasm._setTransposeSemitones(semitones, 8000 / sampleRate);

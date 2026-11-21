@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { AudioPreview } from '../scripts/audio-preview';
 import { MixerTransport } from './MixerTransport';
 import { artworkFilter } from '../../../src/appearance/artwork-filter.js';
+import { validOutputDb } from '../../../src/audio/output-level.mjs';
 import {
   peakProtectionKey,
   readPeakProtection,
@@ -12,6 +13,7 @@ export type EqBand = 'low' | 'mid' | 'high';
 type DeckBus = {
   context: AudioContext;
   level: GainNode;
+  setGain: (db: number) => void;
   setEq: (band: EqBand, db: number) => void;
   setFilter: (value: number) => void;
 };
@@ -26,6 +28,8 @@ type Props = {
   command: { track: string; id: number } | null;
   bus: () => DeckBus;
   pauseSignal: number;
+  otherBpm?: number | null;
+  onBpmChange?: (bpm: number | null) => void;
   onPlayingChange: (playing: boolean) => void;
   onNotice?: (message: string) => void;
 };
@@ -69,6 +73,8 @@ export function MixerDeck({
   command,
   bus,
   pauseSignal,
+  otherBpm = null,
+  onBpmChange,
   onPlayingChange,
   onNotice,
 }: Props) {
@@ -88,6 +94,13 @@ export function MixerDeck({
   const [lock, setLock] = useState(false);
   const [eq, setEq] = useState<EqValues>(flatEq);
   const [djFilter, setDjFilter] = useState(0);
+  const [gainDb, setGainDb] = useState(0);
+  const [gainCapDb, setGainCapDb] = useState(12);
+  const [gainDraft, setGainDraft] = useState('0');
+  const [capDraft, setCapDraft] = useState('12');
+  const [baseBpm, setBaseBpm] = useState<number | null>(null);
+  const [tapCount, setTapCount] = useState(0);
+  const tapsRef = useRef<number[]>([]);
   const player = useRef<AudioPreview | null>(null);
   const deckBus = useRef<DeckBus | null>(null);
   const events = useRef<AbortController | null>(null);
@@ -95,12 +108,16 @@ export function MixerDeck({
   const generation = useRef(0);
   const eqRef = useRef(eq);
   const djFilterRef = useRef(djFilter);
+  const gainDbRef = useRef(gainDb);
   const onPlayingChangeRef = useRef(onPlayingChange);
   const onNoticeRef = useRef(onNotice);
+  const onBpmChangeRef = useRef(onBpmChange);
   eqRef.current = eq;
   djFilterRef.current = djFilter;
+  gainDbRef.current = gainDb;
   onPlayingChangeRef.current = onPlayingChange;
   onNoticeRef.current = onNotice;
+  onBpmChangeRef.current = onBpmChange;
 
   function reportError(message: string) {
     setStatus(message);
@@ -109,6 +126,7 @@ export function MixerDeck({
 
   function syncToneNodes(activeBus: DeckBus | null) {
     if (!activeBus) return;
+    activeBus.setGain(gainDbRef.current);
     activeBus.setEq('low', eqRef.current.low);
     activeBus.setEq('mid', eqRef.current.mid);
     activeBus.setEq('high', eqRef.current.high);
@@ -193,10 +211,24 @@ export function MixerDeck({
   }, [djFilter]);
 
   useEffect(() => {
+    deckBus.current?.setGain(gainDb);
+  }, [gainDb]);
+
+  const effectiveBpm =
+    baseBpm !== null ? Math.round(baseBpm * tempo * 10) / 10 : null;
+
+  useEffect(() => {
+    onBpmChangeRef.current?.(effectiveBpm);
+  }, [effectiveBpm]);
+
+  useEffect(() => {
     if (pauseSignal > 0) player.current?.audio.pause();
   }, [pauseSignal]);
 
   async function load(file?: File, requestedUrl?: string) {
+    tapsRef.current = [];
+    setBaseBpm(null);
+    setTapCount(0);
     let link = '';
     if (!file) {
       try {
@@ -265,12 +297,69 @@ export function MixerDeck({
 
   const filter = artworkFilter(tempo, shift, lock);
   const toneAltered =
-    eq.low !== 0 || eq.mid !== 0 || eq.high !== 0 || djFilter !== 0;
+    eq.low !== 0 || eq.mid !== 0 || eq.high !== 0 || djFilter !== 0 || gainDb !== 0;
   const altered = tempo !== 1 || shift !== 0 || toneAltered;
   const readoutParts = [`${Number(tempo.toFixed(2))}×`];
   if (shift !== 0) readoutParts.push(`${shift > 0 ? '+' : ''}${shift}st`);
   if (toneAltered) readoutParts.push('EQ');
   const readout = readoutParts.join(' ');
+
+  function applyGain(raw: string) {
+    const next = Number(raw);
+    if (raw.trim() === '' || !validOutputDb(next)) {
+      reportError('Enter a dB value of -24 or higher that Web Audio can represent.');
+      setGainDraft(String(gainDb));
+      return;
+    }
+    setGainDb(next);
+    setGainDraft(String(next));
+    if (next > gainCapDb) {
+      setGainCapDb(next);
+      setCapDraft(String(next));
+    }
+    setStatus('');
+  }
+
+  function applyGainCap(raw: string) {
+    const next = Number(raw);
+    if (raw.trim() === '' || !validOutputDb(next) || next < -12) {
+      reportError('Enter a dB cap of -12 or higher that Web Audio can represent.');
+      setCapDraft(String(gainCapDb));
+      return;
+    }
+    setGainCapDb(next);
+    setCapDraft(String(next));
+    if (gainDb > next) {
+      setGainDb(next);
+      setGainDraft(String(next));
+    }
+    setStatus('');
+  }
+
+  function handleTapBpm() {
+    const now = Date.now();
+    const list = tapsRef.current;
+    if (list.length && now - list[list.length - 1] > 2500) list.length = 0;
+    list.push(now);
+    if (list.length > 8) list.shift();
+    setTapCount(list.length);
+    if (list.length >= 2) {
+      const avgMs = (list[list.length - 1] - list[0]) / (list.length - 1);
+      if (avgMs > 0) {
+        const tapped = 60000 / avgMs;
+        setBaseBpm(Math.round((tapped / Math.max(0.25, tempo)) * 10) / 10);
+      }
+    }
+  }
+
+  function syncDeckBpm() {
+    if (!baseBpm || !otherBpm) return;
+    const synced = Math.max(
+      0.5,
+      Math.min(2, Math.round((otherBpm / baseBpm) * 1000) / 1000),
+    );
+    setTempo(synced);
+  }
 
   const sourceControls = (
     <>
@@ -377,10 +466,75 @@ export function MixerDeck({
             onClick={() => {
               setEq(flatEq);
               setDjFilter(0);
+              setGainDb(0);
+              setGainDraft('0');
             }}
           >
             Reset EQ
           </button>
+        </div>
+        <div className="deck-gain-row">
+          <label className="deck-gain-slider-label">
+            Gain <output>{formatDb(gainDb)}</output>
+            <input
+              aria-label={'Deck ' + name + ' gain'}
+              type="range"
+              min={-24}
+              max={gainCapDb}
+              step={0.5}
+              value={Math.min(gainCapDb, Math.max(-24, gainDb))}
+              style={
+                {
+                  '--range-fill':
+                    ((Math.min(gainCapDb, Math.max(-24, gainDb)) + 24) /
+                      Math.max(1, gainCapDb + 24)) *
+                      100 +
+                    '%',
+                } as CSSProperties
+              }
+              onDoubleClick={() => {
+                setGainDb(0);
+                setGainDraft('0');
+              }}
+              onChange={(e) => {
+                const v = e.target.valueAsNumber;
+                setGainDb(v);
+                setGainDraft(String(v));
+              }}
+            />
+          </label>
+          <div className="deck-gain-inputs">
+            <label>
+              dB
+              <input
+                aria-label={'Deck ' + name + ' gain dB'}
+                type="number"
+                min={-24}
+                step="any"
+                value={gainDraft}
+                onChange={(e) => setGainDraft(e.target.value)}
+                onBlur={(e) => applyGain(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') applyGain(e.currentTarget.value);
+                }}
+              />
+            </label>
+            <label>
+              Cap
+              <input
+                aria-label={'Deck ' + name + ' volume cap dB'}
+                type="number"
+                min={-12}
+                step="any"
+                value={capDraft}
+                onChange={(e) => setCapDraft(e.target.value)}
+                onBlur={(e) => applyGainCap(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') applyGainCap(e.currentTarget.value);
+                }}
+              />
+            </label>
+          </div>
         </div>
         <div className="deck-eq-grid">
           {(['low', 'mid', 'high'] as const).map((band) => (
@@ -430,6 +584,30 @@ export function MixerDeck({
             onChange={(e) => setDjFilter(e.target.valueAsNumber)}
           />
         </label>
+        <div className="deck-bpm-row">
+          <button
+            type="button"
+            className="deck-bpm-tap"
+            onClick={handleTapBpm}
+          >
+            Tap BPM
+          </button>
+          <span className="deck-bpm-readout">
+            {effectiveBpm !== null
+              ? `${effectiveBpm.toFixed(1)} BPM`
+              : tapCount === 1
+                ? '1 tap…'
+                : 'No BPM'}
+          </span>
+          <button
+            type="button"
+            className="deck-bpm-sync"
+            disabled={!baseBpm || !otherBpm}
+            onClick={syncDeckBpm}
+          >
+            Sync BPM
+          </button>
+        </div>
       </div>
       <label className="deck-lock">
         <input

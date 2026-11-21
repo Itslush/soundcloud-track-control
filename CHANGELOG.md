@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.9
+
+- Added DJ click-to-deck mode (toggle with `Alt+Shift+D` by default or the docked `DJ` button) with inline `+A`/`+B` pills beside track play buttons and automatic Deck A/B routing when clicking play on SoundCloud tracks.
+- Added customizable Shortcuts settings with chord recording, conflict clearing, unbinding and default resets across tempo shortcuts, mixer deck loading, DJ mode, A-B loop, Tap BPM, Hot Cues 1-4 and WAV export.
+- Added an editable Volume cap setting (`outputMaxDb` in Advanced audio) on SoundCloud alongside per-deck Gain and editable Volume cap controls on the two-deck mixer.
+- Added Master FX & Space (75 Hz sub/bass shelf, bipolar DJ filter, Room/Hall/Cavern impulse reverb, master soft clipper), Pitch Engine selector (Auto/Punch/Smooth), Bass-swap and Cue 1 crossfade options, per-track saved pitch/mode and 4 hot cues, A-B loop, Tap/Target BPM lock and mixer BPM Sync, presets, local WAV export and a live DSP peak meter HUD.
+
 ## 1.2.8
 
 - Moved the two-deck mixer out of the footer button into a full-width console docked above SoundCloud's player. Toggle "Show two-deck mixer" under Appearance in settings, or press Alt+Shift+1 for deck A or Alt+Shift+2 for deck B while hovering or focusing a track.

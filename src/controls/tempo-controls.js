@@ -1,3 +1,4 @@
+import { createTempoExtrasUi } from './tempo-extras-ui.js';
 import {
   initMixerDock,
   isMixerVisible,
@@ -92,6 +93,7 @@ export function createTempoControls({
       wasmStatus: get('#wasm-status'),
       outputSlider: get('#output-level'),
       outputValue: get('#output-value'),
+      outputMaxInput: get('#output-max-db'),
       outputStatus: get('#output-status'),
       wasmToggle: get('#use-wasm'),
       peakToggle: get('#peak-protection'),
@@ -153,6 +155,10 @@ export function createTempoControls({
           services.crossfade.set(
             get('#crossfade').checked,
             Number(get('#crossfade-seconds').value),
+            {
+              bassSwap: get('#crossfade-bass-swap')?.checked ?? false,
+              cueEntry: get('#crossfade-cue-entry')?.checked ?? false,
+            },
           );
         } catch (error) {
           ui.settingsStatus.textContent = `Crossfade could not be saved. ${error.message}`;
@@ -456,9 +462,20 @@ export function createTempoControls({
         window.open(destination.href, '_blank', 'noopener,noreferrer');
       });
       get('.settings-actions').prepend(buildSet);
-      showMixerInput.checked = initMixerDock(website, playback, (visible) => {
-        showMixerInput.checked = Boolean(visible);
-      });
+      showMixerInput.checked = initMixerDock(
+        website,
+        playback,
+        (visible) => {
+          showMixerInput.checked = Boolean(visible);
+        },
+        services.djMode
+          ? {
+              getState: () => services.djMode.state(),
+              onToggle: () => services.djMode.toggle(),
+              onCycleTarget: () => services.djMode.cycleTarget(),
+            }
+          : undefined,
+      );
       showMixerInput.addEventListener('change', () => {
         const saved = setMixerVisible(showMixerInput.checked, true);
         if (!saved) {
@@ -691,6 +708,14 @@ export function createTempoControls({
       }
       event.stopPropagation();
     });
+    ui.extras = createTempoExtrasUi({
+      ui,
+      root,
+      playback,
+      settings,
+      services,
+      actions,
+    });
     render();
     return ui;
   }
@@ -765,6 +790,7 @@ export function createTempoControls({
     if (restoreFocus) {
       (ui.settingsTrigger || ui.settingsButton).focus();
     }
+    ui.extras?.onSettingsClose();
   }
 
   function positionSettings() {
@@ -796,6 +822,7 @@ export function createTempoControls({
     if (ui.settings.showPopover && !ui.settings.matches(':popover-open')) {
       ui.settings.showPopover();
     }
+    ui.extras?.onSettingsOpen();
     ui.savedToggle.focus();
   }
 
@@ -817,6 +844,7 @@ export function createTempoControls({
     }
     ui.wasmStatus.textContent =
       services.bufferedAudio?.label() || services.wasmAudio.label();
+    ui.pitchToggle.checked = settings.preserveKey;
     const increment = readTempoIncrement();
     const incrementInput = ui.root.querySelector('#tempo-increment');
     if (ui.root.activeElement !== incrementInput)
@@ -934,6 +962,7 @@ export function createTempoControls({
     actions.afterRender(
       `${text} · ${actions.preservesKey() ? 'Preserve key' : pitchText}`,
     );
+    ui.extras?.sync();
   }
 
   return createView();

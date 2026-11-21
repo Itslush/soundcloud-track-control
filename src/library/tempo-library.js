@@ -1,3 +1,8 @@
+import {
+  DEFAULT_FX,
+  validFxSettings,
+  validPitchEngine,
+} from '../audio/master-fx.mjs';
 import { validOutputDb } from '../audio/output-level.mjs';
 import { defaultTempoIncrement, validTempoIncrement } from '../controls/tempo-increment.js';
 
@@ -9,6 +14,7 @@ import {
 export function createTempoStore(api) {
   const speedPrefix = 'soundcloud.tempo.track.';
   const timelinePrefix = 'soundcloud.tempo.timeline.';
+  const cuePrefix = 'soundcloud.tempo.cues.';
   const limit = 2 * 1024 * 1024;
   const preferences = {
     randomSaved: false,
@@ -19,13 +25,20 @@ export function createTempoStore(api) {
     showMixer: false,
     crossfade: false,
     crossfadeSeconds: 5,
+    crossfadeBassSwap: false,
+    crossfadeCueEntry: false,
     keyShift: 0,
     pitchControls: defaultPitchSettings,
+    pitchEngine: 'auto',
     copyLinks: false,
     preserveKey: false,
     useWasm: true,
     peakProtection: true,
     outputDb: -6,
+    outputMaxDb: 12,
+    fx: { ...DEFAULT_FX },
+    keybinds: {},
+    presets: [],
   };
   const storage = () => api.storage();
   const round = (value) => Math.round(value * 1000) / 1000;
@@ -40,6 +53,13 @@ export function createTempoStore(api) {
     );
   }
 
+  const serializeSpeed = (entry) =>
+    entry.enabled &&
+    entry.keyShift === undefined &&
+    entry.preserve === undefined
+      ? entry.rate
+      : entry;
+
   function validateSpeed(value) {
     const entry =
       typeof value === 'number' ? { rate: value, enabled: true } : value;
@@ -51,7 +71,49 @@ export function createTempoStore(api) {
       typeof entry.enabled !== 'boolean'
     )
       throw new Error('Saved speeds must be between 0.025 and 4×.');
-    return { rate: round(Math.max(0.25, entry.rate)), enabled: entry.enabled };
+    const result = {
+      rate: round(Math.max(0.25, entry.rate)),
+      enabled: entry.enabled,
+    };
+    if (entry.keyShift !== undefined) {
+      if (
+        typeof entry.keyShift !== 'number' ||
+        !Number.isFinite(entry.keyShift) ||
+        Math.abs(entry.keyShift) > 12
+      )
+        throw new Error(
+          'Saved pitch shift must be between -12 and +12 semitones.',
+        );
+      result.keyShift = round(entry.keyShift);
+    }
+    if (entry.preserve !== undefined) {
+      if (typeof entry.preserve !== 'boolean')
+        throw new Error('Saved pitch lock must be true or false.');
+      result.preserve = entry.preserve;
+    }
+    return result;
+  }
+
+  function validateCues(value) {
+    if (
+      !Array.isArray(value) ||
+      value.length > 4 ||
+      value.some(
+        (point) =>
+          point !== null &&
+          (typeof point !== 'number' ||
+            !Number.isFinite(point) ||
+            point < 0 ||
+            point > 86400),
+      )
+    )
+      throw new Error('Saved hot cues must be up to 4 valid timestamps.');
+    const slots = [0, 1, 2, 3].map((i) =>
+      value[i] === undefined || value[i] === null ? null : round(value[i]),
+    );
+    if (slots.every((point) => point === null))
+      throw new Error('At least one hot cue slot must be set.');
+    return slots;
   }
 
   function validateTimeline(value, track) {
@@ -81,12 +143,16 @@ export function createTempoStore(api) {
     return read(timelinePrefix, track, validateTimeline);
   }
 
+  function cues(track) {
+    return read(cuePrefix, track, validateCues);
+  }
+
   function tracks() {
     const paths = new Set();
     const source = storage();
     for (let index = 0; index < source.length; index++) {
       const key = source.key(index);
-      const prefix = [speedPrefix, timelinePrefix].find((item) =>
+      const prefix = [speedPrefix, timelinePrefix, cuePrefix].find((item) =>
         key?.startsWith(item),
       );
       if (!prefix) continue;
@@ -101,12 +167,14 @@ export function createTempoStore(api) {
       .flatMap((track) => {
         const savedSpeed = speed(track);
         const savedTimeline = timeline(track);
-        return savedSpeed || savedTimeline
+        const savedCues = cues(track);
+        return savedSpeed || savedTimeline || savedCues
           ? [
               {
                 track,
                 ...(savedSpeed && { speed: savedSpeed }),
                 ...(savedTimeline && { timeline: savedTimeline }),
+                ...(savedCues && { cues: savedCues }),
               },
             ]
           : [];
@@ -114,19 +182,26 @@ export function createTempoStore(api) {
   }
 
   function set(track, type, value) {
-    if (!validTrack(track) || !['speed', 'timeline'].includes(type))
+    if (!validTrack(track) || !['speed', 'timeline', 'cues'].includes(type))
       throw new Error('Choose a valid saved track.');
-    const key = keyFor(type === 'speed' ? speedPrefix : timelinePrefix, track);
+    const prefix =
+      type === 'speed'
+        ? speedPrefix
+        : type === 'timeline'
+          ? timelinePrefix
+          : cuePrefix;
+    const key = keyFor(prefix, track);
     if (value === null) {
       storage().removeItem(key);
       return;
     }
     const entry =
-      type === 'speed' ? validateSpeed(value) : validateTimeline(value, track);
-    storage().setItem(
-      key,
-      JSON.stringify(type === 'speed' && entry.enabled ? entry.rate : entry),
-    );
+      type === 'speed'
+        ? serializeSpeed(validateSpeed(value))
+        : type === 'timeline'
+          ? validateTimeline(value, track)
+          : validateCues(value);
+    storage().setItem(key, JSON.stringify(entry));
   }
 
   function readPreferences() {
@@ -142,15 +217,56 @@ export function createTempoStore(api) {
     return result;
   }
 
+  function validKeybindsPref(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      return false;
+    const entries = Object.entries(value);
+    if (entries.length > 32) return false;
+    return entries.every(
+      ([action, chord]) =>
+        typeof action === 'string' &&
+        /^[a-zA-Z0-9_-]{1,40}$/.test(action) &&
+        typeof chord === 'string' &&
+        chord.length <= 40,
+    );
+  }
+
+  function validPresetsPref(value) {
+    if (!Array.isArray(value) || value.length > 24) return false;
+    return value.every(
+      (item) =>
+        item &&
+        typeof item === 'object' &&
+        !Array.isArray(item) &&
+        typeof item.name === 'string' &&
+        item.name.trim().length > 0 &&
+        item.name.length <= 40 &&
+        typeof item.rate === 'number' &&
+        Number.isFinite(item.rate) &&
+        item.rate >= 0.25 &&
+        item.rate <= 4 &&
+        typeof item.keyShift === 'number' &&
+        Number.isFinite(item.keyShift) &&
+        Math.abs(item.keyShift) <= 12 &&
+        typeof item.preserve === 'boolean' &&
+        (item.fx === undefined || validFxSettings(item.fx)),
+    );
+  }
+
   function validPreference(name, value) {
     if (name === 'crossfadeSeconds')
       return Number.isInteger(value) && value >= 1 && value <= 10;
     if (name === 'controlStyle')
       return ['slider', 'dial', 'vertical'].includes(value);
     if (name === 'pitchControls') return validPitchSettings(value);
+    if (name === 'pitchEngine') return validPitchEngine(value);
     if (name === 'tempoIncrement') return validTempoIncrement(value);
     if (name === 'keyShift')
       return Number.isFinite(value) && Math.abs(value) <= 12;
+    if (name === 'outputMaxDb') return validOutputDb(value) && value >= -12;
+    if (name === 'fx') return validFxSettings(value);
+    if (name === 'keybinds') return validKeybindsPref(value);
+    if (name === 'presets') return validPresetsPref(value);
     return name === 'outputDb'
       ? validOutputDb(value)
       : Object.hasOwn(preferences, name) && typeof value === 'boolean';
@@ -187,7 +303,7 @@ export function createTempoStore(api) {
         !entry ||
         !validTrack(entry.track) ||
         seen.has(entry.track) ||
-        (!entry.speed && !entry.timeline)
+        (!entry.speed && !entry.timeline && !entry.cues)
       )
         throw new Error('The backup contains an invalid or duplicate track.');
       seen.add(entry.track);
@@ -199,6 +315,7 @@ export function createTempoStore(api) {
           item.timeline.data.points.length +
           (item.timeline.data.pitchPoints?.length ?? 0);
       }
+      if (entry.cues !== undefined) item.cues = validateCues(entry.cues);
       if (pointCount > 20000)
         throw new Error('Use a backup with at most 20,000 timeline points.');
       return item;
@@ -239,12 +356,17 @@ export function createTempoStore(api) {
       if (entry.speed)
         changes.push([
           keyFor(speedPrefix, entry.track),
-          JSON.stringify(entry.speed.enabled ? entry.speed.rate : entry.speed),
+          JSON.stringify(serializeSpeed(entry.speed)),
         ]);
       if (entry.timeline)
         changes.push([
           keyFor(timelinePrefix, entry.track),
           JSON.stringify(entry.timeline),
+        ]);
+      if (entry.cues)
+        changes.push([
+          keyFor(cuePrefix, entry.track),
+          JSON.stringify(entry.cues),
         ]);
     }
     for (const [name, value] of Object.entries(data.preferences))
@@ -293,6 +415,7 @@ export function createTempoStore(api) {
     limit,
     speed,
     timeline,
+    cues,
     tracks,
     set,
     exportBackup,

@@ -148,13 +148,83 @@
 .deck-source-row button,
 .deck-tone-reset,
 .deck-expand,
-.mixer-hide-button {
+.mixer-hide-button,
+.mixer-dj-button,
+.deck-bpm-tap,
+.deck-bpm-sync {
   min-height: 38px;
   padding: 0 14px;
   color: var(--ink);
   border: 1px solid var(--control);
   background: transparent;
   border-radius: 3px;
+}
+.mixer-dj-button {
+  min-height: 32px;
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.mixer-dj-button[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+.deck-gain-row {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.deck-gain-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.deck-gain-inputs label,
+.deck-tone .deck-gain-inputs label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.deck-gain-inputs input,
+.deck-tone .deck-gain-inputs input {
+  grid-column: auto;
+  width: 68px;
+  height: 30px;
+  padding: 0 6px;
+  color: var(--ink);
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font: inherit;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.deck-gain-inputs input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.deck-bpm-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.deck-bpm-tap,
+.deck-bpm-sync {
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 0.8rem;
+}
+.deck-bpm-readout {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 .mixer-shell button {
   font-family: inherit;
@@ -651,6 +721,7 @@
       .deck-play,
       .deck-expand,
       .mixer-hide-button,
+      .mixer-dj-button,
       .mixer-full-link,
       .mixer-mobile-tab
     ) {
