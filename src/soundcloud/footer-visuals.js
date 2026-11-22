@@ -47,7 +47,7 @@ export function createFooterVisuals({ readUI, readPlayback, themeChanged }) {
     ui.host.style.setProperty('--tempo-accent', resolvedAccent);
     ui.host.style.setProperty(
       '--tempo-accent-ink',
-      isOrange ? (dark ? '#ff8547' : '#9e3400') : resolvedAccent,
+      isOrange ? (dark ? '#ff9866' : '#9e3400') : resolvedAccent,
     );
     const surface = getComputedStyle(document.documentElement)
       .getPropertyValue('--tempo-page-surface')

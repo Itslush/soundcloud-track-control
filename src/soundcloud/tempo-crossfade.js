@@ -167,7 +167,7 @@ export function createCrossfade({
 
   async function prepareOpening(current) {
     current.decodingOpening = true;
-    status('Preparing the next track’s opening…');
+    status("Preparing the next track's opening…");
     try {
       const settings = nextSettingsFor(current.next.trackUrl);
       if (settings.variable) {
@@ -236,12 +236,12 @@ export function createCrossfade({
       current.waitingNext = false;
       if (job !== current || signal.aborted) return;
       current.waitingSource = true;
-      status('Identifying the current track’s audio…');
+      status("Identifying the current track's audio…");
       const source = await resolveSource(current.audio, { signal });
       if (job !== current || signal.aborted) return;
       current.waitingSource = false;
       if (source.status !== 'bound')
-        throw new Error('This track’s audio could not be identified.');
+        throw new Error("This track's audio could not be identified.");
       current.sourceId = source.sourceId;
       current.generation = source.generation;
       current.sourceUrl = source.playlistUrl;
@@ -256,7 +256,7 @@ export function createCrossfade({
         !Number.isFinite(duration) ||
         Math.abs(duration - current.audio.duration) > 0.25
       )
-        throw new Error('This stream’s timing is not suitable for crossfade.');
+        throw new Error("This stream's timing is not suitable for crossfade.");
       if (job !== current || signal.aborted) return;
       const latest = await resolveSource(current.audio, { signal });
       if (job !== current || signal.aborted) return;
@@ -296,7 +296,7 @@ export function createCrossfade({
         status(
           `Playing normally. ${
             waitingSource
-              ? 'This track’s audio could not be identified. See crossfade diagnostics.'
+              ? "This track's audio could not be identified. See crossfade diagnostics."
               : error.message
           }`,
         );

@@ -38,11 +38,15 @@ export const tempoRangeStyle = `
     width: 12px;
     height: 12px;
     margin-top: -5px;
-    border: 1px solid color-mix(in srgb, var(--tempo-accent) 85%, var(--tempo-fg));
+    border: 1.5px solid color-mix(in srgb, var(--tempo-accent) 90%, var(--tempo-fg));
     border-radius: 50%;
     background: var(--tempo-surface);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 35%);
     opacity: var(--range-thumb-opacity);
-    transition: opacity 120ms ease-out;
+    transition: opacity 120ms ease-out, transform 110ms ease-out;
+  }
+  input[type='range']:not(:disabled):active::-webkit-slider-thumb {
+    transform: scale(1.16);
   }
   input[type='range']::-moz-range-track,
   input[type='range']::-moz-range-progress {
@@ -53,11 +57,15 @@ export const tempoRangeStyle = `
     box-sizing: border-box;
     width: 12px;
     height: 12px;
-    border: 1px solid color-mix(in srgb, var(--tempo-accent) 85%, var(--tempo-fg));
+    border: 1.5px solid color-mix(in srgb, var(--tempo-accent) 90%, var(--tempo-fg));
     border-radius: 50%;
     background: var(--tempo-surface);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 35%);
     opacity: var(--range-thumb-opacity);
-    transition: opacity 120ms ease-out;
+    transition: opacity 120ms ease-out, transform 110ms ease-out;
+  }
+  input[type='range']:not(:disabled):active::-moz-range-thumb {
+    transform: scale(1.16);
   }
   input[type='range']:disabled {
     opacity: .45;

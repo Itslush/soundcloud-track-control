@@ -5,14 +5,17 @@ export const editorStyle = `
           padding: 16px;
           max-height: calc(100vh - 84px);
           overflow: auto;
-          border: 1px solid var(--tempo-track);
-          border-radius: 4px;
+          border: 1px solid color-mix(in srgb, var(--tempo-fg) 14%, transparent);
+          border-radius: 12px;
           background: var(--tempo-surface);
           color: var(--tempo-fg);
           font:
             12px/1.5 Arial,
             sans-serif;
           z-index: 2147483647;
+        }
+        .tempo-editor:not(.tempo-editor-inline) {
+          box-shadow: 0 18px 42px rgb(0 0 0 / 34%);
         }
         .tempo-editor[hidden] {
           display: none;
@@ -32,10 +35,14 @@ export const editorStyle = `
           justify-content: flex-end;
           margin-top: 16px;
           padding-top: 12px;
-          border-top: 1px solid var(--tempo-track);
+          border-top: 1px solid color-mix(in srgb, var(--tempo-fg) 12%, transparent);
         }
         .point-actions {
-          margin: 8px 0;
+          margin: 0;
+          gap: 8px;
+        }
+        .point-actions button {
+          flex: 1 1 auto;
         }
         .tempo-editor-inline .editor-actions:not(:has(button:not([hidden]))) {
           display: none;
@@ -47,11 +54,42 @@ export const editorStyle = `
           display: block;
           margin: 4px 0;
         }
+        .editor-point-card {
+          margin-top: 12px;
+          padding: 12px;
+          border: 1px solid color-mix(in srgb, var(--tempo-fg) 12%, transparent);
+          border-radius: 10px;
+          background: color-mix(in srgb, var(--tempo-fg) 3%, transparent);
+        }
+        .editor-point-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-bottom: 12px;
+        }
+        .editor-point-select {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex: 1 1 200px;
+          min-width: 0;
+        }
+        .editor-pitch-row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 12px 20px;
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid color-mix(in srgb, var(--tempo-fg) 10%, transparent);
+        }
         .editor-pitch-label {
           display: flex;
           align-items: center;
           gap: 8px;
-          margin: 12px 0;
+          margin: 0;
         }
         .tempo-editor .editor-pitch {
           width: auto;
@@ -81,21 +119,37 @@ export const editorStyle = `
           font-size: 14px;
         }
         .tempo-editor button {
+          min-height: 36px;
+          height: 36px;
+          box-sizing: border-box;
+          border: 1px solid color-mix(in srgb, var(--tempo-fg) 20%, transparent);
+          border-radius: 7px;
+          background: transparent;
+          padding: 4px 12px;
+          transition: transform 110ms ease-out, background-color 140ms ease-out, border-color 140ms ease-out;
+        }
+        .tempo-editor button:not(:disabled):active {
+          transform: scale(0.97);
+        }
+        .editor-zoom-group {
+          display: inline-flex;
+          align-items: stretch;
+          border: 1px solid color-mix(in srgb, var(--tempo-fg) 20%, transparent);
+          border-radius: 7px;
+          overflow: hidden;
+        }
+        .tempo-editor .editor-zoom-group button {
+          min-width: 36px;
+          width: 36px;
           min-height: 34px;
           height: 34px;
-          box-sizing: border-box;
-          border: 1px solid var(--tempo-track);
-          border-radius: 3px;
-          background: transparent;
-          padding: 4px 10px;
-        }
-        .tempo-editor .zoom-out,
-        .tempo-editor .zoom-in,
-        .tempo-editor .zoom-fit {
-          min-width: 34px;
-          width: 34px;
-          padding-inline: 0;
+          padding: 0;
+          border: 0;
+          border-radius: 0;
           text-align: center;
+        }
+        .tempo-editor .editor-zoom-group button + button {
+          border-left: 1px solid color-mix(in srgb, var(--tempo-fg) 14%, transparent);
         }
         .tempo-editor button:hover {
           background: color-mix(in srgb, var(--tempo-fg) 8%, transparent);
@@ -180,11 +234,12 @@ export const editorStyle = `
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 12px;
-          margin: 12px 0;
+          margin: 0;
         }
         .editor-fields label {
           display: grid;
           gap: 4px;
+          min-width: 0;
         }
         .tempo-editor .editor-fields input,
         .tempo-editor .speed-min,
@@ -193,32 +248,33 @@ export const editorStyle = `
         .tempo-editor select,
         .tempo-editor textarea {
           width: 100%;
-          height: 34px;
+          height: 36px;
           box-sizing: border-box;
-          border: 1px solid var(--tempo-track);
-          border-radius: 3px;
+          border: 1px solid color-mix(in srgb, var(--tempo-fg) 20%, transparent);
+          border-radius: 7px;
           background: var(--tempo-surface);
           color: inherit;
-          padding: 4px 6px;
+          padding: 4px 8px;
           font: inherit;
         }
         .tempo-editor .tempo-choice-trigger {
-          min-height: 34px;
-          height: 34px;
+          min-height: 36px;
+          height: 36px;
           box-sizing: border-box;
           padding: 4px 10px;
+          border-radius: 7px;
         }
         .tempo-editor .tempo-number {
-          border: 1px solid var(--tempo-track);
-          border-radius: 3px;
+          border: 1px solid color-mix(in srgb, var(--tempo-fg) 20%, transparent);
+          border-radius: 7px;
           background: var(--tempo-surface);
-          min-height: 34px;
-          height: 34px;
+          min-height: 36px;
+          height: 36px;
           box-sizing: border-box;
         }
         .tempo-editor .tempo-number input {
           border: 0;
-          height: 32px;
+          height: 34px;
           background: transparent;
           text-align: center;
         }
@@ -314,9 +370,17 @@ export const editorStyle = `
           align-items: center;
           gap: 6px;
         }
-        @media (max-width: 540px) {
+        @media (max-width: 680px) {
           .editor-fields {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+        @media (max-width: 420px) {
+          .editor-fields {
+            grid-template-columns: 1fr;
+          }
+          .editor-point-header {
+            align-items: stretch;
           }
         }
       `;

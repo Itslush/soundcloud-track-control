@@ -2,10 +2,10 @@
 
 ## 1.3.0
 
-- Reorganized Tempo settings into five sticky-header tabs (`Tracks`, `FX & DJ`, `Audio`, `Appearance`, `Shortcuts`) with collapsible per-track loop/cue/BPM disclosures, docked-mixer collision protection, and 3 grouped keybind categories (`Playback`, `Mixer & DJ`, `Loops, Cues & Export`).
-- Rebuilt the homepage feature showcase into five category tabs (`Speed & Pitch`, `Timelines & Sets`, `Mixer & DJ`, `Audio & FX`, `Customize & Library`) with 90 populated 3-theme screenshots and tucked inline timeline toolbar controls under `Advanced`.
-- Unified control proportions and symmetry across the plugin and website (`114×36` flush-right settings boxes with enclosed `st`/`dB`/`×` units, `68×32` bordered saved-track pills, `34×34` timeline zoom squares, 50/50 mode toggles, and mirror-symmetrical `/mixer/` & `/set/` rows) alongside 5-theme WCAG AA solid contrast tokens and Light-theme docked mixer synchronization.
-- Appended the track or set title directly onto the masked Discord share link and redesigned single-track and multi-track MP4 video renders with a `#141414` Studio HUD deck, `#ff5500` orange accent rails, hierarchical track/artist typography, and a recessed DSP readout pill.
+- Split Tempo settings into five tabs (`Tracks`, `FX & DJ`, `Audio`, `Appearance`, `Shortcuts`) with collapsible loop, cue, and BPM controls, keyboard shortcut categories, and docked-mixer protection.
+- Grouped the website showcase into five tabs (`Speed & Pitch`, `Timelines & Sets`, `Mixer & DJ`, `Audio & FX`, `Customize & Library`) with updated 3-theme screenshots and an `Advanced` drawer for inline timeline controls.
+- Cleaned up control sizing, contrast, and Liquid Glass surfaces across both the plugin and website using Lucide icons, Radix switches, Floating UI menus, and balanced spacing.
+- Appended the track or set title to masked Discord share links and updated MP4 video renders with a cleaner layout and contrast.
 
 ## 1.2.9
 
@@ -37,17 +37,17 @@
 
 ## 1.2.7.5
 
-- Lowering pitch by 1 to 4 semitones now keeps more of a distorted kick’s original waveform, including in shared tracks and crossfades.
+- Lowering pitch by 1 to 4 semitones now keeps more of a distorted kick's original waveform, including in shared tracks and crossfades.
 
 ## 1.2.7.4
 
-- Added a peak protection switch to Advanced audio and the website player. Turn it off to hear the pitch shifter’s full output. Each player remembers your choice.
+- Added a peak protection switch to Advanced audio and the website player. Turn it off to hear the pitch shifter's full output. Each player remembers your choice.
 
 ## 1.2.7.3
 
-- Shortened the pitch shifter’s analysis window to reduce the sound that bleeds ahead of kick attacks. A soft ceiling catches peaks introduced by pitch shifting.
+- Shortened the pitch shifter's analysis window to reduce the sound that bleeds ahead of kick attacks. A soft ceiling catches peaks introduced by pitch shifting.
 - Crossfade starts preparing the next queued track when playback starts. Selecting another supported track also prepares a fade while the current track keeps playing.
-- Added an option under Advanced audio → Semitone controls to reverse the player’s pitch arrows.
+- Added an option under Advanced audio -> Semitone controls to reverse the player's pitch arrows.
 - Text fields use an underline while editing. The footer keeps the pitch value and its unit on one line, even beside a long track title.
 
 ## 1.2.7.2

@@ -123,6 +123,7 @@ def verify_mobile_mirroring(browser, base):
     assert not errors, errors
     context.close()
 
+SimpleHTTPRequestHandler.extensions_map['.mjs'] = 'text/javascript'
 server = ThreadingHTTPServer(('127.0.0.1', 0), partial(SimpleHTTPRequestHandler, directory=str(ROOT)))
 threading.Thread(target=server.serve_forever, daemon=True).start()
 try:

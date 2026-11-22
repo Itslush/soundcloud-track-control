@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { Pause, Play } from 'lucide-react';
 import * as Slider from '@radix-ui/react-slider';
 
 // Adapted from ElevenLabs’ Audio Player on 21st.dev; see vendor/elevenlabs-ui.
@@ -40,9 +41,21 @@ export function MixerTransport({
         onClick={toggle}
         aria-label={(playing ? 'Pause deck ' : 'Play deck ') + deck}
       >
-        <svg viewBox="0 0 20 20" aria-hidden="true">
-          <path d={playing ? 'M5 3h4v14H5zM12 3h4v14h-4z' : 'M5 3v14l12-7z'} />
-        </svg>
+        {playing ? (
+          <Pause
+            size={18}
+            strokeWidth={2}
+            fill="currentColor"
+            aria-hidden="true"
+          />
+        ) : (
+          <Play
+            size={18}
+            strokeWidth={2}
+            fill="currentColor"
+            aria-hidden="true"
+          />
+        )}
       </button>
       <div className="deck-position">
         <Slider.Root

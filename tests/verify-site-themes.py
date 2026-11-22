@@ -75,7 +75,17 @@ with sync_playwright() as playwright:
                 page.screenshot(path=str(ROOT / f'test-results/theme-{theme}-{width}.png'))
             page.locator('a[data-capture]').first.click()
             expect(page.locator('.capture-viewer')).to_be_visible()
-            expect(page.locator('.capture-viewer')).to_have_css('background-color', f'rgb({", ".join(map(str, rgb("surface")))})')
+            viewer_glass = page.locator('.capture-viewer').evaluate('''el => {
+                const s = getComputedStyle(el);
+                return { bg: s.backgroundColor, filter: s.backdropFilter };
+            }''')
+            assert 'blur(' in viewer_glass['filter'], viewer_glass
+            viewer_nums = [float(n) for n in viewer_glass['bg'].replace('/', ' ').replace(',', ' ').replace('(', ' ').replace(')', ' ').split() if n.replace('.', '', 1).isdigit()]
+            expected_surface = rgb('surface')
+            if 'color(srgb' in viewer_glass['bg']:
+                assert all(abs(viewer_nums[i] * 255 - expected_surface[i]) < 2 for i in range(3)), (theme, viewer_glass, expected_surface)
+            else:
+                assert tuple(round(v) for v in viewer_nums[:3]) == expected_surface, (theme, viewer_glass, expected_surface)
             page.keyboard.press('Escape')
             expect(page.locator('.capture-viewer')).not_to_be_visible()
             measurements.append({'theme': theme, 'width': width, 'tokens': tokens})

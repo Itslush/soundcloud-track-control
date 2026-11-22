@@ -1,3 +1,5 @@
+import { computePosition, flip, offset, shift } from '@floating-ui/dom';
+
 document.querySelectorAll<HTMLElement>('[data-select]').forEach((root) => {
   const select = root.querySelector('select')!;
   const trigger = root.querySelector<HTMLButtonElement>('.select-trigger')!;
@@ -10,6 +12,18 @@ document.querySelectorAll<HTMLElement>('[data-select]').forEach((root) => {
   select.hidden = true;
   trigger.hidden = false;
 
+  function placeMenu() {
+    void computePosition(trigger, list, {
+      placement: 'bottom-start',
+      middleware: [offset(6), flip({ padding: 8 }), shift({ padding: 8 })],
+    }).then(({ x, y }) => {
+      if (list.hidden) return;
+      list.style.left = `${x}px`;
+      list.style.top = `${y}px`;
+      list.style.minWidth = `${trigger.offsetWidth}px`;
+    });
+  }
+
   function close(restore = false) {
     list.inert = true;
     list.hidden = true;
@@ -21,6 +35,7 @@ document.querySelectorAll<HTMLElement>('[data-select]').forEach((root) => {
     list.inert = false;
     list.hidden = false;
     trigger.setAttribute('aria-expanded', 'true');
+    placeMenu();
     options[Math.max(0, select.selectedIndex)].focus();
   }
 

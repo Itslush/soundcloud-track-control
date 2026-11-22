@@ -1,4 +1,5 @@
 import { controlsStyle } from './tempo-controls-style.js';
+import { iconMarkup, LUCIDE, memoryButtonSvg } from './tempo-ui-icons.js';
 
 function dialTicks() {
   return Array.from({ length: 17 }, (_, index) => {
@@ -60,7 +61,7 @@ export function controlsTemplate({
         </div>
         <div class="slider-wrap"
           ><button id="rate-dial" type="button" role="slider" aria-label="Playback speed dial" aria-valuemin="${MIN}" aria-valuemax="${MAX}" aria-valuenow="1" aria-describedby="dial-help" title="Drag up or down · Shift for fine adjustment · Double-click to reset" hidden><svg viewBox="0 0 32 32" aria-hidden="true"><path class="dial-track" d="M6.1 25.9a14 14 0 1 1 19.8 0"/><path class="dial-fill" pathLength="100" d="M6.1 25.9a14 14 0 1 1 19.8 0"/><path class="dial-ticks" d="${dialTicks()}"/><circle cx="16" cy="16" r="9"/><path class="dial-zero" d="M16 0v4"/></svg><span aria-hidden="true"></span></button>
-          <button id="vertical-toggle" type="button" popovertarget="tempo-fader" aria-label="Open vertical tempo slider" title="Tempo slider" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2v5m0 6v5M6 7h8v6H6Z" /></svg></button>
+          <button id="vertical-toggle" type="button" popovertarget="tempo-fader" aria-label="Open vertical tempo slider" title="Tempo slider" hidden>${iconMarkup(LUCIDE.SlidersVertical, { size: 16, strokeWidth: 1.8 })}</button>
           <div id="tempo-fader"><output class="fader-value" aria-hidden="true">1×</output><div class="fader-rail"><input
             id="rate-slider"
             type="range"
@@ -83,7 +84,7 @@ export function controlsTemplate({
           <button class="fader-reset" type="button">Reset</button>
           </div>
         </div>
-        <label class="quick-key">Pitch <input id="quick-key-shift" type="number" min="-12" max="12" step="0.5" value="0" aria-label="Key shift in semitones"><span class="key-unit" aria-hidden="true">st</span></label>
+        <label class="quick-key" title="Key shift in semitones"><span class="sr-only">Pitch</span><input id="quick-key-shift" type="number" min="-12" max="12" step="0.5" value="0" aria-label="Key shift in semitones"><span class="key-unit" aria-hidden="true">st</span></label>
         <button
           class="memory"
           type="button"
@@ -92,12 +93,7 @@ export function controlsTemplate({
           aria-haspopup="dialog"
           aria-controls="tempo-settings"
           aria-expanded="false"
-          ><svg viewBox="0 0 16 16" aria-hidden="true">
-            <path class="bookmark" d="M4 2h8v12l-4-3-4 3Z" />
-            <circle class="update-dot" cx="13" cy="3" r="2" />
-            <path class="check" d="m3 8 3 3 7-7" />
-            <path class="warning" d="M8 2 15 14H1Z M8 6v3 M8 11.5v.1" /></svg
-        ></button>
+          >${memoryButtonSvg()}</button>
         <button
           class="settings-button"
           type="button"
@@ -106,14 +102,7 @@ export function controlsTemplate({
           aria-haspopup="dialog"
           aria-controls="tempo-settings"
           aria-expanded="false"
-        >
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <path
-              d="m6 1-.4 2-1.2.7-1.9-.6-2 3.4L2 8l-1.5 1.5 2 3.4 1.9-.6 1.2.7.4 2h4l.4-2 1.2-.7 1.9.6 2-3.4L14 8l1.5-1.5-2-3.4-1.9.6-1.2-.7L10 1Z"
-            />
-            <circle cx="8" cy="8" r="2.3" />
-          </svg>
-        </button>
+        >${iconMarkup(LUCIDE.Settings, { size: 15, strokeWidth: 1.85 })}</button>
         <span class="sr-only" id="number-help">${MIN} to ${MAX}×. Double-click to reset.</span>
         <span class="sr-only" id="slider-help">Arrow keys use your default tempo increment. Double-click to reset.</span>
         <span class="sr-only" id="dial-help">Drag up to speed up, down to slow down. Hold Shift for fine adjustment. Double-click to reset to 1×. Arrow keys use your default tempo increment.</span>
@@ -231,12 +220,23 @@ export function controlsTemplate({
                 copied links</label
               >
             </div>
-            <input
-              id="saved-filter"
-              type="search"
-              placeholder="Find a saved track…"
-              aria-label="Find a saved track"
-            />
+            <div class="saved-search-box">
+              ${iconMarkup(LUCIDE.Search, { size: 14, strokeWidth: 1.8, cls: 'saved-search-icon' })}
+              <input
+                id="saved-filter"
+                type="search"
+                placeholder="Find a saved track…"
+                aria-label="Find a saved track"
+              />
+              <button
+                class="saved-search-clear"
+                type="button"
+                aria-label="Clear saved track search"
+                hidden
+              >
+                ${iconMarkup(LUCIDE.X, { size: 13, strokeWidth: 2 })}
+              </button>
+            </div>
             <p class="saved-count"></p>
             <div class="saved-list" role="region" aria-label="Saved tracks"></div>
             <button class="saved-more" type="button" hidden>Show 100 more</button>
@@ -358,7 +358,7 @@ export function controlsTemplate({
                   </button>
                 </div>
                 <details class="deck-disclosure">
-                  <summary>A-B Loop &amp; Hot Cues (per track)</summary>
+                  <summary><span>A-B Loop &amp; Hot Cues (per track)</span>${iconMarkup(LUCIDE.ChevronDown, { size: 14, strokeWidth: 2, cls: 'summary-chevron' })}</summary>
                   <div class="extras-stack">
                     <div class="tool-row">
                       <button id="loop-a" class="extras-btn" type="button">Set A</button>
@@ -427,7 +427,7 @@ export function controlsTemplate({
                   </div>
                 </details>
                 <details class="deck-disclosure">
-                  <summary>Tap / Sync BPM &amp; WAV Export</summary>
+                  <summary><span>Tap / Sync BPM &amp; WAV Export</span>${iconMarkup(LUCIDE.ChevronDown, { size: 14, strokeWidth: 2, cls: 'summary-chevron' })}</summary>
                   <div class="extras-stack">
                     <div class="tool-row">
                       <button id="bpm-tap" class="extras-btn" type="button">Tap BPM</button>

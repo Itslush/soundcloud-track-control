@@ -18,14 +18,14 @@ export async function decodeCrossfade(
         ? info.durationHint
         : info.totalSourceFrames / info.sampleRate;
     if (!Number.isFinite(duration) || duration <= 0)
-      throw new Error('This stream’s duration is unavailable.');
+      throw new Error("This stream's duration is unavailable.");
     const first = Math.floor(start * info.sampleRate);
     const end = Math.floor(
       Math.min(duration, start + length) * info.sampleRate,
     );
     const frames = end - first;
     if (frames <= 0 || frames * 8 > 32 * 1024 * 1024)
-      throw new Error('This track’s crossfade buffer is too large.');
+      throw new Error("This track's crossfade buffer is too large.");
     const buffer = graph
       .contextFor(current.audio)
       .createBuffer(2, frames, info.sampleRate);

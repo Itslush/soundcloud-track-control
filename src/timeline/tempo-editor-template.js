@@ -1,22 +1,26 @@
 import { tempoFieldStyle } from '../controls/tempo-fields.js';
+import { tempoLiquidGlassStyle } from '../controls/tempo-liquid-glass.js';
+import { iconMarkup, LUCIDE } from '../controls/tempo-ui-icons.js';
 import { editorStyle } from './tempo-editor-style.js';
 
 export function editorTemplate(inline = false) {
   const toolbar = `
       <div class="editor-toolbar">
-        <button class="zoom-out" type="button" aria-label="Zoom out timeline">−</button>
-        <button class="zoom-in" type="button" aria-label="Zoom in timeline">+</button>
-        <button class="zoom-fit" type="button">Fit</button>
+        <div class="editor-zoom-group" role="group" aria-label="Timeline zoom">
+          <button class="zoom-out" type="button" aria-label="Zoom out timeline">−</button>
+          <button class="zoom-in" type="button" aria-label="Zoom in timeline">+</button>
+          <button class="zoom-fit" type="button">Fit</button>
+        </div>
         <button class="zoom-focus" type="button">Focus fade</button>
         <output class="zoom-label"></output>
-        <label>Speed range<select class="speed-range" aria-label="Graph speed range"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option><option value="fine">Close · 0.1× grid</option><option value="close">Closer · 0.05× grid</option><option value="custom" selected>Custom</option></select></label>
+        <label class="editor-speed-range">Speed range<select class="speed-range" aria-label="Graph speed range"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option><option value="fine">Close · 0.1× grid</option><option value="close">Closer · 0.05× grid</option><option value="custom" selected>Custom</option></select></label>
         <div class="speed-bounds">
           <label>Min <input class="speed-min" type="number" min="0.25" max="4" step="0.001" value="0.75" aria-label="Graph minimum value"><span class="axis-unit">×</span></label>
           <label>Max <input class="speed-max" type="number" min="0.25" max="4" step="0.001" value="1.5" aria-label="Graph maximum value"><span class="axis-unit">×</span></label>
         </div>
       </div>`;
   return `
-      <style>${editorStyle}${tempoFieldStyle}
+      <style>${editorStyle}${tempoFieldStyle}${tempoLiquidGlassStyle}
 .editor-lanes,.pitch-options{display:flex;align-items:center;gap:8px;margin:12px 0;flex-wrap:wrap}
 .editor-lanes button{min-width:76px;text-align:center}
 .editor-lanes [aria-pressed="true"]{color:var(--tempo-fg);border-color:var(--tempo-accent-ink,var(--tempo-accent))}
@@ -35,20 +39,26 @@ export function editorTemplate(inline = false) {
         <div class="timeline-limits" aria-hidden="true"><span>0:00</span><span class="timeline-end"></span></div>
       </div>
       <div class="editor-readout"><span class="point-readout"></span></div>
-      ${inline ? '<details class="editor-advanced"><summary>Advanced<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></summary>' + toolbar : ''}
-      <label>Point <select class="editor-point-picker" aria-label="Selected tempo point"></select></label>
-      <div class="editor-fields">
-        <label>Reach at (seconds)<input class="point-time" type="number" min="0" step="0.1"></label>
-        <label><span class="target-label">Target speed</span><input class="point-rate" type="number" min="0.25" max="4" step="0.025"></label>
-        <label>Fade duration (seconds)<input class="point-duration" type="number" min="0" step="0.1"></label>
-        <label>Transition<select class="point-curve"><option value="instant">Instant</option><option value="linear">Linear</option><option value="ease-in">Ease-in</option><option value="ease-out">Ease-out</option><option value="smooth">Smooth</option></select></label>
+      ${inline ? '<details class="editor-advanced"><summary>Advanced' + iconMarkup(LUCIDE.ChevronDown, { size: 15, strokeWidth: 1.8 }) + '</summary>' + toolbar : ''}
+      <div class="editor-point-card">
+        <div class="editor-point-header">
+          <label class="editor-point-select">Point <select class="editor-point-picker" aria-label="Selected tempo point"></select></label>
+          <div class="point-actions">
+            <button class="point-add" type="button">Add at playhead</button>
+            <button class="point-remove" type="button">Remove point</button>
+          </div>
+        </div>
+        <div class="editor-fields">
+          <label>Reach at (seconds)<input class="point-time" type="number" min="0" step="0.1"></label>
+          <label><span class="target-label">Target speed</span><input class="point-rate" type="number" min="0.25" max="4" step="0.025"></label>
+          <label>Fade duration (seconds)<input class="point-duration" type="number" min="0" step="0.1"></label>
+          <label>Transition<select class="point-curve"><option value="instant">Instant</option><option value="linear">Linear</option><option value="ease-in">Ease-in</option><option value="ease-out">Ease-out</option><option value="smooth">Smooth</option></select></label>
+        </div>
+        <div class="editor-pitch-row">
+          <label class="editor-pitch-label">Pitch<select class="editor-pitch"><option value="natural">Natural</option><option value="preserve">Preserve key</option></select></label>
+          <label class="editor-pitch-label">Key shift<input class="editor-key-shift" type="number" min="-12" max="12" step="0.5" value="0"><span>st</span></label>
+        </div>
       </div>
-      <div class="point-actions">
-        <button class="point-add" type="button">Add at playhead</button>
-        <button class="point-remove" type="button">Remove point</button>
-      </div>
-      <label class="editor-pitch-label">Pitch<select class="editor-pitch"><option value="natural">Natural</option><option value="preserve">Preserve key</option></select></label>
-      <label class="editor-pitch-label">Key shift<input class="editor-key-shift" type="number" min="-12" max="12" step="0.5" value="0"><span>st</span></label>
       ${inline ? '</details>' : ''}
       <div class="editor-actions">
         <button class="editor-revert" type="button" hidden>Discard edits</button>

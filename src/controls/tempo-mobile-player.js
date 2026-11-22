@@ -1,6 +1,7 @@
 import { enhanceTempoFields } from './tempo-fields.js';
 import { toggleMixer } from './tempo-mixer.js';
 import { syncTempoRange } from './tempo-range.js';
+import { iconMarkup, LUCIDE } from './tempo-ui-icons.js';
 import { readTrackArtwork } from '../soundcloud/tempo-track-visuals.js';
 import { createMobileLayout } from '../soundcloud/mobile-layout.js';
 
@@ -29,14 +30,16 @@ const style = `
 :host { position:relative; }
 .touch-adjustments [hidden] { display:none !important; }
 .touch-transport,.touch-adjustments { display:none; }
-:host([data-touch-player]) { position:fixed !important; display:block !important; left:var(--touch-left) !important; top:var(--touch-dock-top) !important; bottom:auto !important; right:auto; width:var(--touch-width) !important; max-height:var(--touch-panel-height); overflow:auto; overscroll-behavior:contain; min-width:0 !important; margin:0 !important; padding:8px 12px max(8px,env(safe-area-inset-bottom)); transform:scale(var(--touch-inverse)); transform-origin:0 0; z-index:2147483646; font:16px/1.4 Arial,sans-serif; color:var(--tempo-fg); background:var(--tempo-surface); border:0; border-top:1px solid var(--tempo-track); visibility:visible !important; box-sizing:border-box; }
+:host([data-touch-player]) { position:fixed !important; display:block !important; left:var(--touch-left) !important; top:var(--touch-dock-top) !important; bottom:auto !important; right:auto; width:var(--touch-width) !important; max-height:var(--touch-panel-height); overflow:auto; overscroll-behavior:contain; min-width:0 !important; margin:0 !important; padding:10px 12px max(10px,env(safe-area-inset-bottom)); transform:scale(var(--touch-inverse)); transform-origin:0 0; z-index:2147483646; font:16px/1.4 Arial,sans-serif; color:var(--tempo-fg); background:color-mix(in srgb,var(--tempo-surface) 92%,transparent); -webkit-backdrop-filter:blur(24px) saturate(185%); backdrop-filter:blur(24px) saturate(185%); border:0; border-top:1px solid color-mix(in srgb,var(--tempo-fg) 16%,transparent); border-radius:16px 16px 0 0; box-shadow:0 -12px 32px rgb(0 0 0 / 35%),inset 0 1px 0 color-mix(in srgb,#ffffff 16%,transparent); visibility:visible !important; box-sizing:border-box; }
+@media (prefers-reduced-transparency:reduce) { :host([data-touch-player]) { background:var(--tempo-surface); -webkit-backdrop-filter:none; backdrop-filter:none; } }
 :host([data-touch-player]) .controls { display:none; }
 :host([data-touch-player])::backdrop { display:none; }
 :host([data-touch-player]) .touch-transport { display:grid; grid-template-columns:44px minmax(0,1fr) 44px 44px 64px; align-items:center; gap:6px; }
-.touch-transport button,.touch-adjustments button { display:flex; align-items:center; justify-content:center; min-height:44px; min-width:44px; border:1px solid var(--tempo-track); border-radius:4px; padding:6px; background:var(--tempo-surface); color:var(--tempo-fg); font:inherit; }
+.touch-transport button,.touch-adjustments button { display:flex; align-items:center; justify-content:center; min-height:44px; min-width:44px; border:1px solid color-mix(in srgb,var(--tempo-fg) 16%,transparent); border-radius:8px; padding:6px; background:color-mix(in srgb,var(--tempo-fg) 5%,var(--tempo-surface)); color:var(--tempo-fg); font:inherit; -webkit-tap-highlight-color:transparent; transition:transform 110ms ease-out,background-color 140ms ease-out; }
+.touch-transport button:not(:disabled):active,.touch-adjustments button:not(:disabled):active { transform:scale(0.97); }
 .touch-transport button:disabled { opacity:.5; }
-.touch-transport svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; }
-.touch-art { width:44px; height:44px; border-radius:4px; background-position:center; background-size:cover; }
+.touch-transport svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.85; stroke-linecap:round; stroke-linejoin:round; }
+.touch-art { width:44px; height:44px; border-radius:8px; background-position:center; background-size:cover; outline:1px solid oklch(1 0 0 / 0.1); outline-offset:-1px; }
 .touch-art { position:relative; overflow:hidden; }
 .touch-cover,.touch-cover > span { position:absolute; inset:0; pointer-events:none; background-position:center; background-size:cover; }
 .touch-cover { transition:--tempo-artwork-start 100ms linear,--tempo-artwork-end 100ms linear,--tempo-artwork-progress 100ms linear; }
@@ -59,12 +62,12 @@ const style = `
 .touch-adjustments .touch-number-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; align-items:center; }
 .touch-adjustments .tempo-number { display:grid; grid-template-columns:minmax(0,1fr) 44px 44px; width:100%; }
 .touch-adjustments .tempo-number-arrows { display:contents; }
-.touch-adjustments .tempo-number input { width:100%; min-width:0; min-height:44px; padding:6px 12px; border:1px solid var(--tempo-track); border-radius:4px; font:inherit; text-align:center; background:var(--tempo-surface); color:var(--tempo-fg); appearance:textfield; }
+.touch-adjustments .tempo-number input { width:100%; min-width:0; min-height:44px; padding:6px 12px; border:1px solid color-mix(in srgb,var(--tempo-fg) 18%,transparent); border-radius:8px; font:inherit; text-align:center; background:var(--tempo-surface); color:var(--tempo-fg); appearance:textfield; }
 .touch-adjustments .tempo-number input::-webkit-inner-spin-button { appearance:none; }
 .touch-adjustments input[type=range] { height:44px; touch-action:pan-y; }
 .touch-adjustments input[type=range]::-webkit-slider-thumb { width:20px; height:20px; margin-top:-9px; }
 .touch-adjustments input[type=range]::-moz-range-thumb { width:20px; height:20px; }
-.touch-tools { display:flex; flex-wrap:wrap; gap:8px; }
+.touch-tools { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; }
 :host([data-touch-player]) .settings,:host([data-touch-player]) .tempo-editor,:host([data-touch-player]) #tempo-fader[popover] { left:var(--touch-left) !important; top:var(--touch-top) !important; bottom:auto !important; width:var(--touch-width) !important; max-width:none !important; max-height:var(--touch-panel-height) !important; transform:scale(var(--touch-inverse)) !important; transform-origin:0 0 !important; font-size:16px !important; margin:0 !important; }
 :host([data-touch-player]) .settings button,:host([data-touch-player]) .settings input:not([type=checkbox],[type=radio]),:host([data-touch-player]) .tempo-editor button,:host([data-touch-player]) .tempo-editor input:not([type=checkbox],[type=radio]) { min-height:44px; }
 :host([data-touch-player]) .settings header,:host([data-touch-player]) .settings-actions { flex-wrap:wrap; }
@@ -128,7 +131,7 @@ export function createMobilePlayer({
   sheet.textContent = style;
   const transport = document.createElement('div');
   transport.className = 'touch-transport';
-  transport.innerHTML = `<div class="touch-art" aria-hidden="true"></div><div class="touch-caption"><strong></strong><span></span></div><button type="button" class="touch-play" aria-label="Play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4l12 8-12 8Z"/></svg></button><button type="button" class="touch-next" aria-label="Next track"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l12 8-12 8ZM20 4v16"/></svg></button><button type="button" class="touch-expand" aria-expanded="false" aria-controls="touch-adjustments">Controls</button>`;
+  transport.innerHTML = `<div class="touch-art" aria-hidden="true"></div><div class="touch-caption"><strong></strong><span></span></div><button type="button" class="touch-play" aria-label="Play">${iconMarkup(LUCIDE.Play, { size: 19, strokeWidth: 1.9 })}</button><button type="button" class="touch-next" aria-label="Next track">${iconMarkup(LUCIDE.SkipForward, { size: 19, strokeWidth: 1.9 })}</button><button type="button" class="touch-expand" aria-expanded="false" aria-controls="touch-adjustments">Controls</button>`;
   const pitchNotice = document.createElement('span');
   const settingsButton = document.createElement('button');
   settingsButton.type = 'button';
@@ -333,7 +336,7 @@ export function createMobilePlayer({
         .querySelector('path')
         .setAttribute(
           'd',
-          state.paused ? 'M8 4l12 8-12 8Z' : 'M8 4v16M16 4v16',
+          state.paused ? LUCIDE.Play[0][1].d : 'M7 4v16M17 4v16',
         );
     }
     const title = native('.playbackSoundBadge__titleLink');

@@ -70,7 +70,7 @@ const groups = [
       {
         id: 'mixer',
         title: 'Mix two decks live',
-        text: 'Run two SoundCloud tracks or local files side by side with crossfader, 3-band EQ, DJ filter, Gain, Volume cap and Tap/Sync BPM.',
+        text: 'Play two SoundCloud tracks or local files side by side with a crossfader, 3-band EQ, filter, per-deck gain, and BPM sync.',
         images: ['mixer'],
         alt: 'Two-deck mixer with crossfader, Gain, Volume cap, 3-band EQ, filter and BPM sync.',
       },
@@ -96,15 +96,15 @@ const groups = [
     items: [
       {
         id: 'fx',
-        title: 'Master FX, A-B Loops, Cues & Export',
-        text: 'Shape live playback with Sub/Bass shelf, DJ filter, Slowed + Reverb rooms, Presets with Undo, A-B loops, 4 hot cues and offline WAV export.',
+        title: 'Master FX, A-B loops, cues & export',
+        text: 'Shape live playback with a bass shelf, DJ filter, and slowed reverb rooms. Save presets with undo, mark A-B loops and hot cues, or render the track locally to WAV.',
         images: ['fx'],
         alt: 'FX & DJ tab with Master FX sliders, presets, A-B loop buttons, 4 hot cues and WAV export.',
       },
       {
         id: 'output',
-        title: 'Unlimited boost cap & peak protection',
-        text: 'Toggle soft peak protection, dial output gain, and set your own Volume cap in dB without arbitrary slider ceilings.',
+        title: 'Custom boost cap & peak protection',
+        text: 'Soften loud peaks when shifting pitch, dial output gain, and type your own Volume cap in dB past the slider limit.',
         images: ['output'],
         alt: 'Audio tab Output level slider, customizable Volume cap box and Peak protection.',
       },
@@ -116,22 +116,22 @@ const groups = [
     items: [
       {
         id: 'saved',
-        title: 'Per-track library & JSON backups',
-        text: 'Remember speed, pitch and timelines per track, filter saved tracks, undo accidental deletes and back up everything as JSON.',
+        title: 'Per-track library & backups',
+        text: 'Save speed, pitch, and timelines per track. Filter the list, undo accidental removals, and back everything up as JSON.',
         images: ['saved'],
         alt: 'Tracks tab with searchable saved tracks, per-track speeds and backup disclosure.',
       },
       {
         id: 'appearance',
         title: 'Themes, layout & Pin mode',
-        text: 'Switch SoundCloud, Light, Charcoal or OLED themes, choose control style, adjust star motion, or Pin settings open while scrubbing.',
+        text: 'Switch SoundCloud, Light, Charcoal, or OLED themes, choose a control style, adjust star motion, or Pin settings open while scrubbing.',
         images: ['appearance'],
         alt: 'Appearance tab showing control style, default increment, theme selector and star motion.',
       },
       {
         id: 'shortcuts',
-        title: 'Fully customizable keyboard shortcuts',
-        text: 'Rebind or clear any global or player shortcut for speed steps, DJ mode, Deck A/B loading, A-B loops, cues, BPM tap and WAV export.',
+        title: 'Custom keyboard shortcuts',
+        text: 'Rebind or clear any global hotkey for speed steps, Deck A/B routing, A-B loops, hot cues, BPM tap, and WAV export.',
         images: ['shortcuts'],
         alt: 'Shortcuts tab with interactive chord buttons, Clear controls and Reset defaults.',
       },
@@ -144,8 +144,8 @@ const groups = [
   <section class="hero shell" aria-labelledby="hero-title">
     <div class="hero-copy">
       <h1 id="hero-title">Change speed and pitch <br />on SoundCloud.</h1><p>
-        Save a setup for each track, draw changes over time, mix two decks live,
-        and share the adjusted version.
+        Remember speeds per track, automate changes over time, mix two decks
+        live, and share links friends can play.
       </p><div class="hero-actions">
         <a class="button primary" href={installUrl}
           ><Icon name="download" />Install userscript</a
@@ -167,7 +167,7 @@ const groups = [
       <div>
         <h2 id="proof-title">Built for listening, mixing and sharing</h2>
         <p>
-          Speed, pitch, timelines, two-deck mixing and per-track memory inside
+          Everyday speed, pitch, timeline, mixer, and library tools inside
           SoundCloud.
         </p>
       </div>

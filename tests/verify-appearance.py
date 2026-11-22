@@ -36,17 +36,17 @@ def fixture(browser):
         page.locator('[data-settings-tab="appearance"]').click()
         theme(page, 'light')
         expect(page.locator('body')).to_have_css('background-color', 'rgb(244, 244, 244)')
-        expect(page.locator('#tempo-settings')).to_have_css('background-color', 'rgb(255, 255, 255)')
+        assert page.locator('#tempo-settings').evaluate("el => getComputedStyle(el).backdropFilter.includes('blur(') && (getComputedStyle(el).backgroundColor.includes('1 1 1') || getComputedStyle(el).backgroundColor.includes('255, 255, 255'))")
         assert text_contrast(page.locator('#tempo-settings')) >= 4.5
         page.reload()
         expect(page.locator('html')).to_have_attribute(ATTRIBUTE, 'light')
         page.locator('.settings-button').click()
-        expect(page.locator('#tempo-settings')).to_have_css('background-color', 'rgb(255, 255, 255)')
+        assert page.locator('#tempo-settings').evaluate("el => getComputedStyle(el).backdropFilter.includes('blur(') && (getComputedStyle(el).backgroundColor.includes('1 1 1') || getComputedStyle(el).backgroundColor.includes('255, 255, 255'))")
         assert text_contrast(page.locator('#tempo-settings')) >= 4.5
         page.locator('[data-settings-tab="appearance"]').click()
         theme(page, 'charcoal')
         expect(page.locator('body')).to_have_css('background-color', 'rgb(17, 17, 17)')
-        expect(page.locator('#tempo-settings')).to_have_css('background-color', 'rgb(32, 32, 32)')
+        assert page.locator('#tempo-settings').evaluate("el => getComputedStyle(el).backdropFilter.includes('blur(') && (getComputedStyle(el).backgroundColor.includes('0.125') || getComputedStyle(el).backgroundColor.includes('32, 32, 32'))")
         page.evaluate('''() => {
             const frame = document.createElement('iframe');
             frame.id = 'appearance-frame';
@@ -59,7 +59,7 @@ def fixture(browser):
         page.locator('[value=charcoal][name=appearance]').press('ArrowRight')
         expect(page.locator('html')).to_have_attribute(ATTRIBUTE, 'oled')
         expect(page.locator('body')).to_have_css('background-color', 'rgb(0, 0, 0)')
-        expect(page.locator('#tempo-settings')).to_have_css('background-color', 'rgb(11, 11, 11)')
+        assert page.locator('#tempo-settings').evaluate("el => getComputedStyle(el).backdropFilter.includes('blur(') && (getComputedStyle(el).backgroundColor.includes('0.043') || getComputedStyle(el).backgroundColor.includes('11, 11, 11'))")
         expect(embedded.locator('html')).to_have_attribute(ATTRIBUTE, 'oled')
         expect(embedded.locator('body')).to_have_css('background-color', 'rgb(0, 0, 0)')
         page.evaluate('''() => {

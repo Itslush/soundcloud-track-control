@@ -1,4 +1,6 @@
 ---
+import Icon from './Icon.astro';
+
 const wallets = [
   {
     coin: 'BTC',
@@ -35,15 +37,7 @@ const wallets = [
 
 <section class="donations shell" aria-label="Donations">
   <details>
-    <summary
-      >Donate <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"
-        ><path
-          d="m4 6 4 4 4-4"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"></path></svg
-      ></summary
-    >
+    <summary>Donate <Icon name="chevron" size={16} /></summary>
     <p>Track Control is free. Donations are optional.</p>
     <p class="network-note">
       Use the network shown for each address. Sending on another network can

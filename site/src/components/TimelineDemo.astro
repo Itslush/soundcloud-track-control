@@ -171,13 +171,21 @@ const { shared = false } = Astro.props;
           <button type="submit">Load</button>
         </div>
       </form>
-      <label class="preview-file"
-        >Or choose an audio file<input
-          id="preview-file"
-          type="file"
-          accept="audio/*,.flac,.wav,.mp3,.m4a,.ogg"
-        /></label
-      >
+      <label class="preview-file">
+        <span>Or choose an audio file</span>
+        <span class="preview-file-control">
+          <span class="preview-file-button"
+            ><Icon name="upload" size={16} /><span>Choose audio file</span
+            ></span
+          >
+          <input
+            id="preview-file"
+            class="sr-only"
+            type="file"
+            accept="audio/*,.flac,.wav,.mp3,.m4a,.ogg"
+          />
+        </span>
+      </label>
       <a id="preview-credit" hidden target="_blank" rel="noopener noreferrer"
         >Listen on SoundCloud</a
       >

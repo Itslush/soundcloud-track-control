@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import * as Switch from '@radix-ui/react-switch';
+import { Upload } from 'lucide-react';
 import { AudioPreview } from '../scripts/audio-preview';
 import { MixerTransport } from './MixerTransport';
 import { artworkFilter } from '../../../src/appearance/artwork-filter.js';
@@ -400,6 +402,7 @@ export function MixerDeck({
           className="deck-file"
           onClick={() => fileInput.current?.click()}
         >
+          <Upload size={14} strokeWidth={1.85} aria-hidden="true" />
           Open audio file
         </button>
         <input
@@ -620,14 +623,19 @@ export function MixerDeck({
           </button>
         </div>
       </div>
-      <label className="deck-lock">
-        <input
-          type="checkbox"
+      <div className="deck-lock">
+        <Switch.Root
+          id={`deck-lock-${name}`}
+          className="deck-switch"
           checked={lock}
-          onChange={(e) => setLock(e.target.checked)}
-        />
-        Preserve key at different tempos
-      </label>
+          onCheckedChange={setLock}
+        >
+          <Switch.Thumb className="deck-switch-thumb" />
+        </Switch.Root>
+        <label htmlFor={`deck-lock-${name}`}>
+          Preserve key at different tempos
+        </label>
+      </div>
     </>
   );
 

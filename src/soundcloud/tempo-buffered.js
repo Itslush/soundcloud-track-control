@@ -134,7 +134,7 @@ export function createBufferedPlayback({
           finish(
             reject,
             new Error(
-              'Could not identify this track’s audio. Choose 0.25× or higher to use browser playback.',
+              "Could not identify this track's audio. Choose 0.25× or higher to use browser playback.",
             ),
           );
       };

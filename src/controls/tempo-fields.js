@@ -1,4 +1,6 @@
-export function enhanceTempoFields(root) {
+import { createIconElement, LUCIDE } from './tempo-ui-icons.js';
+
+export function enhanceTempoFields(root, { positionMenu } = {}) {
   const syncs = [];
   for (const input of root.querySelectorAll(
     'input[type="number"]:not(#rate-number)',
@@ -97,13 +99,10 @@ export function enhanceTempoFields(root) {
     trigger.type = 'button';
     trigger.className = 'tempo-choice-trigger';
     const caption = document.createElement('span');
-    const chevron = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'svg',
-    );
-    chevron.setAttribute('viewBox', '0 0 10 8');
-    chevron.setAttribute('aria-hidden', 'true');
-    chevron.innerHTML = '<path d="m2 3 3 3 3-3"/>';
+    const chevron = createIconElement(document, LUCIDE.ChevronDown, {
+      size: 13,
+      strokeWidth: 2,
+    });
     trigger.append(caption, chevron);
     trigger.setAttribute('aria-haspopup', 'listbox');
     trigger.setAttribute('aria-expanded', 'false');
@@ -142,7 +141,14 @@ export function enhanceTempoFields(root) {
           button.setAttribute('aria-selected', String(option.selected));
           button.tabIndex = -1;
           button.disabled = option.disabled;
-          button.textContent = option.textContent;
+          const text = document.createElement('span');
+          text.textContent = option.textContent;
+          const mark = createIconElement(document, LUCIDE.Check, {
+            size: 13,
+            strokeWidth: 2.2,
+            cls: 'tempo-choice-check',
+          });
+          button.append(text, mark);
           button.onclick = () => {
             select.value = option.value;
             select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -154,6 +160,7 @@ export function enhanceTempoFields(root) {
       );
       list.hidden = false;
       trigger.setAttribute('aria-expanded', 'true');
+      positionMenu?.(trigger, list);
       (list.children[select.selectedIndex] || list.firstElementChild)?.focus();
     }
     trigger.onclick = () => (list.hidden ? open() : close());
@@ -225,27 +232,32 @@ export function enhanceTempoFields(root) {
 export const tempoFieldStyle = `
 :is(:host, .tempo-editor) input:is([type='text'], [type='number'], [type='search'], [type='url'], :not([type])):focus {
   outline: none;
-  box-shadow: inset 0 -2px currentColor;
+  box-shadow: inset 0 0 0 1.5px var(--tempo-accent);
+  border-radius: 5px;
 }
 @media (forced-colors: active) {
   :is(:host, .tempo-editor) input:is([type='text'], [type='number'], [type='search'], [type='url'], :not([type])):focus {
-    border-bottom: 2px solid Highlight;
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
   }
 }
 .tempo-number { display:inline-flex; align-items:center; min-width:0; vertical-align:middle; }
 .tempo-number input { appearance:textfield; min-width:0; width:64px; }
 .tempo-number-unit { padding-right:5px; opacity:.8; font-size:11px; white-space:nowrap; pointer-events:none; }
 .tempo-number input::-webkit-inner-spin-button,.tempo-number input::-webkit-outer-spin-button { appearance:none; margin:0; }
-.tempo-number-arrows { display:grid; flex-shrink:0; }
-.tempo-number-arrows button { display:grid; place-items:center; min-height:16px; width:22px; padding:0; border:0; background:transparent; color:inherit; }
+.tempo-number-arrows { display:grid; flex-shrink:0; place-content:center; }
+.tempo-number-arrows button { display:grid; place-items:center; min-height:15px; height:15px; width:22px; padding:0; border:0; background:transparent; color:inherit; border-radius:3px; }
 .tempo-number-arrows svg { width:10px; height:8px; fill:none; stroke:currentColor; stroke-width:1.4; }
 .tempo-choice { position:relative; display:inline-block; min-width:0; }
-.tempo-choice-trigger { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; text-align:left; color:inherit; }
-.tempo-choice-trigger > svg { flex:none; width:10px; height:8px; fill:none; stroke:currentColor; stroke-width:1.5; }
+.tempo-choice-trigger { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; text-align:left; color:inherit; border-radius:7px; }
+.tempo-choice-trigger > svg { flex:none; width:13px; height:13px; transition:transform 150ms cubic-bezier(0.22,1,0.36,1); }
 .tempo-choice-trigger[aria-expanded="true"] > svg { transform:rotate(180deg); }
-.tempo-choice-list { position:absolute; z-index:5; left:0; top:100%; min-width:100%; max-width:240px; max-height:220px; overflow:auto; padding:4px; border:1px solid var(--tempo-track); background:var(--tempo-surface); box-shadow:0 4px 12px #0004; }
-.tempo-choice-list button { display:block; width:100%; text-align:left; border:0; color:inherit; min-height:32px; }
-.tempo-choice-list [aria-selected="true"] { color:var(--tempo-fg); box-shadow:inset 2px 0 var(--tempo-accent); }
+.tempo-choice-list { position:absolute; z-index:20; left:0; top:calc(100% + 4px); min-width:100%; max-width:240px; max-height:220px; overflow:auto; padding:4px; border:1px solid var(--tempo-track); border-radius:10px; background:var(--tempo-surface); box-shadow:0 8px 24px #0005; }
+.tempo-choice-list button { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; padding:4px 8px; text-align:left; border:0; border-radius:6px; background:transparent; color:inherit; min-height:32px; }
+.tempo-choice-list button:hover { background:color-mix(in srgb,var(--tempo-fg) 8%,transparent); }
+.tempo-choice-list .tempo-choice-check { flex:none; opacity:0; color:var(--tempo-accent-ink,var(--tempo-accent)); }
+.tempo-choice-list [aria-selected="true"] { color:var(--tempo-fg); font-weight:600; background:color-mix(in srgb,var(--tempo-fg) 6%,transparent); }
+.tempo-choice-list [aria-selected="true"] .tempo-choice-check { opacity:1; }
 .tempo-number-arrows button:focus-visible,.tempo-choice button:focus-visible { outline:2px solid var(--tempo-accent); outline-offset:1px; }
 .tempo-number-arrows button:disabled { opacity:.35; }
 `;

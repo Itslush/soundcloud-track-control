@@ -3,6 +3,7 @@ import { createSettingsTabs } from './tempo-settings-tabs.js';
 import { initMixerDock, isMixerVisible, mixerDockHeight, readShowMixer, setMixerVisible } from './tempo-mixer.js';
 import { controlsTemplate } from './tempo-controls-template.js';
 import { enhanceTempoFields } from './tempo-fields.js';
+import { positionFloatingMenu } from './tempo-floating.js';
 import { syncTempoRange } from './tempo-range.js';
 import { readTempoIncrement, validTempoIncrement, tempoIncrementKey } from './tempo-increment.js';
 import { readPitchSettings, validPitchSettings, pitchSettingsKey } from './tempo-pitch-settings.js';
@@ -73,6 +74,7 @@ export function createTempoControls({
       copyToggle: get('#copy-tempo-links'),
       pitchToggle: get('#preserve-key'),
       savedFilter: get('#saved-filter'),
+      savedClear: get('.saved-search-clear'),
       savedList: get('.saved-list'),
       savedCount: get('.saved-count'),
       settingsStatus: get('.settings-status'),
@@ -244,7 +246,7 @@ export function createTempoControls({
         services.timeline.setKeyShift(next);
         actions.updateAll();
       });
-    ui.syncFields = enhanceTempoFields(ui.root);
+    ui.syncFields = enhanceTempoFields(ui.root, { positionMenu: positionFloatingMenu });
     get('#tempo-increment').addEventListener('change', (event) => {
       const increment = Number(event.target.value);
       if (!validTempoIncrement(increment)) {
@@ -523,7 +525,16 @@ export function createTempoControls({
       }
     });
     get('.close-settings').addEventListener('click', () => closeSettings(true));
-    ui.savedFilter.addEventListener('input', populateSavedTracks);
+    ui.savedFilter.addEventListener('input', () => {
+      if (ui.savedClear) ui.savedClear.hidden = !ui.savedFilter.value;
+      populateSavedTracks();
+    });
+    ui.savedClear?.addEventListener('click', () => {
+      ui.savedFilter.value = '';
+      ui.savedClear.hidden = true;
+      populateSavedTracks();
+      ui.savedFilter.focus();
+    });
     ui.savedToggle.addEventListener('change', () => {
       try {
         localStorage.setItem(SAVED_STORAGE, String(ui.savedToggle.checked));
@@ -741,10 +752,10 @@ export function createTempoControls({
     ui.root.querySelector('.quick-key').hidden = !showKey;
     ui.root.querySelector('#show-key').checked = showKey;
     ui.root.querySelector('.controls').classList.toggle('hide-key', !showKey);
-    const keySpace = showKey ? 0 : 136;
-    ui.host.style.flexBasis = `${(style === 'slider' ? 416 : 312) - keySpace}px`;
-    ui.host.style.minWidth = `${(style === 'slider' ? 320 : 312) - keySpace}px`;
-    ui.host.style.setProperty('--tempo-compact-width', `${308 - keySpace}px`);
+    const keySpace = showKey ? 0 : 108;
+    ui.host.style.flexBasis = `${(style === 'slider' ? 404 : 300) - keySpace}px`;
+    ui.host.style.minWidth = `${(style === 'slider' ? 324 : 300) - keySpace}px`;
+    ui.host.style.setProperty('--tempo-compact-width', `${320 - keySpace}px`);
     ui.root.querySelector('.slider-wrap').dataset.style = style;
     ui.root.querySelector('#control-style').value = style;
     ui.slider.hidden = style === 'dial';
@@ -823,6 +834,7 @@ export function createTempoControls({
     if (website && showMixerInput) showMixerInput.checked = isMixerVisible();
     ui.settingsStatus.textContent = '';
     ui.savedFilter.value = '';
+    if (ui.savedClear) ui.savedClear.hidden = true;
     ui.library.clearPreview();
     populateSavedTracks();
     positionSettings();
@@ -891,7 +903,7 @@ export function createTempoControls({
         const audio = ref.deref();
         return audio && services.wasmAudio.hasGraph(audio);
       })
-        ? 'Boost needs the player’s audio connection. Start playback; reload SoundCloud if it stays unavailable.'
+        ? "Boost needs the player's audio connection. Start playback; reload SoundCloud if it stays unavailable."
         : '';
     const text = actions.formatRate(playback.rate);
     const shift = services.timeline.keyShift() ?? playback.keyShift;

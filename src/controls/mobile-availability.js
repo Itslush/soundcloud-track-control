@@ -29,7 +29,7 @@ export function createMobileAvailability({ document, website }) {
       const text = document.createElement('p');
       text.style.cssText = 'margin:0 0 12px';
       text.textContent =
-        'Track Control needs SoundCloud’s desktop player. Turn on Desktop site in your browser to use the touch controls.';
+        "Track Control needs SoundCloud's desktop player. Turn on Desktop site in your browser to use the touch controls.";
       const help = document.createElement('a');
       help.href = new URL('guide/', website).href;
       help.textContent = 'Installation help';

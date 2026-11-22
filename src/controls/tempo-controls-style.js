@@ -1,5 +1,6 @@
 import { tempoExtrasStyle } from './tempo-extras-style.js';
 import { tempoFieldStyle } from './tempo-fields.js';
+import { tempoLiquidGlassStyle } from './tempo-liquid-glass.js';
 import { tempoRangeStyle } from './tempo-range.js';
 
 export const controlsStyle = `
@@ -21,7 +22,7 @@ export const controlsStyle = `
 
         .controls {
           display: grid;
-          grid-template-columns: 56px 20px minmax(0, 1fr) 132px 24px 24px;
+          grid-template-columns: 54px 20px minmax(0, 1fr) 104px 28px 28px;
           align-items: center;
           gap: 4px;
           width: 100%;
@@ -30,7 +31,7 @@ export const controlsStyle = `
           font-size: 12px;
         }
 
-        .controls.hide-key { grid-template-columns: 56px 20px minmax(0, 1fr) 24px 24px; }
+        .controls.hide-key { grid-template-columns: 54px 20px minmax(0, 1fr) 28px 28px; }
 
         button,
         input,
@@ -53,12 +54,23 @@ export const controlsStyle = `
         .field {
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-end;
           gap: 2px;
+          height: 28px;
+          padding: 0 3px 0 5px;
+          border: 1px solid var(--tempo-capsule-border);
+          border-right: 0;
+          border-radius: 7px 0 0 7px;
+          box-shadow: var(--tempo-capsule-shadow);
           font-variant-numeric: tabular-nums;
         }
 
+        .field:focus-within {
+          border-color: color-mix(in srgb, var(--tempo-accent) 70%, transparent);
+        }
+
         .field #rate-number {
+          width: 36px;
           text-align: right;
         }
 
@@ -80,24 +92,37 @@ export const controlsStyle = `
           transform: translateY(var(--tempo-rail-offset, 0px));
         }
         .controls:has(.slider-wrap:not([data-style='slider'])) {
-          grid-template-columns: 56px 20px 36px 132px 24px 24px;
+          grid-template-columns: 54px 20px 36px 104px 28px 28px;
         }
         .controls.hide-key:has(.slider-wrap:not([data-style='slider'])) {
-          grid-template-columns: 56px 20px 36px 24px 24px;
+          grid-template-columns: 54px 20px 36px 28px 28px;
         }
         .quick-key {
-          display: grid;
-          grid-template-columns: 28px 42px 12px 20px;
+          display: inline-grid;
+          grid-template-columns: 38px 12px 20px;
           align-items: center;
           gap: 4px;
+          height: 28px;
           margin-left: 16px;
+          padding: 0 2px 0 6px;
+          border: 1px solid var(--tempo-capsule-border);
+          border-radius: 7px;
+          box-shadow: var(--tempo-capsule-shadow);
           font-size: 12px;
-          line-height: 24px;
+          line-height: 26px;
+        }
+        .quick-key:focus-within {
+          border-color: color-mix(in srgb, var(--tempo-accent) 70%, transparent);
         }
         @media (max-width: 340px) {
-          .controls { grid-template-columns: 38px 12px minmax(24px, 1fr) 132px 24px 24px; gap: 2px; }
-          .controls:has(.slider-wrap:not([data-style='slider'])) { grid-template-columns: 34px 12px 32px 132px 24px 24px; }
-          .controls.hide-key, .controls.hide-key:has(.slider-wrap:not([data-style='slider'])) { grid-template-columns: 38px 12px minmax(24px, 1fr) 24px 24px; }
+          .controls { grid-template-columns: 46px 18px minmax(24px, 1fr) 94px 26px 26px; gap: 2px; }
+          .controls:has(.slider-wrap:not([data-style='slider'])) { grid-template-columns: 46px 18px 32px 94px 26px 26px; }
+          .controls.hide-key, .controls.hide-key:has(.slider-wrap:not([data-style='slider'])) { grid-template-columns: 46px 18px minmax(24px, 1fr) 26px 26px; }
+          .controls.hide-key:has(.slider-wrap:not([data-style='slider'])) { grid-template-columns: 46px 18px 32px 26px 26px; }
+          .field { padding: 0 2px 0 4px; }
+          .field #rate-number { width: 30px; }
+          .step { width: 18px; }
+          .quick-key { grid-template-columns: 32px 12px 18px; gap: 3px; padding: 0 2px 0 5px; }
         }
         .fader-value, .fader-reset, .fader-normal, .fader-limit, .fader-level, .fader-ticks { display: none; }
         #tempo-fader[popover] .fader-value {
@@ -115,7 +140,7 @@ export const controlsStyle = `
           margin-top: 8px;
           padding: 0;
           border: 1px solid var(--tempo-track);
-          border-radius: 2px;
+          border-radius: 7px;
           background: transparent;
           font-size: 11px;
         }
@@ -322,24 +347,29 @@ export const controlsStyle = `
           display: flex;
           gap: 2px;
           margin: 0 0 10px;
-          border-bottom: 1px solid color-mix(in srgb, var(--tempo-fg) 26%, transparent);
+          padding: 3px;
+          border-radius: 9px;
+          background: color-mix(in srgb, var(--tempo-fg) 6%, transparent);
+          border: 1px solid color-mix(in srgb, var(--tempo-fg) 12%, transparent);
           overflow-x: auto;
           scrollbar-width: none;
         }
         .settings .settings-tab {
           flex: 1 0 auto;
-          min-height: 34px;
-          padding: 6px 10px;
+          min-height: 30px;
+          padding: 4px 10px;
           border: 0;
-          border-bottom: 2px solid transparent;
-          border-radius: 0;
+          border-radius: 6px;
           background: transparent;
           font-weight: 600;
           white-space: nowrap;
         }
         .settings .settings-tab[aria-selected='true'] {
-          border-bottom-color: var(--tempo-accent-ink, var(--tempo-accent));
+          background: var(--tempo-surface);
           color: var(--tempo-accent-ink, var(--tempo-accent));
+          box-shadow:
+            0 1px 3px rgb(0 0 0 / 24%),
+            inset 0 1px 0 color-mix(in srgb, #ffffff 10%, transparent);
         }
         .settings .pin-settings[aria-pressed='true'] {
           border-color: var(--tempo-accent-ink, var(--tempo-accent));
@@ -412,7 +442,7 @@ export const controlsStyle = `
           min-height: 30px;
           padding: 4px 10px;
           border: 1px solid var(--tempo-border, #767676);
-          border-radius: 3px;
+          border-radius: 7px;
           background: transparent;
         }
 
@@ -423,12 +453,11 @@ export const controlsStyle = `
         .check-label {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
           cursor: pointer;
         }
 
         .settings input[type='checkbox'] {
-          accent-color: var(--tempo-accent);
           margin: 0;
         }
 
@@ -520,7 +549,7 @@ export const controlsStyle = `
           height: 32px;
           box-sizing: border-box;
           border: 1px solid var(--tempo-border, #767676);
-          border-radius: 3px;
+          border-radius: 7px;
           background: var(--tempo-btn-bg, transparent);
         }
         .saved-setting .saved-remove {
@@ -553,7 +582,7 @@ export const controlsStyle = `
           height: 32px;
           box-sizing: border-box;
           border: 1px solid var(--tempo-track);
-          border-radius: 3px;
+          border-radius: 7px;
           font-variant-numeric: tabular-nums;
         }
 
@@ -693,17 +722,25 @@ export const controlsStyle = `
 
         .steppers {
           display: grid;
-          grid-template-rows: repeat(2, 16px);
+          grid-template-rows: repeat(2, 13px);
+          align-content: center;
+          height: 28px;
+          margin-left: -4px;
+          border: 1px solid var(--tempo-capsule-border);
+          border-left: 1px solid color-mix(in srgb, var(--tempo-fg) 10%, transparent);
+          border-radius: 0 7px 7px 0;
+          box-shadow: var(--tempo-capsule-shadow);
+          overflow: hidden;
         }
 
         .step {
           display: grid;
           place-items: center;
-          width: 20px;
-          height: 16px;
+          width: 19px;
+          height: 13px;
           padding: 0;
           border: 0;
-          border-radius: 2px;
+          border-radius: 0;
           background: transparent;
         }
 
@@ -728,7 +765,7 @@ export const controlsStyle = `
         }
 
         @media (max-width: 960px) {
-          .controls { gap: 3px; }
+          .controls { gap: 4px; }
           :host {
             flex-basis: var(--tempo-compact-width, 292px) !important;
             min-width: var(--tempo-compact-width, 292px) !important;
@@ -738,6 +775,8 @@ export const controlsStyle = `
         @media (max-width: 340px) {
           :host { min-width: 0 !important; flex-basis: 100% !important; }
           .controls { gap: 2px; }
+          .steppers { margin-left: -2px; }
+          .memory, .settings-button { width: 26px; height: 26px; }
         }
 
         input::selection {
@@ -745,16 +784,17 @@ export const controlsStyle = `
           color: var(--tempo-selection-fg, #fff);
         }
 
-        ${tempoRangeStyle}${tempoFieldStyle}
+        ${tempoRangeStyle}${tempoFieldStyle}${tempoLiquidGlassStyle}
 .quick-key .tempo-number{display:contents}
-.quick-key .tempo-number input{grid-column:2;grid-row:1;width:42px;height:32px;padding:0;border:0;background:transparent;text-align:center;color:inherit;font:inherit;font-variant-numeric:tabular-nums}
-.quick-key .tempo-number-arrows{grid-column:4;grid-row:1}
-.quick-key .tempo-number-arrows button{width:20px}
-.quick-key .key-unit{grid-column:3;grid-row:1}
+.quick-key .tempo-number input{grid-column:1;grid-row:1;width:38px;height:24px;padding:0;border:0;background:transparent;text-align:center;color:inherit;font:inherit;font-variant-numeric:tabular-nums}
+.quick-key .tempo-number-arrows{grid-column:3;grid-row:1;height:24px;place-content:center}
+.quick-key .tempo-number-arrows button{width:20px;height:12px;min-height:12px}
+.quick-key .key-unit{grid-column:2;grid-row:1;text-align:center}
+@media (max-width: 340px){.quick-key .tempo-number input{width:32px}.quick-key .tempo-number-arrows button{width:18px}}
 #tempo-settings input[type='range']{--range-thumb-opacity:1}
-.settings .tempo-choice-trigger{min-height:36px;padding:6px 8px;gap:6px;border:1px solid var(--tempo-track);border-radius:3px;background:var(--tempo-surface)}
-.settings .tempo-number{width:114px;min-height:36px;box-sizing:border-box;justify-content:space-between;border:1px solid var(--tempo-track);border-radius:3px;background:var(--tempo-surface)}
-.settings .tempo-number input{flex:1;min-width:0;width:auto;height:32px;padding:4px 2px 4px 6px;border:0;background:transparent;text-align:center;font-variant-numeric:tabular-nums}
+.settings .tempo-choice-trigger{min-height:36px;padding:6px 8px;gap:6px;border:1px solid var(--tempo-track);border-radius:7px;background:var(--tempo-surface)}
+.settings .tempo-number{width:114px;min-height:36px;height:36px;box-sizing:border-box;justify-content:space-between;border:1px solid var(--tempo-track);border-radius:7px;background:var(--tempo-surface)}
+.settings .tempo-number input{flex:1;min-width:0;width:auto;height:34px;padding:4px 2px 4px 6px;border:0;background:transparent;text-align:center;font-variant-numeric:tabular-nums}
 .control-style-label .tempo-choice,.pitch-engine-label .tempo-choice,.extras-select-row .tempo-choice,.dj-target-wrap .tempo-choice{width:114px}
 .quick-key{white-space:nowrap}
 
@@ -763,12 +803,16 @@ export const controlsStyle = `
         .settings-button {
           display: grid;
           place-items: center;
-          width: 24px;
-          height: 24px;
-          padding: 4px;
-          border: 0;
-          border-radius: 3px;
+          width: 28px;
+          height: 28px;
+          padding: 0;
+          border: 1px solid var(--tempo-capsule-border);
+          border-radius: 7px;
+          box-shadow: var(--tempo-capsule-shadow);
           background: transparent;
+        }
+        @media (max-width: 340px) {
+          .memory, .settings-button { width: 26px; height: 26px; }
         }
 
         .memory:hover,
@@ -778,11 +822,11 @@ export const controlsStyle = `
 
         .memory svg,
         .settings-button svg {
-          width: 14px;
-          height: 14px;
+          width: 15px;
+          height: 15px;
           fill: none;
           stroke: currentColor;
-          stroke-width: 1.5;
+          stroke-width: 1.85;
           stroke-linecap: round;
           stroke-linejoin: round;
         }

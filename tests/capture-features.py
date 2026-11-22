@@ -22,7 +22,7 @@ s.STAGING.mkdir(parents=True, exist_ok=True)
 server, base = serve_site()
 
 
-def capture(page, name, theme, selectors, top_margin=6):
+def capture(page, name, theme, selectors, top_margin=6, margin=6):
     viewport = page.viewport_size
     narrow_width = viewport['width'] if name in ['player', 'dial', 'vertical'] else 390
     for width, suffix in [(viewport['width'], ''), (narrow_width, '-mobile')]:
@@ -37,7 +37,7 @@ def capture(page, name, theme, selectors, top_margin=6):
         right = max(box['x'] + box['width'] for box in boxes)
         bottom = max(box['y'] + box['height'] for box in boxes)
         s.record_image(page, f'feature-{name}-{theme}{suffix}.png', evidence,
-                       clip={'x': max(0, x - 6), 'y': max(0, y - top_margin), 'width': right - x + 12, 'height': bottom - y + top_margin + 6},
+                       clip={'x': max(0, x - margin), 'y': max(0, y - top_margin), 'width': right - x + margin * 2, 'height': bottom - y + top_margin + margin},
                        state=f'{name} controls, {theme} variant at {width}px; playback paused or not started.')
     page.set_viewport_size(viewport)
     print(f'Captured {name}: {theme}', flush=True)
@@ -79,7 +79,7 @@ try:
                 page.locator('.close-settings').click()
                 if style == 'vertical':
                     page.locator('#vertical-toggle').click()
-                    capture(page, style, name, ['#tempo-fader'])
+                    capture(page, style, name, ['#tempo-fader'], top_margin=0, margin=0)
                     page.keyboard.press('Escape')
                 else:
                     capture(page, 'player' if style == 'slider' else style, name, ['#soundcloud-tempo-control .controls'])
@@ -133,7 +133,7 @@ try:
             if not page.locator('#dj-mode-toggle').is_checked():
                 page.locator('#dj-mode-toggle').check()
             page.locator('.close-settings').click()
-            capture(page, 'dj', name, ['.soundTitle__playButton', '.tempo-dj-pills'])
+            capture(page, 'dj', name, ['.soundTitle__playButton', '.tempo-dj-pills >> nth=0'])
             settings(page)
             tab(page, 'shortcuts')
             capture(page, 'shortcuts', name, ['#settings-panel-shortcuts'])

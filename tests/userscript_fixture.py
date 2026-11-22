@@ -56,21 +56,37 @@ def text_contrast(element):
         let ancestor = element;
         while (ancestor) {
             const background = getComputedStyle(ancestor).backgroundColor;
-            if (background !== 'rgba(0, 0, 0, 0)') return [foreground, background];
+            if (background && background !== 'rgba(0, 0, 0, 0)' && background !== 'transparent') {
+                return [foreground, background];
+            }
             ancestor = ancestor.parentElement || ancestor.getRootNode().host;
         }
-        throw new Error('No opaque background found');
+        throw new Error('No visible background found');
     }''')
 
-    def luminance(color):
-        values = [float(value) for value in re.findall(r'[\d.]+', color)]
-        assert len(values) == 3 or values[3] == 1, color
-        channels = [value / 255 for value in values[:3]]
+    def parse_rgba(color):
+        if color.startswith('color(srgb'):
+            nums = [float(v) for v in re.findall(r'[\d.]+', color)]
+            return [nums[0] * 255, nums[1] * 255, nums[2] * 255, nums[3] if len(nums) > 3 else 1.0]
+        nums = [float(v) for v in re.findall(r'[\d.]+', color)]
+        return [nums[0], nums[1], nums[2], nums[3] if len(nums) > 3 else 1.0]
+
+    def luminance(rgb):
+        channels = [value / 255 for value in rgb]
         linear = [value / 12.92 if value <= .04045 else ((value + .055) / 1.055) ** 2.4 for value in channels]
         return sum(value * weight for value, weight in zip(linear, [.2126, .7152, .0722]))
 
-    light, dark = sorted(map(luminance, colors), reverse=True)
-    return (light + .05) / (dark + .05)
+    def ratio(fg_rgb, bg_rgb):
+        light, dark = sorted([luminance(fg_rgb), luminance(bg_rgb)], reverse=True)
+        return (light + .05) / (dark + .05)
+
+    fg = parse_rgba(colors[0])[:3]
+    bg_r, bg_g, bg_b, alpha = parse_rgba(colors[1])
+    if alpha >= 0.999:
+        return ratio(fg, (bg_r, bg_g, bg_b))
+    over_black = (bg_r * alpha, bg_g * alpha, bg_b * alpha)
+    over_white = (bg_r * alpha + 255 * (1 - alpha), bg_g * alpha + 255 * (1 - alpha), bg_b * alpha + 255 * (1 - alpha))
+    return min(ratio(fg, over_black), ratio(fg, over_white))
 
 
 def userscript_bytes(path=None):

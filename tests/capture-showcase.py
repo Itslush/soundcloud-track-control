@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote, urlparse
 
+from PIL import Image
 from playwright.sync_api import sync_playwright, expect, TimeoutError
 
 from userscript_fixture import choose_option, ROOT, SITE_URL, userscript_bytes, userscript_source, browser_options
@@ -142,6 +143,8 @@ def record_image(page, name, evidence, selector=None, clip=None, state=''):
         page.locator(selector).screenshot(path=str(path), animations='disabled')
     else:
         page.screenshot(path=str(path), clip=clip, animations='disabled')
+    with Image.open(path) as image:
+        image.convert('RGB').quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.FLOYDSTEINBERG).save(path, format='PNG', optimize=True, compress_level=9)
     annotate_origin(path, page.url, state)
     width, height = struct.unpack('>II', path.read_bytes()[16:24])
     evidence['screenshots'].append({

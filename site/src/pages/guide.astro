@@ -14,7 +14,7 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
         >, or a compatible userscript manager.
       </li><li>
         Open the <a href={installUrl}>Track Control userscript</a> and confirm Install.
-        If you see source code instead, use your manager’s “Install from URL” option
+        If you see source code instead, use your manager's "Install from URL" option
         with the download link.
       </li><li>
         Reload SoundCloud and choose a track. Use the tempo controls in the
@@ -25,7 +25,7 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
     <section id="mixer">
       <h2>Mix two tracks</h2>
       <p>
-        Turn on “Show two-deck mixer” under Appearance in settings, or{' '}<a
+        Turn on "Show two-deck mixer" under Appearance in settings, or{' '}<a
           href={route('mixer/')}>open the standalone mixer here</a
         >. In SoundCloud, click <strong>More A</strong> or{' '}
         <strong>More B</strong> on the docked mixer for extra EQ, filter, Gain, Volume
@@ -36,22 +36,37 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
         deck A or <kbd>Alt+Shift+2</kbd> for deck B, or press{' '}
         <kbd>Alt+Shift+D</kbd> (or the docked <strong>DJ</strong> button) to enable
         click-to-deck routing with inline <code>+A</code>/<code>+B</code>{' '}
-        pills. All hotkeys can be customized or cleared under Shortcuts.
+        pills. Any hotkey can be rebound or cleared under Shortcuts.
       </p>
     </section>
     <section id="settings-tabs">
       <h2>Settings overview</h2>
       <p>
-        Open the gear menu in SoundCloud’s player bar to switch across five
-        tabs:{' '}
-        <strong>Tracks</strong> (saved speeds and JSON backup),{' '}
-        <strong>FX &amp; DJ</strong> (Master Bass shelf, DJ filter, Slowed + Reverb,
-        soft-clip saturation, Presets, A-B loop, hot cues, Tap/Sync BPM, DJ mode
-        and WAV export), <strong>Audio</strong> (key shift, pitch lock, Peak protection,
-        Volume cap, crossfade and live DSP meter),{' '}
-        <strong>Appearance</strong> (themes, control style, increments and star motion),
-        and <strong>Shortcuts</strong>.
+        Open the gear button in SoundCloud's player bar to switch between five
+        tabs:
       </p>
+      <ul>
+        <li>
+          <strong>Tracks</strong> — saved track speeds, filters, and JSON backups.
+        </li>
+        <li>
+          <strong>FX &amp; DJ</strong> — bass boost shelf, DJ filter, slowed reverb,
+          soft clip, presets, A-B loop, hot cues, Tap/Sync BPM, DJ routing, and WAV
+          export.
+        </li>
+        <li>
+          <strong>Audio</strong> — key shift, pitch lock, Peak protection, Volume
+          cap, queue crossfade, and the live peak meter.
+        </li>
+        <li>
+          <strong>Appearance</strong> — Light, Charcoal, or OLED themes, control
+          style, arrow increments, and star motion.
+        </li>
+        <li>
+          <strong>Shortcuts</strong> — keyboard bindings for playback, decks, loops,
+          cues, and export.
+        </li>
+      </ul>
       <p>
         Click <strong>Pin</strong> in the settings header to keep the panel open
         while clicking SoundCloud waveforms to locate loops or hot cues.
@@ -67,7 +82,7 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
         list, enable Track Control, then reload SoundCloud.
       </p>
       <p>
-        Keep soundcloud-rpc’s separate Playback Speed plugin disabled. Both
+        Keep soundcloud-rpc's separate Playback Speed plugin disabled. Both
         plugins would try to control the same audio element.
       </p>
       <p>
@@ -83,11 +98,11 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
         for up to 4×. Double-click the number or slider to reset to 1×;
         Shift-click the arrows for 0.01× adjustments.
       </p><p>
-        Use the bookmark button to remember a track’s speed. The gear opens
+        Use the bookmark button to remember a track's speed. The gear opens
         settings, saved tracks and the tempo editor.
       </p><p>
         Choose a slider, dial or vertical slider under Appearance. Saved tempos
-        apply when you return to a track; turn off “Apply saved tempos” to start
+        apply when you return to a track; turn off "Apply saved tempos" to start
         each track at 1× instead.
       </p>
     </section>
@@ -99,8 +114,8 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
         full track is available. Installation is optional for listening on
         SoundCloud itself.
       </p><p>
-        For everyday sharing, enable “Include tempo in copied links” in
-        settings. Then copying the current, loaded track’s full SoundCloud link
+        For everyday sharing, enable "Include tempo in copied links" in
+        settings. Then copying the current, loaded track's full SoundCloud link
         can include your adjustments. Unloaded tracks and short links may stay
         unchanged.
       </p><p>
@@ -121,13 +136,13 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
       </p><p>
         The arrows move in half-semitone steps by default. Type a finer value,
         or change the limits and default increment under Audio → Key shift
-        limits &amp; arrows. Appearance lets you toggle the player’s key shift
+        limits &amp; arrows. Appearance lets you toggle the player's key shift
         control and choose the default tempo arrow increment.
       </p><p>
         To change pitch during a song, open the tempo editor and choose Pitch.
         Add points, set their times and choose how they fade into each other.
         Apply once previews the curve; Save timeline keeps it for that track.
-        Changing the player’s Pitch control overrides the pitch curve until you
+        Changing the player's Pitch control overrides the pitch curve until you
         reapply the timeline.
       </p><p>
         Extreme changes can affect sound quality. Start with small adjustments.
@@ -145,13 +160,13 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
     </section>
     <section>
       <h2>Where things are stored</h2><p>
-        Settings and saved timelines stay in SoundCloud’s local site storage in
+        Settings and saved timelines stay in SoundCloud's local site storage in
         this browser. Export a backup from settings before clearing browser
         data.
       </p><a href={route('privacy/')}>Privacy details</a>
     </section>
     <section id="troubleshooting">
-      <h2>If something isn’t working</h2>
+      <h2>If something isn't working</h2>
       <p>
         Missing controls? Check that Track Control is enabled in your userscript
         manager, then reload SoundCloud. Disable older copies of the script.

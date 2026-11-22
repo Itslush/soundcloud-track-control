@@ -1,4 +1,6 @@
 ---
+import Icon from './Icon.astro';
+
 interface Props {
   id: string;
   label: string;
@@ -43,13 +45,7 @@ const { id, label, options, value, prefix } = Astro.props;
         >{options.find((option) => option.value === value)?.label}</span
       >
     </span>
-    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"
-      ><path
-        d="m4 6 4 4 4-4"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"></path></svg
-    >
+    <Icon name="chevron" size={16} strokeWidth={1.8} />
   </button>
   <div
     class="select-options"
@@ -67,7 +63,10 @@ const { id, label, options, value, prefix } = Astro.props;
           data-value={option.value}
           tabindex="-1"
         >
-          {option.label}
+          <span class="select-option-label">{option.label}</span>
+          <span class="select-option-check" aria-hidden="true">
+            <Icon name="check" size={14} strokeWidth={2} />
+          </span>
         </button>
       ))
     }

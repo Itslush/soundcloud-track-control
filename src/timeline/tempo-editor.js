@@ -4,6 +4,7 @@ import { readPitchSettings, pitchSettingsKey } from '../controls/tempo-pitch-set
 import { readTempoIncrement } from '../controls/tempo-increment.js';
 import { tempoShareLink } from '../sharing/tempo-share.js';
 import { enhanceTempoFields } from '../controls/tempo-fields.js';
+import { positionFloatingMenu } from '../controls/tempo-floating.js';
 import { editorTemplate } from './tempo-editor-template.js';
 import { syncTempoRange } from '../controls/tempo-range.js';
 import { evaluatePoints, profilePitchAt, validKeyShift } from './tempo-profile.js';
@@ -492,7 +493,7 @@ export function createTempoEditor(api) {
       refresh();
       status('Draft loaded.');
     };
-    syncFields = enhanceTempoFields(panel);
+    syncFields = enhanceTempoFields(panel, { positionMenu: positionFloatingMenu });
     const graph = el('.editor-graph');
     const coords = (event) => {
       const bounds = graph.getBoundingClientRect();

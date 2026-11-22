@@ -78,7 +78,7 @@ export const tempoExtrasStyle = `
   min-height: 32px;
   padding: 4px 10px;
   border: 1px solid var(--tempo-border, #767676);
-  border-radius: 3px;
+  border-radius: 7px;
   background: var(--tempo-btn-bg, #262626);
   font-variant-numeric: tabular-nums;
 }
@@ -172,7 +172,7 @@ export const tempoExtrasStyle = `
   min-width: 28px;
   padding: 2px 6px;
   border: 1px solid var(--tempo-border, #767676);
-  border-radius: 3px;
+  border-radius: 7px;
   background: var(--tempo-btn-bg, #262626);
 }
 .preset-save-row input[type='text'] {
@@ -181,7 +181,7 @@ export const tempoExtrasStyle = `
   min-height: 36px;
   padding: 4px 8px;
   border: 1px solid var(--tempo-track);
-  border-radius: 3px;
+  border-radius: 7px;
   background: transparent;
 }
 .bpm-entry .tempo-number input {
@@ -285,7 +285,7 @@ export const tempoExtrasStyle = `
   padding: 4px 8px;
   text-align: center;
   border: 1px solid var(--tempo-border, #767676);
-  border-radius: 3px;
+  border-radius: 7px;
   background: transparent;
 }
 .settings .kb-clear:disabled {
