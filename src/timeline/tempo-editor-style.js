@@ -37,9 +37,11 @@ export const editorStyle = `
         .point-actions {
           margin: 8px 0;
         }
+        .tempo-editor-inline .editor-actions:not(:has(button:not([hidden]))) {
+          display: none;
+        }
         .editor-actions .editor-revert {
           margin-right: auto;
-          border-color: transparent;
         }
         .playback-state {
           display: block;
@@ -79,11 +81,21 @@ export const editorStyle = `
           font-size: 14px;
         }
         .tempo-editor button {
-          min-height: 28px;
+          min-height: 34px;
+          height: 34px;
+          box-sizing: border-box;
           border: 1px solid var(--tempo-track);
           border-radius: 3px;
           background: transparent;
           padding: 4px 10px;
+        }
+        .tempo-editor .zoom-out,
+        .tempo-editor .zoom-in,
+        .tempo-editor .zoom-fit {
+          min-width: 34px;
+          width: 34px;
+          padding-inline: 0;
+          text-align: center;
         }
         .tempo-editor button:hover {
           background: color-mix(in srgb, var(--tempo-fg) 8%, transparent);
@@ -177,16 +189,44 @@ export const editorStyle = `
         .tempo-editor .editor-fields input,
         .tempo-editor .speed-min,
         .tempo-editor .speed-max,
+        .tempo-editor .pitch-step,
         .tempo-editor select,
         .tempo-editor textarea {
           width: 100%;
-          height: 30px;
+          height: 34px;
+          box-sizing: border-box;
           border: 1px solid var(--tempo-track);
           border-radius: 3px;
           background: var(--tempo-surface);
           color: inherit;
           padding: 4px 6px;
           font: inherit;
+        }
+        .tempo-editor .tempo-choice-trigger {
+          min-height: 34px;
+          height: 34px;
+          box-sizing: border-box;
+          padding: 4px 10px;
+        }
+        .tempo-editor .tempo-number {
+          border: 1px solid var(--tempo-track);
+          border-radius: 3px;
+          background: var(--tempo-surface);
+          min-height: 34px;
+          height: 34px;
+          box-sizing: border-box;
+        }
+        .tempo-editor .tempo-number input {
+          border: 0;
+          height: 32px;
+          background: transparent;
+          text-align: center;
+        }
+        .tempo-editor .tempo-number-arrows button {
+          min-height: 15px;
+          height: 15px;
+          padding: 0;
+          border: 0;
         }
         .tempo-editor textarea {
           height: 60px;
@@ -219,6 +259,7 @@ export const editorStyle = `
         }
         .speed-bounds {
           display: flex;
+          flex-wrap: wrap;
           gap: 8px;
         }
         .editor-toolbar output {

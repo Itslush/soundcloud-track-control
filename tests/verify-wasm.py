@@ -63,7 +63,7 @@ def main():
             page.locator('#rate-number').fill('0.5')
             page.locator('#rate-number').press('Enter')
             page.locator('.settings-button').click()
-            page.locator('.advanced-audio > summary').click()
+            page.locator('[data-settings-tab="audio"]').click()
             page.locator('#preserve-key').check()
             page.wait_for_function("document.querySelector('#soundcloud-tempo-control')?.shadowRoot?.querySelector('#wasm-status')?.textContent.includes('Pitch preservation active')", timeout=15000)
             page.wait_for_timeout(1200)

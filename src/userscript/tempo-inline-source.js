@@ -1,13 +1,5 @@
 import { createMixerShortcut } from '../soundcloud/mixer-shortcut.js';
-import {
-  buildSliderTicks,
-  clampRate,
-  createInlineExtras,
-  formatRate,
-  migrateTrackStorage,
-  parseTrackKey,
-  readCrossfadeNextSettings,
-} from './inline-extras.js';
+import { buildSliderTicks, clampRate, createInlineExtras, formatRate, migrateTrackStorage, parseTrackKey, readCrossfadeNextSettings } from './inline-extras.js';
 import { readPeakProtection } from '../audio/pitch-quality.mjs';
 import * as audioModules from '../audio/index.mjs';
 import { syncTempoRange } from '../controls/tempo-range.js';
@@ -29,89 +21,38 @@ import { createMediaGuards } from '../soundcloud/media-guards.js';
 import { createMobilePlayer } from '../controls/tempo-mobile-player.js';
 import { createMobileAvailability } from '../controls/mobile-availability.js';
 import { createTempoControls } from '../controls/tempo-controls.js';
+import { syncMixerTheme } from '../controls/tempo-mixer.js';
 import { createFooterVisuals } from '../soundcloud/footer-visuals.js';
 import { installClipboardSharing } from '../sharing/clipboard.js';
 
 (() => {
   'use strict';
-
   const KEY = '__soundCloudTempoControlV1';
-  if (window[KEY]) {
-    return;
-  }
+  if (window[KEY]) return;
   window[KEY] = true;
-  const VERSION = __TEMPO_VERSION__;
-  const WEBSITE = __TEMPO_WEBSITE__;
-  const COPY_STORAGE = 'soundcloud.tempo.copyLinks';
+  const VERSION = __TEMPO_VERSION__, WEBSITE = __TEMPO_WEBSITE__, COPY_STORAGE = 'soundcloud.tempo.copyLinks';
   function copyLinksEnabled() {
-    try {
-      return localStorage.getItem(COPY_STORAGE) === 'true';
-    } catch {
-      return false;
-    }
+    try { return localStorage.getItem(COPY_STORAGE) === 'true'; } catch { return false; }
   }
-  const PITCH_STORAGE = 'soundcloud.tempo.preserveKey';
-  const WASM_STORAGE = 'soundcloud.tempo.useWasm';
-  let timeline = null;
-  let clipboardSharing = null;
-  let bufferedAudio = null;
-  let crossfade = null;
-  let extras = null;
-  const trackVisuals = createTrackVisuals({
-    document,
-    readTrack: () => currentTrackKey(),
-  });
-  let badgeAnimations = [];
-  let appearance = null;
-  const MIN = 0.25;
-  const MAX = 4;
-  const SLIDER_MAX = 2;
-  const SLIDER_STEP = 0.025;
-  const SLIDER_STEPS = Math.round((SLIDER_MAX - MIN) / SLIDER_STEP);
+  const PITCH_STORAGE = 'soundcloud.tempo.preserveKey', WASM_STORAGE = 'soundcloud.tempo.useWasm';
+  let timeline = null, clipboardSharing = null, bufferedAudio = null, crossfade = null, extras = null, badgeAnimations = [], appearance = null;
+  const trackVisuals = createTrackVisuals({ document, readTrack: () => currentTrackKey() });
+  const MIN = 0.25, MAX = 4, SLIDER_MAX = 2, SLIDER_STEP = 0.025, SLIDER_STEPS = Math.round((SLIDER_MAX - MIN) / SLIDER_STEP);
   const TRACK_STORAGE = 'soundcloud.tempo.track.';
   migrateTrackStorage();
-  const SAVED_STORAGE = 'soundcloud.tempo.applySaved';
-  const STYLE_STORAGE = 'soundcloud.tempo.controlStyle';
-  const SHOW_KEY_STORAGE = 'soundcloud.tempo.showKey';
-  const KEY_SHIFT_STORAGE = 'soundcloud.tempo.keyShift';
+  const SAVED_STORAGE = 'soundcloud.tempo.applySaved', STYLE_STORAGE = 'soundcloud.tempo.controlStyle', SHOW_KEY_STORAGE = 'soundcloud.tempo.showKey', KEY_SHIFT_STORAGE = 'soundcloud.tempo.keyShift';
   const TRACK_LINK = '.playControls__soundBadge .playbackSoundBadge__titleLink';
-  const {
-    references,
-    discover,
-    isAudio,
-    applyNative,
-    installGuards,
-    supportsPitch,
-  } = createMediaGuards({
+  const { references, discover, isAudio, applyNative, installGuards, supportsPitch } = createMediaGuards({
     apply,
     handleShortcut: (event) => extras?.handleShortcut(event) ?? false,
     readUI: () => ui,
     readServices: () => ({ outputLevel, wasmAudio, bufferedAudio, crossfade }),
-    readPlayback: () => ({
-      preserve: preservesKey(),
-      useWasm,
-      keyShift: timeline.keyShift() ?? keyShift,
-      rate,
-    }),
+    readPlayback: () => ({ preserve: preservesKey(), useWasm, keyShift: timeline.keyShift() ?? keyShift, rate }),
   });
-  let ui;
-  let mobilePlayer;
-  const mobileAvailability = createMobileAvailability({
-    document,
-    website: WEBSITE,
-  });
-  let controlSetupShown = false;
-  let mountQueued = false;
-  let failure = '';
-  let storageFailure = '';
-  let rate = 1;
-  let savedRate = null;
-  let trackKey = '';
-  let lastTrackKey = '';
-  let applySaved = readSavedSetting();
-  let keyShift = readKeyShift();
-  let preserveKey = readPitchSetting();
-  let useWasm = readWasmSetting();
+  let ui, mobilePlayer, controlSetupShown = false, mountQueued = false, failure = '', storageFailure = '';
+  const mobileAvailability = createMobileAvailability({ document, website: WEBSITE });
+  let rate = 1, savedRate = null, trackKey = '', lastTrackKey = '';
+  let applySaved = readSavedSetting(), keyShift = readKeyShift(), preserveKey = readPitchSetting(), useWasm = readWasmSetting();
 
   function syncPeakProtection(enabled = readPeakProtection()) {
     if (ui) ui.peakToggle.checked = enabled;
@@ -136,7 +77,13 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     readSavedRate,
     formatRate,
     tempoLogo,
-    readTrack: () => ({ trackKey, rate, failure, shift: timeline?.keyShift() ?? keyShift, preserve: preservesKey() }),
+    readTrack: () => ({
+      trackKey,
+      rate,
+      failure,
+      shift: timeline?.keyShift() ?? keyShift,
+      preserve: preservesKey(),
+    }),
     readEmbeddedPages: () => embeddedPages,
   });
 
@@ -254,8 +201,14 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
     }
     lastTrackKey = next;
     rate = applySaved ? clamp(savedRate ?? 1) : 1;
-    keyShift = applySaved && saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
-    preserveKey = applySaved && saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
+    keyShift =
+      applySaved && saved?.keyShift !== undefined
+        ? saved.keyShift
+        : readKeyShift();
+    preserveKey =
+      applySaved && saved?.preserve !== undefined
+        ? saved.preserve
+        : readPitchSetting();
     if (ui) {
       delete ui.memory.dataset.feedback;
       ui.editTrack = next;
@@ -299,7 +252,9 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
           : {
               rate,
               enabled: true,
-              ...(currentShift !== readKeyShift() && { keyShift: currentShift }),
+              ...(currentShift !== readKeyShift() && {
+                keyShift: currentShift,
+              }),
               ...(currentPreserve !== readPitchSetting() && {
                 preserve: currentPreserve,
               }),
@@ -471,7 +426,10 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
         announce,
         supportsPitch,
         applyPreset: (preset) => extras?.applyPreset(preset),
-        exportWav: (signal, onProgress) => extras?.exportWav(signal, onProgress),
+        undoPreset: () => extras?.undoPreset(),
+        canUndoPreset: () => extras?.canUndoPreset(),
+        exportWav: (signal, onProgress) =>
+          extras?.exportWav(signal, onProgress),
         keyShiftChanged(value) {
           keyShift = value;
         },
@@ -485,8 +443,14 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
           applySaved = value;
           const saved = trackKey ? readSavedEntry(trackKey) : null;
           rate = applySaved ? clamp(saved?.rate ?? 1) : 1;
-          keyShift = applySaved && saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
-          preserveKey = applySaved && saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
+          keyShift =
+            applySaved && saved?.keyShift !== undefined
+              ? saved.keyShift
+              : readKeyShift();
+          preserveKey =
+            applySaved && saved?.preserve !== undefined
+              ? saved.preserve
+              : readPitchSetting();
         },
         savedTrackChanged(track, type) {
           pageArtwork.refreshSaved(track);
@@ -496,8 +460,12 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
             savedRate = saved?.rate ?? null;
             if (type === 'speed' && applySaved) {
               rate = clamp(savedRate ?? 1);
-              keyShift = saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
-              preserveKey = saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
+              keyShift =
+                saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
+              preserveKey =
+                saved?.preserve !== undefined
+                  ? saved.preserve
+                  : readPitchSetting();
               if (ui) ui.pitchToggle.checked = preserveKey;
             }
           }
@@ -510,8 +478,14 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
           applySaved = readSavedSetting();
           const saved = trackKey ? readSavedEntry(trackKey) : null;
           savedRate = saved?.rate ?? null;
-          keyShift = applySaved && saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
-          preserveKey = applySaved && saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
+          keyShift =
+            applySaved && saved?.keyShift !== undefined
+              ? saved.keyShift
+              : readKeyShift();
+          preserveKey =
+            applySaved && saved?.preserve !== undefined
+              ? saved.preserve
+              : readPitchSetting();
           timeline.clearKeyOverride();
           syncControlStyle();
           useWasm = readWasmSetting();
@@ -595,7 +569,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
       ui.root.querySelector('.control-setup-intro').hidden = false;
       ui.root.querySelector('#settings-title').textContent =
         'Choose your tempo control';
-      ui.root.querySelector('.appearance-settings').open = true;
+      ui.selectSettingsTab?.('appearance');
       const close = ui.root.querySelector('.close-settings');
       close.textContent = 'Use this style';
       close.setAttribute('aria-label', 'Use this style');
@@ -666,6 +640,8 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
         input.checked = input.value === appearance.mode();
       const moving = appearance.motion() === 'on';
       ui.root.querySelector('#star-motion').checked = moving;
+      const starWrap = ui.root.querySelector('.star-speed-wrap');
+      if (starWrap) starWrap.hidden = !moving;
       ui.root.querySelector('#star-speed').value = String(appearance.speed());
       ui.root.querySelector('#star-speed').disabled = !moving;
       syncTempoRange(ui.root.querySelector('#star-speed'));
@@ -673,6 +649,7 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
         `${appearance.speed()}×`;
       ui.settingsStatus.textContent = '';
       syncTheme();
+      syncMixerTheme();
     },
     onError() {
       if (ui)
@@ -774,7 +751,8 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
       bufferedAudio.resolveSource(audio, options),
     sourceStats: () => bufferedAudio.sourceStats(),
     preloadNext: (audio, options) => bufferedAudio.preloadNext(audio, options),
-    isCurrentTrack: (audio, track) => bufferedAudio.isCurrentTrack(audio, track),
+    isCurrentTrack: (audio, track) =>
+      bufferedAudio.isCurrentTrack(audio, track),
     readNextSettings: (url) =>
       readCrossfadeNextSettings(url, {
         parseTrackKey,
@@ -890,8 +868,14 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
         timeline.changeTrack(trackKey);
         const saved = trackKey ? readSavedEntry(trackKey) : null;
         rate = applySaved ? clamp(saved?.rate ?? 1) : 1;
-        keyShift = applySaved && saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
-        preserveKey = applySaved && saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
+        keyShift =
+          applySaved && saved?.keyShift !== undefined
+            ? saved.keyShift
+            : readKeyShift();
+        preserveKey =
+          applySaved && saved?.preserve !== undefined
+            ? saved.preserve
+            : readPitchSetting();
         updateAll();
       },
       reloadPitchUi: () => {
@@ -911,8 +895,10 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
         savedRate = saved?.rate ?? null;
         if (applySaved) {
           rate = clamp(savedRate ?? 1);
-          keyShift = saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
-          preserveKey = saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
+          keyShift =
+            saved?.keyShift !== undefined ? saved.keyShift : readKeyShift();
+          preserveKey =
+            saved?.preserve !== undefined ? saved.preserve : readPitchSetting();
           if (ui) ui.pitchToggle.checked = preserveKey;
         }
         updateAll();
@@ -983,7 +969,12 @@ import { installClipboardSharing } from '../sharing/clipboard.js';
       if (element)
         themeObserver.observe(element, {
           attributes: true,
-          attributeFilter: ['class', 'style', 'data-theme'],
+          attributeFilter: [
+            'class',
+            'style',
+            'data-theme',
+            'data-tempo-appearance',
+          ],
         });
     }
   }

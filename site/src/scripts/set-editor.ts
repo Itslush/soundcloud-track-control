@@ -64,6 +64,7 @@ const sharing = initDiscordShare(
     document.querySelector<HTMLElement>('#set-listen')!.hidden = false;
     playStatus.textContent = 'The rendered set is ready. Press Play to listen.';
   },
+  () => items.map(profileName).join(' / '),
 );
 
 function changed() {

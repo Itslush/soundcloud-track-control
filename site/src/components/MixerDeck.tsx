@@ -297,7 +297,11 @@ export function MixerDeck({
 
   const filter = artworkFilter(tempo, shift, lock);
   const toneAltered =
-    eq.low !== 0 || eq.mid !== 0 || eq.high !== 0 || djFilter !== 0 || gainDb !== 0;
+    eq.low !== 0 ||
+    eq.mid !== 0 ||
+    eq.high !== 0 ||
+    djFilter !== 0 ||
+    gainDb !== 0;
   const altered = tempo !== 1 || shift !== 0 || toneAltered;
   const readoutParts = [`${Number(tempo.toFixed(2))}×`];
   if (shift !== 0) readoutParts.push(`${shift > 0 ? '+' : ''}${shift}st`);
@@ -307,7 +311,9 @@ export function MixerDeck({
   function applyGain(raw: string) {
     const next = Number(raw);
     if (raw.trim() === '' || !validOutputDb(next)) {
-      reportError('Enter a dB value of -24 or higher that Web Audio can represent.');
+      reportError(
+        'Enter a dB value of -24 or higher that Web Audio can represent.',
+      );
       setGainDraft(String(gainDb));
       return;
     }
@@ -323,7 +329,9 @@ export function MixerDeck({
   function applyGainCap(raw: string) {
     const next = Number(raw);
     if (raw.trim() === '' || !validOutputDb(next) || next < -12) {
-      reportError('Enter a dB cap of -12 or higher that Web Audio can represent.');
+      reportError(
+        'Enter a dB cap of -12 or higher that Web Audio can represent.',
+      );
       setCapDraft(String(gainCapDb));
       return;
     }
@@ -448,7 +456,8 @@ export function MixerDeck({
             value={shift}
             style={
               {
-                '--range-fill': ((shift + 12) / 24) * 100 + '%',
+                '--range-fill':
+                  shift === 0 ? '0%' : ((shift + 12) / 24) * 100 + '%',
               } as CSSProperties
             }
             onDoubleClick={() => setShift(0)}
@@ -486,10 +495,12 @@ export function MixerDeck({
               style={
                 {
                   '--range-fill':
-                    ((Math.min(gainCapDb, Math.max(-24, gainDb)) + 24) /
-                      Math.max(1, gainCapDb + 24)) *
-                      100 +
-                    '%',
+                    gainDb === 0
+                      ? '0%'
+                      : ((Math.min(gainCapDb, Math.max(-24, gainDb)) + 24) /
+                          Math.max(1, gainCapDb + 24)) *
+                          100 +
+                        '%',
                 } as CSSProperties
               }
               onDoubleClick={() => {
@@ -520,7 +531,7 @@ export function MixerDeck({
               />
             </label>
             <label>
-              Cap
+              Cap dB
               <input
                 aria-label={'Deck ' + name + ' volume cap dB'}
                 type="number"
@@ -550,7 +561,10 @@ export function MixerDeck({
                 value={eq[band]}
                 style={
                   {
-                    '--range-fill': ((eq[band] + 24) / 30) * 100 + '%',
+                    '--range-fill':
+                      eq[band] === 0
+                        ? '0%'
+                        : ((eq[band] + 24) / 30) * 100 + '%',
                   } as CSSProperties
                 }
                 onDoubleClick={() =>
@@ -577,7 +591,8 @@ export function MixerDeck({
             value={djFilter}
             style={
               {
-                '--range-fill': ((djFilter + 100) / 200) * 100 + '%',
+                '--range-fill':
+                  djFilter === 0 ? '0%' : ((djFilter + 100) / 200) * 100 + '%',
               } as CSSProperties
             }
             onDoubleClick={() => setDjFilter(0)}
@@ -585,11 +600,7 @@ export function MixerDeck({
           />
         </label>
         <div className="deck-bpm-row">
-          <button
-            type="button"
-            className="deck-bpm-tap"
-            onClick={handleTapBpm}
-          >
+          <button type="button" className="deck-bpm-tap" onClick={handleTapBpm}>
             Tap BPM
           </button>
           <span className="deck-bpm-readout">
@@ -636,6 +647,7 @@ export function MixerDeck({
         <span
           className="deck-light"
           data-playing={playing}
+          hidden={!playing}
           aria-hidden="true"
         />
       </header>
@@ -742,6 +754,7 @@ export function MixerDeck({
         <span
           className="deck-light"
           data-playing={playing}
+          hidden={!playing}
           aria-hidden="true"
         />
       </header>

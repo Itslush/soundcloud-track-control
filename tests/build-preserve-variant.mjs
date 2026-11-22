@@ -19,13 +19,28 @@ const result = await esbuild.build({
     sourcefile: 'diagnostic-preserve-entry.mjs',
     loader: 'js',
   },
-  outfile: 'preserve-worklet.js', bundle:true, format:'esm', platform:'browser',
-  target:'es2022', treeShaking:true, minifyWhitespace:true, legalComments:'none',
-  sourcemap:'external', sourcesContent:true, write:false, logLevel:'silent',
+  outfile: 'preserve-worklet.js',
+  bundle: true,
+  format: 'esm',
+  platform: 'browser',
+  target: 'es2022',
+  treeShaking: true,
+  minifyWhitespace: true,
+  legalComments: 'none',
+  sourcemap: 'external',
+  sourcesContent: true,
+  write: false,
+  logLevel: 'silent',
 });
 if (result.warnings.length) throw new Error(JSON.stringify(result.warnings));
 const artifact = assets.writeWorkletArtifact(directory, {
-  output: result.outputFiles.find(file => file.path.endsWith('.js')).text,
-  sourceMap: result.outputFiles.find(file => file.path.endsWith('.map')).text,
+  output: result.outputFiles.find((file) => file.path.endsWith('.js')).text,
+  sourceMap: result.outputFiles.find((file) => file.path.endsWith('.map')).text,
 });
-console.log(JSON.stringify({...artifact, factory, factorySha256:createHash('sha256').update(bytes).digest('hex')}));
+console.log(
+  JSON.stringify({
+    ...artifact,
+    factory,
+    factorySha256: createHash('sha256').update(bytes).digest('hex'),
+  }),
+);

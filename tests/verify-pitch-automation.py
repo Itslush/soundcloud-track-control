@@ -25,7 +25,7 @@ def main():
         page.locator('.quick-key .tempo-number-arrows button').first.click()
         expect(quick).to_have_value('0.75')
         page.locator('.settings-button').click()
-        page.locator('.appearance-settings summary').click()
+        page.locator('[data-settings-tab="appearance"]').click()
         page.locator('#tempo-increment').fill('0.1')
         page.locator('#tempo-increment').press('Tab')
         page.locator('.open-editor').click()
@@ -77,7 +77,7 @@ def main():
         page.locator('.editor-close').click()
         page.set_viewport_size({'width':1100,'height':950})
         page.locator('.settings-button').click()
-        page.locator('.advanced-audio > summary').click()
+        page.locator('[data-settings-tab="audio"]').click()
         page.locator('.pitch-customization summary').click()
         for field, value in [('#pitch-min', '-6'), ('#pitch-max', '6'), ('#pitch-step', '0.125')]:
             page.locator(field).fill(value)
@@ -88,7 +88,7 @@ def main():
         invert = page.locator('#pitch-invert-arrows')
         expect(invert).not_to_be_checked()
         invert.check()
-        page.locator('#apply-saved').press('Escape')
+        page.keyboard.press('Escape')
         arrows = page.locator('.quick-key .tempo-number-arrows button')
         upper, lower = arrows.first, arrows.last
         assert upper.bounding_box()['y'] < lower.bounding_box()['y']
@@ -108,7 +108,7 @@ def main():
         page.reload()
         expect(upper).to_have_accessible_name('Decrease Key shift in semitones')
         page.locator('.settings-button').click()
-        page.locator('.advanced-audio > summary').click()
+        page.locator('[data-settings-tab="audio"]').click()
         page.locator('.pitch-customization summary').click()
         expect(invert).to_be_checked()
         invert.uncheck()
@@ -137,9 +137,9 @@ def main():
         site.locator('.editor-advanced summary').click()
         site.locator('.point-rate').fill('1.5')
         site.locator('.point-rate').press('Tab')
-        site.locator('.editor-save').click()
-        stored = site.evaluate("Object.keys(localStorage).filter(k=>k.startsWith('soundcloud.tempo.timeline.')).map(k=>JSON.parse(localStorage.getItem(k)))")
-        assert stored[0]['data']['pitchPoints'][1]['k'] == 1.5, stored
+        expect(site.locator('.point-rate')).to_have_value('1.5')
+        expect(site.locator('.editor-save')).to_be_hidden()
+        expect(site.locator('.editor-link')).to_be_hidden()
         for width in [1100,390]:
             site.set_viewport_size({'width':width,'height':1000})
             assert site.evaluate('document.documentElement.scrollWidth<=innerWidth+1')

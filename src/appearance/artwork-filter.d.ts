@@ -1,1 +1,5 @@
-export function artworkFilter(rate: number, shift: number, preserve: boolean): string;
+export function artworkFilter(
+  rate: number,
+  shift: number,
+  preserve: boolean,
+): string;

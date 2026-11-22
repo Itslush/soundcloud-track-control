@@ -8,9 +8,11 @@ export const controlsStyle = `
           color: inherit;
           --tempo-fg: #222;
           --tempo-accent: #ff5500;
+          --tempo-accent-ink: #b23c00;
           --tempo-accent-surface: #242424;
-          --tempo-accent-hover: #282828;
-          --tempo-track: #888;
+          --tempo-accent-hover: #ededeb;
+          --tempo-selection-fg: #ffffff;
+          --tempo-track: #6d6d6d;
         }
 
         * {
@@ -240,7 +242,7 @@ export const controlsStyle = `
           margin: 0;
           padding: 8px;
           width: 96px;
-          border: 1px solid color-mix(in srgb, var(--tempo-fg) 35%, var(--tempo-surface));
+          border: 1px solid var(--tempo-border, #767676);
           border-radius: 4px;
           background: var(--tempo-surface, #f2f2f2);
           color: var(--tempo-fg);
@@ -262,8 +264,8 @@ export const controlsStyle = `
         .slider-wrap[data-style='vertical'] #rate-slider::-webkit-slider-runnable-track { width: 2px; height: 100%; }
         .slider-wrap[data-style='vertical'] #rate-slider::-webkit-slider-thumb { margin-top: 0; margin-left: -5px; }
         .slider-wrap[data-style='vertical'] #rate-slider::-moz-range-track { width: 2px; height: 100%; }
-        .control-style-label, .key-shift-label { display: flex; align-items: center; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
-        .key-shift-label input { width: 58px; }
+        .control-style-label,
+        .key-shift-label { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
         .settings select { font: inherit; color: inherit; background: var(--tempo-surface); border: 1px solid var(--tempo-track); min-height: 32px; }
 
         @media (forced-colors: active) {
@@ -283,7 +285,7 @@ export const controlsStyle = `
           margin: 0;
           z-index: 2147483647;
           max-height: calc(100dvh - 80px);
-          overflow: auto;
+          overflow: hidden;
           padding: 12px;
           border: 1px solid var(--tempo-track);
           border-radius: 4px;
@@ -308,26 +310,75 @@ export const controlsStyle = `
         .settings-actions {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
         }
-        .settings[data-choosing-style] .quick-settings,
-        .settings[data-choosing-style] #saved-filter,
-        .settings[data-choosing-style] .saved-count,
-        .settings[data-choosing-style] .saved-list,
-        .settings[data-choosing-style] .saved-more,
+        @media (min-width: 480px) {
+          .settings-actions button {
+            min-width: 60px;
+            text-align: center;
+          }
+        }
+        .settings-tabs {
+          display: flex;
+          gap: 2px;
+          margin: 0 0 10px;
+          border-bottom: 1px solid color-mix(in srgb, var(--tempo-fg) 26%, transparent);
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+        .settings .settings-tab {
+          flex: 1 0 auto;
+          min-height: 34px;
+          padding: 6px 10px;
+          border: 0;
+          border-bottom: 2px solid transparent;
+          border-radius: 0;
+          background: transparent;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+        .settings .settings-tab[aria-selected='true'] {
+          border-bottom-color: var(--tempo-accent-ink, var(--tempo-accent));
+          color: var(--tempo-accent-ink, var(--tempo-accent));
+        }
+        .settings .pin-settings[aria-pressed='true'] {
+          border-color: var(--tempo-accent-ink, var(--tempo-accent));
+          color: var(--tempo-accent-ink, var(--tempo-accent));
+          font-weight: 600;
+        }
+        .settings-panels {
+          display: flex;
+          flex-direction: column;
+          min-height: 0;
+          flex: 1 1 auto;
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          padding-right: 4px;
+        }
+        #settings-panel-tracks {
+          display: flex;
+          flex-direction: column;
+          min-height: 0;
+          flex: 1 1 auto;
+        }
+        #settings-panel-appearance {
+          display: grid;
+          gap: 6px;
+        }
+        .settings[data-choosing-style] .settings-tabs,
+        .settings[data-choosing-style] .pin-settings,
         .settings[data-choosing-style] .open-editor,
+        .settings[data-choosing-style] .settings-panel:not(.appearance-settings),
         .settings[data-choosing-style] .appearance-options,
-        .settings[data-choosing-style] .appearance-settings summary,
-        .settings[data-choosing-style] .settings-tools > details:not(.appearance-settings) {
+        .settings[data-choosing-style] .show-mixer-label,
+        .settings[data-choosing-style] .increment-label,
+        .settings[data-choosing-style] .star-motion-label,
+        .settings[data-choosing-style] .star-speed-wrap {
           display: none;
         }
         .settings[data-choosing-style] header {
           flex-wrap: wrap;
           gap: 8px;
-        }
-        .settings[data-choosing-style] .settings-tools {
-          border: 0;
-          margin: 0;
         }
         .settings[data-choosing-style] .close-settings {
           min-height: 44px;
@@ -358,18 +409,18 @@ export const controlsStyle = `
           line-height: 1.5;
         }
         .settings button {
-          min-height: 28px;
-          padding: 3px 6px;
-          border: 0;
+          min-height: 30px;
+          padding: 4px 10px;
+          border: 1px solid var(--tempo-border, #767676);
           border-radius: 3px;
           background: transparent;
         }
 
         .settings button:hover {
-          background: color-mix(in srgb, var(--tempo-fg) 10%, transparent);
+          background: var(--tempo-hover, #2c2c2c);
         }
 
-        .random-label {
+        .check-label {
           display: flex;
           align-items: center;
           gap: 8px;
@@ -392,8 +443,8 @@ export const controlsStyle = `
           margin-top: 12px;
         }
 
-        .output-entry { display: flex; align-items: center; gap: 6px; }
-        #output-value { width: 84px; min-height: 32px; padding: 4px 8px; border: 1px solid var(--tempo-track); border-radius: 2px; text-align: right; font-variant-numeric: tabular-nums; }
+        .output-entry { display: inline-flex; align-items: center; }
+        .output-entry input { text-align: center; font-variant-numeric: tabular-nums; }
 
         #output-level {
           display: block;
@@ -416,7 +467,7 @@ export const controlsStyle = `
 
         .saved-row {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 132px;
+          grid-template-columns: minmax(0, 1fr) 144px;
           gap: 4px 12px;
           align-items: center;
           padding: 4px 2px;
@@ -451,8 +502,8 @@ export const controlsStyle = `
         .saved-setting {
           display: grid;
           grid-column: 2;
-          grid-template-columns: 28px 64px 28px;
-          gap: 6px;
+          grid-template-columns: 28px 68px 32px;
+          gap: 8px;
           align-items: center;
         }
 
@@ -466,6 +517,15 @@ export const controlsStyle = `
 
         .saved-setting button {
           min-height: 32px;
+          height: 32px;
+          box-sizing: border-box;
+          border: 1px solid var(--tempo-border, #767676);
+          border-radius: 3px;
+          background: var(--tempo-btn-bg, transparent);
+        }
+        .saved-setting .saved-remove {
+          width: 32px;
+          padding: 0;
         }
 
         .saved-row a {
@@ -479,8 +539,10 @@ export const controlsStyle = `
         }
 
         .saved-row input[type='number'] {
-          width: 46px;
-          height: 32px;
+          width: 38px;
+          height: 30px;
+          padding-right: 3px;
+          text-align: right;
           border: 0;
         }
 
@@ -488,6 +550,8 @@ export const controlsStyle = `
           display: flex;
           align-items: center;
           justify-content: center;
+          height: 32px;
+          box-sizing: border-box;
           border: 1px solid var(--tempo-track);
           border-radius: 3px;
           font-variant-numeric: tabular-nums;
@@ -533,7 +597,9 @@ export const controlsStyle = `
         }
 
         .library-backup {
-          margin: 0;
+          margin-top: 8px;
+          padding-top: 6px;
+          border-top: 1px solid color-mix(in srgb, var(--tempo-fg) 22%, transparent);
         }
 
         .backup-actions {
@@ -541,6 +607,10 @@ export const controlsStyle = `
           gap: 8px;
           flex-wrap: wrap;
           margin-block: 10px;
+        }
+        .backup-actions button {
+          min-width: 114px;
+          text-align: center;
         }
 
         .backup-preview p {
@@ -568,11 +638,27 @@ export const controlsStyle = `
         }
 
         @media (pointer: coarse) {
+          .settings button,
+          .settings .settings-tab,
+          .settings .tempo-choice-trigger,
+          .settings summary,
           .appearance-options label,
+          .check-label,
           .saved-setting button,
           .saved-switch,
           .saved-row input[type='number'] {
             min-height: 44px;
+          }
+          .settings .tempo-number-arrows {
+            grid-auto-flow: column;
+          }
+          .settings .tempo-number-arrows button {
+            min-width: 32px;
+            min-height: 44px;
+          }
+          .settings .tempo-number {
+            width: auto;
+            min-width: 114px;
           }
         }
 
@@ -656,7 +742,7 @@ export const controlsStyle = `
 
         input::selection {
           background: var(--tempo-accent);
-          color: #fff;
+          color: var(--tempo-selection-fg, #fff);
         }
 
         ${tempoRangeStyle}${tempoFieldStyle}
@@ -666,8 +752,10 @@ export const controlsStyle = `
 .quick-key .tempo-number-arrows button{width:20px}
 .quick-key .key-unit{grid-column:3;grid-row:1}
 #tempo-settings input[type='range']{--range-thumb-opacity:1}
-.settings .tempo-choice-trigger{min-height:36px;padding:6px 10px;border:1px solid var(--tempo-track);border-radius:3px;background:var(--tempo-surface)}
-.control-style-label .tempo-choice{min-width:164px}
+.settings .tempo-choice-trigger{min-height:36px;padding:6px 8px;gap:6px;border:1px solid var(--tempo-track);border-radius:3px;background:var(--tempo-surface)}
+.settings .tempo-number{width:114px;min-height:36px;box-sizing:border-box;justify-content:space-between;border:1px solid var(--tempo-track);border-radius:3px;background:var(--tempo-surface)}
+.settings .tempo-number input{flex:1;min-width:0;width:auto;height:32px;padding:4px 2px 4px 6px;border:0;background:transparent;text-align:center;font-variant-numeric:tabular-nums}
+.control-style-label .tempo-choice,.pitch-engine-label .tempo-choice,.extras-select-row .tempo-choice,.dj-target-wrap .tempo-choice{width:114px}
 .quick-key{white-space:nowrap}
 
 
@@ -700,7 +788,7 @@ export const controlsStyle = `
         }
 
         .memory[aria-pressed='true'] {
-          color: var(--tempo-accent);
+          color: var(--tempo-accent-ink, var(--tempo-accent));
         }
 
         .memory[data-state='saved'] .bookmark {
@@ -763,9 +851,7 @@ export const controlsStyle = `
         }
 
 .pitch-bounds{display:grid;gap:12px;margin:12px 0}
-.pitch-bounds label,.increment-label{display:grid;grid-template-columns:minmax(0,1fr) 90px 16px;gap:8px;align-items:center}
+.pitch-bounds label,.increment-label{display:flex;justify-content:space-between;gap:12px;align-items:center}
 .increment-label{margin:12px 0}
-.pitch-bounds .tempo-number,.increment-label .tempo-number{border:1px solid var(--tempo-track);border-radius:3px;min-height:36px}
-.pitch-bounds .tempo-number input,.increment-label .tempo-number input{width:64px;text-align:center}
 ${tempoExtrasStyle}
 `;

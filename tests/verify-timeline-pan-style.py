@@ -14,6 +14,8 @@ try:
                 page = browser.new_page(viewport={'width': 1050, 'height': 1000}, reduced_motion='reduce')
                 if surface == 'site':
                     page.goto(base, wait_until='networkidle')
+                    if not page.locator('.zoom-in').is_visible():
+                        page.locator('.editor-advanced > summary').click()
                 else:
                     page.route('https://soundcloud.com/**', lambda route: route.fulfill(
                         path=str(ROOT / 'tests/fixtures/inline-fixture.html'), content_type='text/html'))

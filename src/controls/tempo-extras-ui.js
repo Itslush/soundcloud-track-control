@@ -6,7 +6,12 @@ import {
   readFxSettings,
   readPitchEngine,
 } from '../audio/master-fx.mjs';
-import { KEYBIND_ACTIONS, eventToChord, formatChord } from './tempo-keybinds.js';
+import {
+  KEYBIND_ACTIONS,
+  eventToChord,
+  formatChord,
+} from './tempo-keybinds.js';
+import { syncTempoRange } from './tempo-range.js';
 import {
   deleteCustomPreset,
   listPresets,
@@ -27,13 +32,7 @@ function formatFilterLabel(value) {
   return pct < 0 ? `LPF ${Math.abs(pct)}%` : `HPF ${pct}%`;
 }
 
-export function createTempoExtrasUi({
-  ui,
-  root,
-  playback,
-  services,
-  actions,
-}) {
+export function createTempoExtrasUi({ ui, root, playback, services, actions }) {
   const get = (selector) => root.querySelector(selector);
   const bassSwapEl = get('#crossfade-bass-swap');
   const cueEntryEl = get('#crossfade-cue-entry');
@@ -49,18 +48,19 @@ export function createTempoExtrasUi({
   const fxSpaceOut = get('#fx-space-value');
   const djToggleEl = get('#dj-mode-toggle');
   const djTargetEl = get('#dj-target');
+  const djTargetWrap = get('.dj-target-wrap');
   const presetListEl = get('.preset-list');
   const presetNameEl = get('#preset-name');
+  const presetUndoBtn = get('#preset-undo');
   const toolsStatusEl = get('#tools-status');
   const loopReadoutEl = get('#loop-readout');
   const bpmReadoutEl = get('#bpm-readout');
   const bpmTargetEl = get('#bpm-target');
   const exportBtn = get('#export-wav');
   const exportCancelBtn = get('#export-cancel');
-  const shortcutsDetails = get('.shortcuts');
   const kbMount = get('.keybinds-mount');
   const kbStatus = get('.kb-status');
-  const dspHud = get('.dsp-hud');
+  const diagnosticsGroup = get('.diagnostics-group');
   const hudEngine = get('#hud-engine');
   const hudRate = get('#hud-rate');
   const hudFill = get('.hud-meter-fill');
@@ -68,6 +68,7 @@ export function createTempoExtrasUi({
   const hudClip = get('#hud-clip');
   const hudCrossfade = get('#hud-crossfade');
 
+  let activeTab = 'tracks';
   let recordingAction = null;
   let exportController = null;
   let hudFrame = 0;
@@ -89,10 +90,18 @@ export function createTempoExtrasUi({
     const fx = readFxSettings();
     fxBassEl.value = String(fx.bassDb);
     fxBassOut.value = `${fx.bassDb} dB`;
+    syncTempoRange(fxBassEl);
     fxFilterEl.value = String(Math.round(fx.filter * 100));
     fxFilterOut.value = formatFilterLabel(fx.filter);
+    const filterFill =
+      fx.filter === 0
+        ? '0%'
+        : `${((Number(fxFilterEl.value) + 100) / 200) * 100}%`;
+    if (fxFilterEl.style.getPropertyValue('--range-fill') !== filterFill)
+      fxFilterEl.style.setProperty('--range-fill', filterFill);
     fxSpaceEl.value = String(Math.round(fx.space * 100));
     fxSpaceOut.value = `${Math.round(fx.space * 100)}%`;
+    syncTempoRange(fxSpaceEl);
     fxRoomEl.value = fx.room;
     fxClipEl.checked = fx.softClip;
   }
@@ -177,7 +186,8 @@ export function createTempoExtrasUi({
     presetListEl.replaceChildren();
     const currentRate = Math.round(playback.rate * 1000) / 1000;
     const currentShift =
-      Math.round((services.timeline.keyShift() ?? playback.keyShift) * 1000) / 1000;
+      Math.round((services.timeline.keyShift() ?? playback.keyShift) * 1000) /
+      1000;
     const currentPreserve = actions.preservesKey();
     const currentFx = readFxSettings();
     for (const preset of listPresets()) {
@@ -215,7 +225,14 @@ export function createTempoExtrasUi({
       }
       presetListEl.append(wrap);
     }
+    if (presetUndoBtn) presetUndoBtn.hidden = !actions.canUndoPreset?.();
   }
+
+  presetUndoBtn?.addEventListener('click', () => {
+    if (!actions.undoPreset?.()) return;
+    toolsStatusEl.textContent = 'Reverted previous preset.';
+    sync();
+  });
 
   get('#preset-save').addEventListener('click', () => {
     try {
@@ -240,7 +257,8 @@ export function createTempoExtrasUi({
   get('#loop-b').addEventListener('click', () => {
     const state = services.deckTools?.setB();
     if (!state?.active)
-      toolsStatusEl.textContent = 'Move playback after Point A before setting B.';
+      toolsStatusEl.textContent =
+        'Move playback after Point A before setting B.';
     syncDeckTools();
   });
   get('#loop-clear').addEventListener('click', () => {
@@ -354,8 +372,11 @@ export function createTempoExtrasUi({
     }
     try {
       const res = services.keybinds?.set(recordingAction, chord);
-      const conflictNote = res?.clearedFrom?.length
-        ? ` Reassigned from ${res.clearedFrom.join(', ')}.`
+      const conflictNames = (res?.clearedFrom ?? []).map(
+        (id) => KEYBIND_ACTIONS.find((a) => a.id === id)?.label || id,
+      );
+      const conflictNote = conflictNames.length
+        ? ` Reassigned from ${conflictNames.join(', ')}.`
         : '';
       stopRecording(`Bound ${formatChord(chord)}.${conflictNote}`, true);
     } catch (error) {
@@ -363,61 +384,86 @@ export function createTempoExtrasUi({
     }
   }
 
+  const KB_GROUPS = [
+    { title: 'Playback', ids: ['tempoDown', 'tempoUp', 'tempoReset'] },
+    { title: 'Mixer & DJ', ids: ['djMode', 'deckA', 'deckB'] },
+    {
+      title: 'Loops, Cues & Export',
+      ids: [
+        'loopToggle',
+        'tapBpm',
+        'cue1',
+        'cue2',
+        'cue3',
+        'cue4',
+        'exportWav',
+      ],
+    },
+  ];
+
   function renderKeybinds(focusAction = null) {
     if (!services.keybinds) return;
     const map = services.keybinds.getAll();
     kbMount.replaceChildren();
     let buttonToFocus = null;
-    for (const item of KEYBIND_ACTIONS) {
-      const row = document.createElement('div');
-      row.className = 'kb-row';
-      const label = document.createElement('span');
-      label.className = 'kb-name';
-      label.textContent = item.label;
-      const keyBtn = document.createElement('button');
-      keyBtn.type = 'button';
-      keyBtn.className = 'kb-key';
-      keyBtn.dataset.action = item.id;
-      const activeRec = recordingAction === item.id;
-      keyBtn.dataset.recording = String(activeRec);
-      keyBtn.textContent = activeRec
-        ? 'Press keys…'
-        : formatChord(map[item.id]);
-      keyBtn.setAttribute(
-        'aria-label',
-        `${item.label}: ${formatChord(map[item.id])}. Click to change`,
-      );
-      if (focusAction === item.id) buttonToFocus = keyBtn;
-      keyBtn.addEventListener('click', () => {
-        if (activeRec) {
-          stopRecording('Shortcut edit cancelled.', true);
-          return;
-        }
-        stopRecording('');
-        recordingAction = item.id;
-        services.keybinds.setRecording(true);
-        window.addEventListener('keydown', onRecordKey, true);
-        kbStatus.textContent = `Press a chord for ${item.label}, or Esc to cancel.`;
-        renderKeybinds(item.id);
-      });
-      const clr = document.createElement('button');
-      clr.type = 'button';
-      clr.className = 'kb-clear';
-      clr.textContent = 'Clear';
-      clr.setAttribute('aria-label', `Clear shortcut for ${item.label}`);
-      clr.disabled = !map[item.id];
-      clr.addEventListener('click', () => {
-        stopRecording('');
-        try {
-          services.keybinds.set(item.id, '');
-          kbStatus.textContent = `${item.label} cleared.`;
-          renderKeybinds();
-        } catch (error) {
-          kbStatus.textContent = error.message;
-        }
-      });
-      row.append(label, keyBtn, clr);
-      kbMount.append(row);
+    for (const group of KB_GROUPS) {
+      const heading = document.createElement('h4');
+      heading.className = 'kb-group-title';
+      heading.textContent = group.title;
+      kbMount.append(heading);
+      for (const id of group.ids) {
+        const item = KEYBIND_ACTIONS.find((entry) => entry.id === id);
+        if (!item) continue;
+        const row = document.createElement('div');
+        row.className = 'kb-row';
+        const label = document.createElement('span');
+        label.className = 'kb-name';
+        label.textContent = item.label;
+        const keyBtn = document.createElement('button');
+        keyBtn.type = 'button';
+        keyBtn.className = 'kb-key';
+        keyBtn.dataset.action = item.id;
+        const activeRec = recordingAction === item.id;
+        keyBtn.dataset.recording = String(activeRec);
+        keyBtn.textContent = activeRec
+          ? 'Press keys…'
+          : formatChord(map[item.id]);
+        keyBtn.setAttribute(
+          'aria-label',
+          `${item.label}: ${formatChord(map[item.id])}. Click to change`,
+        );
+        if (focusAction === item.id) buttonToFocus = keyBtn;
+        keyBtn.addEventListener('click', () => {
+          if (activeRec) {
+            stopRecording('Shortcut edit cancelled.', true);
+            return;
+          }
+          stopRecording('');
+          recordingAction = item.id;
+          services.keybinds.setRecording(true);
+          window.addEventListener('keydown', onRecordKey, true);
+          kbStatus.textContent = `Press a chord for ${item.label}, or Esc to cancel.`;
+          renderKeybinds(item.id);
+        });
+        const clr = document.createElement('button');
+        clr.type = 'button';
+        clr.className = 'kb-clear';
+        clr.textContent = 'Clear';
+        clr.setAttribute('aria-label', `Clear shortcut for ${item.label}`);
+        clr.disabled = !map[item.id];
+        clr.addEventListener('click', () => {
+          stopRecording('');
+          try {
+            services.keybinds.set(item.id, '');
+            kbStatus.textContent = `${item.label} cleared.`;
+            renderKeybinds();
+          } catch (error) {
+            kbStatus.textContent = error.message;
+          }
+        });
+        row.append(label, keyBtn, clr);
+        kbMount.append(row);
+      }
     }
     buttonToFocus?.focus();
   }
@@ -427,11 +473,6 @@ export function createTempoExtrasUi({
     services.keybinds?.reset();
     kbStatus.textContent = 'Default shortcuts restored.';
     renderKeybinds();
-  });
-
-  shortcutsDetails.addEventListener('toggle', () => {
-    if (!shortcutsDetails.open) stopRecording('');
-    else renderKeybinds();
   });
 
   function updateHudOnce() {
@@ -447,22 +488,31 @@ export function createTempoExtrasUi({
     hudEngine.textContent = `${snap.engine} (${snap.mode})`;
     hudRate.textContent = `${snap.sampleRate} Hz · ${snap.latencyMs} ms`;
     const pct = Math.max(0, Math.min(100, ((snap.peakDb + 60) / 60) * 100));
-    hudFill.style.width = `${pct.toFixed(1)}%`;
+    hudFill.style.transform = `scaleX(${(pct / 100).toFixed(3)})`;
     hudPeak.textContent = `${snap.peakDb.toFixed(1)} dB / ${snap.peakHoldDb.toFixed(1)} dB`;
     hudClip.dataset.clipped = String(snap.clipped);
     hudClip.textContent = snap.clipped ? 'CLIP (Reset)' : 'Clean';
     hudCrossfade.textContent = services.crossfade?.label() || 'Idle';
   }
 
+  function hudVisible() {
+    return (
+      !ui.settings.hidden &&
+      activeTab === 'audio' &&
+      Boolean(diagnosticsGroup?.open) &&
+      !document.hidden
+    );
+  }
+
   function hudTick() {
     hudFrame = 0;
-    if (ui.settings.hidden || !dspHud.open || document.hidden) return;
+    if (!hudVisible()) return;
     updateHudOnce();
     hudFrame = requestAnimationFrame(hudTick);
   }
 
   function ensureHud() {
-    if (!ui.settings.hidden && dspHud.open && !document.hidden) {
+    if (hudVisible()) {
       updateHudOnce();
       if (!hudFrame) hudFrame = requestAnimationFrame(hudTick);
     } else if (hudFrame) {
@@ -471,7 +521,7 @@ export function createTempoExtrasUi({
     }
   }
 
-  dspHud.addEventListener('toggle', ensureHud);
+  diagnosticsGroup?.addEventListener('toggle', ensureHud);
   hudClip.addEventListener('click', () => {
     services.wasmAudio?.resetPeakHold?.();
     updateHudOnce();
@@ -484,6 +534,7 @@ export function createTempoExtrasUi({
       djToggleEl.checked = dj.enabled;
       djTargetEl.value = dj.target;
     }
+    if (djTargetWrap) djTargetWrap.hidden = !dj?.enabled;
     const loop = services.deckTools?.loopState?.() ?? {
       active: false,
       a: null,
@@ -522,12 +573,18 @@ export function createTempoExtrasUi({
     syncFx();
     renderPresets();
     syncDeckTools();
-    if (shortcutsDetails.open) renderKeybinds();
-    if (dspHud.open && !ui.settings.hidden) updateHudOnce();
+    if (activeTab === 'shortcuts' && !ui.settings.hidden) renderKeybinds();
+    if (hudVisible()) updateHudOnce();
   }
 
   return {
     sync,
+    onTabChange(tabId) {
+      activeTab = tabId;
+      if (tabId === 'shortcuts') renderKeybinds();
+      else stopRecording('');
+      ensureHud();
+    },
     onSettingsOpen() {
       sync();
       ensureHud();

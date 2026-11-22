@@ -1,14 +1,6 @@
 import { createTempoEditorPlayback } from './tempo-editor-playback.js';
-import {
-  renderTempoEditorGraph,
-  round,
-  timeLabel,
-  preciseTime,
-} from './tempo-editor-graph.js';
-import {
-  readPitchSettings,
-  pitchSettingsKey,
-} from '../controls/tempo-pitch-settings.js';
+import { renderTempoEditorGraph, round, timeLabel, preciseTime } from './tempo-editor-graph.js';
+import { readPitchSettings, pitchSettingsKey } from '../controls/tempo-pitch-settings.js';
 import { readTempoIncrement } from '../controls/tempo-increment.js';
 import { tempoShareLink } from '../sharing/tempo-share.js';
 import { enhanceTempoFields } from '../controls/tempo-fields.js';
@@ -21,24 +13,15 @@ export function createTempoEditor(api) {
     syncControls,
     updatePlayhead,
     openPendingLink,
-    isAnimating: () =>
-      !document.hidden && panel && !panel.hidden && draft && !imported,
+    isAnimating: () => !document.hidden && panel && !panel.hidden && draft && !imported,
   });
-  const {
-    website,
-    storageKey,
-    validate,
-    encodeProfile,
-    decodeProfile,
-    playbackDuration,
-    running,
-    wake,
-  } = playback;
+  const { website, storageKey, validate, encodeProfile, decodeProfile, playbackDuration, running, wake } = playback;
   let panel = null;
   let syncFields = () => {};
   let draft = null;
   let selected = 0;
   let imported = null;
+  let loadedDraft = null;
   let dirty = false;
   let dragging = null;
   let dragOffset = 0;
@@ -414,6 +397,14 @@ export function createTempoEditor(api) {
     el('.editor-revert').onclick = () => {
       const track = draft.track;
       dirty = false;
+      if (loadedDraft?.track === track) {
+        draft = structuredClone(loadedDraft);
+        selected = 0;
+        fit();
+        refresh();
+        status('Double-click the graph to add a point.');
+        return;
+      }
       draft = null;
       open(track);
     };
@@ -974,11 +965,15 @@ export function createTempoEditor(api) {
     },
     loadDraft(data) {
       draft = validate(data);
+      loadedDraft = structuredClone(draft);
       selected = 0;
       lane = 'tempo';
       [speedBottom, speedTop] = laneViews.tempo;
       dirty = true;
       open();
+      dirty = false;
+      syncControls();
+      status('Double-click the graph to add a point.');
     },
     refreshSaved: playback.refreshSaved,
     suspend: playback.suspend,

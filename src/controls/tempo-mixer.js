@@ -6,7 +6,7 @@ export const MIXER_THEMES = {
     surface: '#fff',
     ink: '#202020',
     muted: '#5d5d5d',
-    line: '#c4c4c1',
+    line: '#888885',
     control: '#777',
     accent: '#b33b00',
     onAccent: '#fff',
@@ -17,7 +17,7 @@ export const MIXER_THEMES = {
     surface: '#202020',
     ink: '#f4f4f4',
     muted: '#b2b2b2',
-    line: '#434343',
+    line: '#767676',
     control: '#767676',
     accent: '#ff5500',
     onAccent: '#141414',
@@ -28,7 +28,7 @@ export const MIXER_THEMES = {
     surface: '#0b0b0b',
     ink: '#f4f4f4',
     muted: '#b2b2b2',
-    line: '#262626',
+    line: '#656565',
     control: '#767676',
     accent: '#ff5500',
     onAccent: '#141414',
@@ -171,12 +171,10 @@ function createDock() {
     );
     panel.style.bottom = `${bottom}px`;
 
-    const noticeHeight = notice.hidden ? 0 : Math.max(28, notice.offsetHeight || 28);
-    const fallbackHeight = expanded
-      ? 360
-      : window.innerWidth <= 1100
-        ? 96
-        : 58;
+    const noticeHeight = notice.hidden
+      ? 0
+      : Math.max(28, notice.offsetHeight || 28);
+    const fallbackHeight = expanded ? 360 : window.innerWidth <= 1100 ? 96 : 58;
     const iframeHeight =
       reportedHeight > 0
         ? Math.max(52, Math.min(480, Math.ceil(reportedHeight)))
@@ -189,14 +187,31 @@ function createDock() {
       ? ''
       : `body { padding-bottom: ${applied}px !important; } html[data-track-control-mobile-layout] body { padding-bottom: calc(var(--tc-phone-dock, 0px) + ${applied}px) !important; }`;
 
-    const bg = bar ? getComputedStyle(bar).backgroundColor : '';
-    const channels = bg.match(/\d+/g)?.map(Number) || [24, 24, 24];
-    const theme =
-      channels.slice(0, 3).reduce((a, b) => a + b, 0) > 450
-        ? 'light'
-        : channels.slice(0, 3).every((value) => value < 12)
-          ? 'oled'
-          : 'charcoal';
+    const attr = document.documentElement.getAttribute('data-tempo-appearance');
+    let theme =
+      attr === 'light' || attr === 'charcoal' || attr === 'oled' ? attr : '';
+    if (!theme) {
+      let rgb = null;
+      for (const el of [
+        bar?.querySelector('.playControls__bg'),
+        bar,
+        document.body,
+      ]) {
+        const val = el ? getComputedStyle(el).backgroundColor : '';
+        const nums = val?.match(/[\d.]+/g)?.map(Number);
+        if (nums && (nums.length < 4 || nums[3] > 0)) {
+          rgb = nums.slice(0, 3);
+          break;
+        }
+      }
+      const channels = rgb || [24, 24, 24];
+      theme =
+        channels.reduce((a, b) => a + b, 0) > 450
+          ? 'light'
+          : channels.every((value) => value < 12)
+            ? 'oled'
+            : 'charcoal';
+    }
     const palette = MIXER_THEMES[theme] || MIXER_THEMES.charcoal;
     panel.style.background = palette.ground;
     panel.style.borderTopColor = palette.line;
@@ -230,7 +245,12 @@ function createDock() {
     if (element)
       themeObserver.observe(element, {
         attributes: true,
-        attributeFilter: ['class', 'style', 'data-theme'],
+        attributeFilter: [
+          'class',
+          'style',
+          'data-theme',
+          'data-tempo-appearance',
+        ],
       });
 
   window.addEventListener('message', (event) => {
@@ -302,6 +322,7 @@ function createDock() {
       this.open();
       showNotice(value, 6000);
     },
+    syncTheme: position,
     clearNotice: hideNotice,
     send(message) {
       if (ready) frame.contentWindow.postMessage(message, destination.origin);
@@ -369,6 +390,16 @@ export function mixerMessage(message) {
   if (!config?.website) return;
   setMixerVisible(true, true);
   dock?.message(message);
+}
+
+export function syncMixerTheme() {
+  dock?.syncTheme?.();
+}
+
+export function mixerDockHeight() {
+  return dock && !dock.panel.hidden
+    ? dock.panel.getBoundingClientRect().height
+    : 0;
 }
 
 export function syncMixerDjState(state) {

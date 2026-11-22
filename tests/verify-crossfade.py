@@ -148,13 +148,13 @@ with sync_playwright() as p:
     context.route('https://soundcloud.com/**', lambda route: route.fulfill(path=str(ROOT/'tests/fixtures/inline-fixture.html'), content_type='text/html'))
     page = context.new_page()
     page.goto('https://soundcloud.com/test-artist/first-track')
-    page.locator('.settings-button').click(); page.locator('.advanced-audio > summary').click()
+    page.locator('.settings-button').click(); page.locator('[data-settings-tab="audio"]').click()
     expect(page.locator('#crossfade')).not_to_be_checked()
     expect(page.locator('#crossfade-seconds')).to_be_disabled()
     page.locator('#crossfade').check()
     page.locator('#crossfade-seconds').fill('8')
     page.locator('#crossfade-seconds').dispatch_event('change')
-    page.locator('.crossfade-debug > summary').focus()
+    page.locator('.diagnostics-group > summary').focus()
     page.keyboard.press('Enter')
     expect(page.locator('#crossfade-debug-output')).to_contain_text('overlapSeconds')
     page.evaluate('''() => Object.defineProperty(navigator, 'clipboard', {configurable:true, value:{
@@ -239,7 +239,7 @@ with sync_playwright() as p:
     page.wait_for_timeout(300)
     assert page.evaluate('window.badgeFades.length') == 4
     assert page.locator('.playbackSoundBadge__avatar').evaluate('el=>getComputedStyle(el).opacity') == '1'
-    page.reload(); page.locator('.settings-button').click(); page.locator('.advanced-audio > summary').click()
+    page.reload(); page.locator('.settings-button').click(); page.locator('[data-settings-tab="audio"]').click()
     expect(page.locator('#crossfade')).to_be_checked()
     expect(page.locator('#crossfade-seconds')).to_have_value('8')
     page.locator('#crossfade').uncheck()

@@ -1153,7 +1153,10 @@ test('adaptive seek lead compensates repeated undershot seeks without changing i
   f.context.currentTime = 2.0;
   f.audio.currentTime = 1.7;
   f.tick();
-  assert.ok(f.audio.currentTime > 2.1, `Expected adaptive lead past 2.0, got ${f.audio.currentTime}`);
+  assert.ok(
+    f.audio.currentTime > 2.1,
+    `Expected adaptive lead past 2.0, got ${f.audio.currentTime}`,
+  );
   f.api.dispose();
 });
 
@@ -1178,7 +1181,11 @@ test('muted rate pull tightens sub-5ms handoff without seeking and resets to 1 b
   f.context.currentTime = 2.0;
   f.audio.currentTime = 1.9;
   f.tick();
-  assert.equal(f.audio.currentTime, 1.9, 'small error uses rate pull rather than seek');
+  assert.equal(
+    f.audio.currentTime,
+    1.9,
+    'small error uses rate pull rather than seek',
+  );
   assert.ok(f.api.syncRate(f.audio) > 1.01 && f.api.syncRate(f.audio) <= 1.04);
   assert.ok(pullCalls.length >= 1);
 
@@ -1223,6 +1230,10 @@ test('manualNext launches full buffered overlap when opening is ready and falls 
   b.state.track = 'second';
   b.audio.currentTime = 0.2;
   b.tick();
-  assert.equal(b.state.fades.length, 1, 'wildcard next target accepts next playing track');
+  assert.equal(
+    b.state.fades.length,
+    1,
+    'wildcard next target accepts next playing track',
+  );
   b.api.dispose();
 });

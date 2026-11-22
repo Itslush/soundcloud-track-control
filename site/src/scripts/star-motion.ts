@@ -16,7 +16,6 @@ if (field && pattern) {
   const drift = createStarMotion((x, y) => {
     pattern.setAttribute('patternTransform', `translate(${x} ${y})`);
   });
-  toggle?.closest('details')?.removeAttribute('hidden');
 
   function sync() {
     const enabled = choice !== 'off';

@@ -284,14 +284,18 @@
   gap: 4px 12px;
 }
 .preview-mode-row {
-  display: grid;
-  grid-template-columns: auto minmax(130px, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
   gap: 12px;
   margin-top: 8px;
 }
+#demo-copy {
+  margin-inline-start: auto;
+}
 .preview-mode {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: stretch;
   border: 1px solid var(--control);
   border-radius: 3px;

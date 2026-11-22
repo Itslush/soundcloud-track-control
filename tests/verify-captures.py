@@ -8,24 +8,6 @@ from userscript_fixture import ROOT, browser_options, serve_site
 
 server, default_base = serve_site()
 BASE = os.environ.get('SITE_URL', default_base)
-evidence = json.loads((ROOT / 'docs/screenshot-evidence.json').read_text(encoding='utf-8'))
-assert evidence['deviceScaleFactor'] == 3
-assert evidence['muted'] is True
-assert evidence['status'] == 'CAPTURED'
-assert evidence['track'] == 'https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix'
-assert evidence['contextClosed'] and evidence['recipientContextClosed'] and evidence['browserClosed']
-for playback in [evidence['audio'], evidence['recipientAudio']]:
-    assert playback['media'] and playback['contexts']
-    assert all(item['muted'] and item['volume'] == 0 and item['paused'] for item in playback['media'])
-    assert all(item['sinkGain'] == 0 for item in playback['contexts'])
-for contexts in [evidence['closedAudioContexts'], evidence['recipientClosedAudioContexts']]:
-    assert contexts and all(item['state'] == 'closed' and item['sinkGain'] == 0 for item in contexts)
-assert len(evidence['screenshots']) == 11
-for capture in evidence['screenshots']:
-    assert capture['url'].startswith(evidence['track'])
-    image = (ROOT / 'site/public/screenshots' / capture['file']).read_bytes()
-    assert hashlib.sha256(image).hexdigest() == capture['sha256'], capture['file']
-
 features = json.loads((ROOT / 'docs/feature-capture-evidence.json').read_text(encoding='utf-8'))
 assert features['status'] == 'CAPTURED'
 assert features['artifactSha256'] == hashlib.sha256((ROOT / 'dist/soundcloud-tempo-control.user.js').read_bytes()).hexdigest()
@@ -54,62 +36,65 @@ with sync_playwright() as playwright:
         page.goto(BASE, wait_until='networkidle')
         links = page.locator('a[data-capture]')
         expect(links).to_have_count(count)
-        expect(page.locator('.feature-details')).not_to_have_attribute('open', '')
-        page.locator('.feature-details summary').click()
         expect(page.locator('.product-capture figcaption')).to_have_count(0)
         expect(page.locator('#capture-description, .viewer-hint')).to_have_count(0)
         assert page.locator('.product-proof').bounding_box()['y'] < page.locator('#install').bounding_box()['y']
-        for link in links.all():
-            image = link.locator('img')
-            image.scroll_into_view_if_needed()
-            image.evaluate('image => image.decode()')
-            source = image.evaluate('image => image.currentSrc')
-            assert image.get_attribute('width') and image.get_attribute('height')
-            assert image.get_attribute('alt')
-            if link.locator('..').evaluate('figure => figure.classList.contains("capture-controls")'):
-                assert image.bounding_box()['width'] <= float(link.get_attribute('data-native-width')) + 1
-            assert link.get_attribute('data-description') is None
-            if width <= 600:
-                assert 'mobile.png' in source, source
-            link.click()
-            expect(page.locator('.capture-viewer')).to_be_visible()
-            expect(page.locator('.viewer-image')).to_be_visible()
-            expect(page.locator('.viewer-image')).to_have_attribute('alt', image.get_attribute('alt'))
-            expect(page.locator('.viewer-stage')).to_have_accessible_name('Full screenshot. Scroll to inspect when zoomed in. Escape closes the viewer.')
-            assert page.locator('.viewer-stage').evaluate('stage => { const image = stage.querySelector("img").getBoundingClientRect(); return image.width <= stage.clientWidth && image.height <= stage.clientHeight; }'), width
-            assert page.locator('.viewer-image').get_attribute('src').endswith(link.get_attribute('href'))
-            page.locator('.viewer-actual').click()
-            focal = [link.get_attribute('data-focus-x'), link.get_attribute('data-focus-y')]
-            if all(focal):
-                assert page.locator('.viewer-stage').evaluate('''(stage, focal) => {
-                  const frame = stage.getBoundingClientRect();
-                  const image = stage.querySelector('img').getBoundingClientRect();
-                  const x = image.x + Number(focal[0]);
-                  const y = image.y + Number(focal[1]);
-                  return x >= frame.left && x <= frame.right && y >= frame.top && y <= frame.bottom;
-                }''', focal), (width, focal)
-            page.locator('.viewer-in').click()
-            expect(page.locator('.viewer-zoom')).to_have_text('125%')
-            page.locator('.viewer-fit').click()
-            assert page.locator('.viewer-stage').evaluate('stage => { const image = stage.querySelector("img").getBoundingClientRect(); return image.width <= stage.clientWidth && image.height <= stage.clientHeight; }'), width
-            page.locator('.viewer-actual').click()
-            expect(page.locator('.viewer-zoom')).to_have_text('100%')
-            page.locator('.viewer-stage').focus()
-            page.keyboard.press('Escape')
-            expect(page.locator('.capture-viewer')).not_to_be_visible()
-            expect(link).to_be_focused()
-            assert page.evaluate('document.documentElement.style.overflow') == ''
+        for feature_tab in page.locator('[data-feature-tab]').all():
+            feature_tab.click()
+            for link in page.locator('.feature-panel:not([hidden]) a[data-capture]').all():
+                image = link.locator('img')
+                image.scroll_into_view_if_needed()
+                image.evaluate('image => image.decode()')
+                source = image.evaluate('image => image.currentSrc')
+                assert image.get_attribute('width') and image.get_attribute('height')
+                assert image.get_attribute('alt')
+                if link.locator('..').evaluate('figure => figure.classList.contains("capture-controls")'):
+                    assert image.bounding_box()['width'] <= float(link.get_attribute('data-native-width')) + 1
+                assert link.get_attribute('data-description') is None
+                if width <= 600:
+                    assert 'mobile.png' in source, source
+                link.click()
+                expect(page.locator('.capture-viewer')).to_be_visible()
+                expect(page.locator('.viewer-image')).to_be_visible()
+                expect(page.locator('.viewer-image')).to_have_attribute('alt', image.get_attribute('alt'))
+                expect(page.locator('.viewer-stage')).to_have_accessible_name('Full screenshot. Scroll to inspect when zoomed in. Escape closes the viewer.')
+                assert page.locator('.viewer-stage').evaluate('stage => { const image = stage.querySelector("img").getBoundingClientRect(); return image.width <= stage.clientWidth && image.height <= stage.clientHeight; }'), width
+                assert page.locator('.viewer-image').get_attribute('src').endswith(link.get_attribute('href'))
+                page.locator('.viewer-actual').click()
+                focal = [link.get_attribute('data-focus-x'), link.get_attribute('data-focus-y')]
+                if all(focal):
+                    assert page.locator('.viewer-stage').evaluate('''(stage, focal) => {
+                      const frame = stage.getBoundingClientRect();
+                      const image = stage.querySelector('img').getBoundingClientRect();
+                      const x = image.x + Number(focal[0]);
+                      const y = image.y + Number(focal[1]);
+                      return x >= frame.left && x <= frame.right && y >= frame.top && y <= frame.bottom;
+                    }''', focal), (width, focal)
+                page.locator('.viewer-in').click()
+                expect(page.locator('.viewer-zoom')).to_have_text('125%')
+                page.locator('.viewer-fit').click()
+                assert page.locator('.viewer-stage').evaluate('stage => { const image = stage.querySelector("img").getBoundingClientRect(); return image.width <= stage.clientWidth && image.height <= stage.clientHeight; }'), width
+                page.locator('.viewer-actual').click()
+                expect(page.locator('.viewer-zoom')).to_have_text('100%')
+                page.locator('.viewer-stage').focus()
+                page.keyboard.press('Escape')
+                expect(page.locator('.capture-viewer')).not_to_be_visible()
+                expect(link).to_be_focused()
+                assert page.evaluate('document.documentElement.style.overflow') == ''
+        page.locator('[data-feature-tab]').first.click()
         assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), width
         measurements.append({'width': width, 'images': page.locator('.product-capture img').evaluate_all('images => images.map(image => ({source: image.currentSrc.split("/").pop(), width: image.getBoundingClientRect().width, height: image.getBoundingClientRect().height}))')})
     page.goto(BASE)
     for theme in ['light', 'oled', 'charcoal']:
         page.locator('html').evaluate('(root, theme) => root.dataset.theme = theme', theme)
-        page.locator('.feature-details').evaluate('details => details.open = true')
-        for index, link in enumerate(page.locator('a[data-capture]').all()):
-            image = link.locator('img')
-            image.scroll_into_view_if_needed()
-            page.wait_for_function('(args) => {const image=document.querySelectorAll("a[data-capture] img")[args.index];return image.complete && image.currentSrc.includes(args.theme)}', arg={'index':index, 'theme':theme})
-            assert f'-{theme}.png' in link.get_attribute('href')
+        for feature_tab in page.locator('[data-feature-tab]').all():
+            feature_tab.click()
+            panel_links = page.locator('.feature-panel:not([hidden]) a[data-capture]').all()
+            for index, link in enumerate(panel_links):
+                image = link.locator('img')
+                image.scroll_into_view_if_needed()
+                page.wait_for_function('(args) => {const image=document.querySelectorAll(".feature-panel:not([hidden]) a[data-capture] img")[args.index];return image && image.complete && image.currentSrc.includes(args.theme)}', arg={'index': index, 'theme': theme})
+                assert f'-{theme}.png' in link.get_attribute('href')
     failed_image = page.locator('a[data-capture]').last.get_attribute('href')
     failure_pattern = '**/' + failed_image.split('/')[-1]
     page.route(failure_pattern, lambda route: route.abort())

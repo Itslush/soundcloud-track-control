@@ -32,8 +32,8 @@ export async function renderSet(
     (process.platform === 'win32'
       ? 'C:/Windows/Fonts/arial.ttf'
       : '/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf');
-  const text = (filename, size, y) =>
-    `drawtext=fontfile='${filterPath(font)}':textfile='${filterPath(filename)}':expansion=none:fontcolor=white:fontsize=${size}:x=24:y=${y}`;
+  const text = (filename, size, y, color = '0xf4f4f4', x = 24) =>
+    `drawtext=fontfile='${filterPath(font)}':textfile='${filterPath(filename)}':expansion=none:fontcolor=${color}:fontsize=${size}:x=${x}:y=${y}`;
   let sourceSeconds = 0;
   let decodedSeconds = 0;
   for (const [index, profile] of set.tracks.entries()) {
@@ -121,11 +121,16 @@ export async function renderSet(
       'scale=640:640:force_original_aspect_ratio=decrease',
       'pad=640:640:(ow-iw)/2:(oh-ih)/2:color=0x111111',
       'setsar=1',
-      'drawbox=x=0:y=476:w=640:h=164:color=black@0.85:t=fill',
-      text(titleFile, fit(title, 24), 488),
-      text(artistFile, fit(artist, 20), 558),
-      text(settingsFile, fit(settings, 18), 602),
-      ...(notice ? [text(noticeFile, 12, 626)] : []),
+      'drawbox=x=0:y=476:w=640:h=164:color=0x141414@0.94:t=fill',
+      'drawbox=x=0:y=476:w=640:h=1:color=0x383838:t=fill',
+      'drawbox=x=0:y=476:w=4:h=164:color=0xff5500:t=fill',
+      text(titleFile, fit(title, 22), 492, '0xf4f4f4', 24),
+      text(artistFile, fit(artist, 18), 550, '0xb2b2b2', 24),
+      'drawbox=x=24:y=582:w=592:h=34:color=0x202020:t=fill',
+      'drawbox=x=24:y=582:w=592:h=34:color=0x383838:t=1',
+      'drawbox=x=24:y=582:w=3:h=34:color=0xff5500:t=fill',
+      text(settingsFile, fit(settings, 16), 591, '0xff8547', 38),
+      ...(notice ? [text(noticeFile, 12, 622, '0x9e9e9e', 24)] : []),
     ].join(',');
     const input = track.artwork
       ? ['-protocol_whitelist', 'file,pipe', '-i', file('artwork.image')]
@@ -171,18 +176,36 @@ export async function renderSet(
       tracks[index + 1].artist,
       `${tracks[index].tempo} to ${tracks[index + 1].tempo}   ${formatPitchNotice(set.tracks.slice(index, index + 2).flatMap((profile) => profile.pitchPoints?.map((point) => point.k) || [profile.keyShift || 0])) || 'Pitch unchanged'}`,
     ];
-    const filters = [];
+    const filters = [
+      'drawbox=x=0:y=476:w=640:h=164:color=0x141414:t=fill',
+      'drawbox=x=0:y=476:w=640:h=1:color=0x383838:t=fill',
+      'drawbox=x=0:y=476:w=4:h=164:color=0xff5500:t=fill',
+      'drawbox=x=24:y=592:w=592:h=32:color=0x202020:t=fill',
+      'drawbox=x=24:y=592:w=592:h=32:color=0x383838:t=1',
+      'drawbox=x=24:y=592:w=3:h=32:color=0xff5500:t=fill',
+    ];
+    const rowColors = [
+      '0x9e9e9e',
+      '0x7a7a7a',
+      '0xf4f4f4',
+      '0xb2b2b2',
+      '0xff8547',
+    ];
+    const rowYs = [488, 512, 538, 566, 600];
+    const rowXs = [24, 24, 24, 24, 38];
     for (const [row, label] of labels.entries()) {
       const filename = file(`join-${index}-${row}.txt`);
       const line = words(label, 50).split('\n')[0];
       await writeFile(filename, line);
       const size = Math.floor(
         Math.min(
-          row === 0 || row === 2 ? 22 : 18,
-          592 / Math.max(1, line.length),
+          row === 2 ? 20 : row === 0 ? 18 : 15,
+          576 / Math.max(1, line.length),
         ),
       );
-      filters.push(text(filename, size, [488, 520, 552, 584, 614][row]));
+      filters.push(
+        text(filename, size, rowYs[row], rowColors[row], rowXs[row]),
+      );
     }
     const footer = file(`join-${index}.rgb`);
     await convert([

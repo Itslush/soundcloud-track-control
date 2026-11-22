@@ -132,7 +132,7 @@ try:
         page.locator('.discord-copy').click()
         expect(page.locator('.discord-status')).to_have_text('Link copied.')
         discord_copy = page.evaluate('navigator.clipboard.readText()')
-        assert discord_copy == '[' + SITE_URL.removeprefix('https://') + '](' + response['url'] + ')'
+        assert discord_copy == '[' + SITE_URL.removeprefix('https://') + 'listener / first / Fixture second track](' + response['url'] + ')'
         page.locator('#set-play').click()
         expect(page.locator('#set-play')).to_have_text('Pause')
         page.wait_for_function('document.querySelector("#set-video").readyState === 4')

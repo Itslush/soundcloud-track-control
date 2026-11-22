@@ -117,7 +117,9 @@ function Mixer() {
         );
       },
       setEq(band: EqBand, db: number) {
-        const clamped = Number.isFinite(db) ? Math.max(-24, Math.min(6, db)) : 0;
+        const clamped = Number.isFinite(db)
+          ? Math.max(-24, Math.min(6, db))
+          : 0;
         deck[band].gain.setTargetAtTime(clamped, context.currentTime, 0.012);
       },
       setFilter(value: number) {

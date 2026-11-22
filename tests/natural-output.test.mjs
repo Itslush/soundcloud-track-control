@@ -85,7 +85,10 @@ class FakeSource {
   }
   end({ early = false } = {}) {
     if (!early)
-      this.context.currentTime = Math.max(this.context.currentTime, this.stops.at(-1)?.[0] ?? 0);
+      this.context.currentTime = Math.max(
+        this.context.currentTime,
+        this.stops.at(-1)?.[0] ?? 0,
+      );
     for (const callback of [...this.listeners]) callback();
   }
 }

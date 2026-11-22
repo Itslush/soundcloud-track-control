@@ -265,6 +265,7 @@ export function createTempoAppearance({ onChange, onError } = {}) {
         }
         ${scope} .playbackSoundBadge__lightLink {
           color: var(--tempo-page-muted);
+          opacity: 1 !important;
         }
         ${scope} .playbackTimeline__progressBar {
           background-color: var(--tempo-page-accent) !important;
@@ -482,7 +483,9 @@ export function createTempoAppearance({ onChange, onError } = {}) {
   }
 
   function ready() {
-    if (!disposed) render(selected);
+    if (disposed) return;
+    render(selected);
+    onChange?.(selected);
   }
 
   function moving() {

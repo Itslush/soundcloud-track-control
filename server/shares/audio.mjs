@@ -1,6 +1,9 @@
 import { openSync, closeSync, readSync, writeSync, fstatSync } from 'node:fs';
 import Module from '../../vendor/signalsmith/wasm-factory.mjs';
-import { evaluatePoints, profilePitchAt } from '../../src/timeline/tempo-profile.js';
+import {
+  evaluatePoints,
+  profilePitchAt,
+} from '../../src/timeline/tempo-profile.js';
 
 export const SAMPLE_RATE = 44100;
 export const MAX_SOURCE_SECONDS = 900;

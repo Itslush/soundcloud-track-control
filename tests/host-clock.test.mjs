@@ -261,7 +261,9 @@ test('unsupported host identity skips duration synchronization without rejecting
   f.flush();
   await value.binding.restoration;
   let changed = false;
-  const error = Object.assign(new Error('Host implementation changed'), { code: 'SOUNDCLOUD_HOST_UNSUPPORTED' });
+  const error = Object.assign(new Error('Host implementation changed'), {
+    code: 'SOUNDCLOUD_HOST_UNSUPPORTED',
+  });
   const binding = f.adapter.bind(value.media, {
     snapshot: () => ({ ...value.state }),
     sourceMatches: () => {

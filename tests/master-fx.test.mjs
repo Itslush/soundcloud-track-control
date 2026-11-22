@@ -24,9 +24,24 @@ function makeAudioContext(samples = [0.25, -0.5]) {
     constructor(kind) {
       this.kind = kind;
       this.connections = new Set();
-      this.gain = { value: 1, setValueAtTime(v) { this.value = v; } };
-      this.frequency = { value: 0, setValueAtTime(v) { this.value = v; } };
-      this.Q = { value: 1, setValueAtTime(v) { this.value = v; } };
+      this.gain = {
+        value: 1,
+        setValueAtTime(v) {
+          this.value = v;
+        },
+      };
+      this.frequency = {
+        value: 0,
+        setValueAtTime(v) {
+          this.value = v;
+        },
+      };
+      this.Q = {
+        value: 1,
+        setValueAtTime(v) {
+          this.value = v;
+        },
+      };
       created.push(this);
     }
     connect(dest) {
@@ -48,7 +63,10 @@ function makeAudioContext(samples = [0.25, -0.5]) {
     createConvolver: () => new MockNode('convolver'),
     createWaveShaper: () => new MockNode('shaper'),
     createBuffer: (channels, length, sampleRate) => {
-      const data = Array.from({ length: channels }, () => new Float32Array(length));
+      const data = Array.from(
+        { length: channels },
+        () => new Float32Array(length),
+      );
       return {
         numberOfChannels: channels,
         length,
@@ -92,11 +110,38 @@ test('pitch engine and fx validators handle valid, partial, JSON and corrupt sto
   assert.equal(validFxSettings({ ...DEFAULT_FX, filter: -1.1 }), false);
   assert.equal(validFxSettings({ ...DEFAULT_FX, room: 'garage' }), false);
 
-  const normalized = normalizeFxSettings({ bassDb: 20, filter: -2, space: 0.5, room: 'bad', softClip: 1 });
-  assert.deepEqual(normalized, { bassDb: 9, filter: -1, space: 0.5, room: 'room', softClip: false });
+  const normalized = normalizeFxSettings({
+    bassDb: 20,
+    filter: -2,
+    space: 0.5,
+    room: 'bad',
+    softClip: 1,
+  });
+  assert.deepEqual(normalized, {
+    bassDb: 9,
+    filter: -1,
+    space: 0.5,
+    room: 'room',
+    softClip: false,
+  });
 
-  mem.set(FX_STORAGE, JSON.stringify({ bassDb: 4, filter: 0.25, space: 0.3, room: 'hall', softClip: true }));
-  assert.deepEqual(readFxSettings(storage), { bassDb: 4, filter: 0.25, space: 0.3, room: 'hall', softClip: true });
+  mem.set(
+    FX_STORAGE,
+    JSON.stringify({
+      bassDb: 4,
+      filter: 0.25,
+      space: 0.3,
+      room: 'hall',
+      softClip: true,
+    }),
+  );
+  assert.deepEqual(readFxSettings(storage), {
+    bassDb: 4,
+    filter: 0.25,
+    space: 0.3,
+    room: 'hall',
+    softClip: true,
+  });
   mem.set(FX_STORAGE, '{broken');
   assert.deepEqual(readFxSettings(storage), { ...DEFAULT_FX });
 });
@@ -118,7 +163,10 @@ test('buildImpulseBuffer is deterministic per room and sampleRate', () => {
   const b = buildImpulseBuffer(context, 'hall');
   assert.equal(a, b);
   assert.equal(a.numberOfChannels, 2);
-  assert.deepEqual(a.getChannelData(0).subarray(0, 64), b.getChannelData(0).subarray(0, 64));
+  assert.deepEqual(
+    a.getChannelData(0).subarray(0, 64),
+    b.getChannelData(0).subarray(0, 64),
+  );
   const cavern = buildImpulseBuffer(context, 'cavern');
   assert.ok(cavern.length > a.length);
 });
@@ -126,10 +174,19 @@ test('buildImpulseBuffer is deterministic per room and sampleRate', () => {
 test('createMasterFx bypasses heavy nodes at defaults, wires active chain, and tracks peak hold + clip reset', () => {
   const { context, samples } = makeAudioContext([0.25, -0.5]);
   const fx = createMasterFx(context, context.destination, DEFAULT_FX);
-  assert.deepEqual(context.created.map((n) => n.kind), ['destination', 'gain']);
+  assert.deepEqual(
+    context.created.map((n) => n.kind),
+    ['destination', 'gain'],
+  );
   assert.equal(fx.input.connections.has(context.destination), true);
 
-  fx.update({ bassDb: 6, filter: -0.5, space: 0.35, room: 'room', softClip: true });
+  fx.update({
+    bassDb: 6,
+    filter: -0.5,
+    space: 0.35,
+    room: 'room',
+    softClip: true,
+  });
   const kinds = context.created.map((n) => n.kind);
   assert.ok(kinds.includes('biquad'));
   assert.ok(kinds.includes('convolver'));
@@ -216,7 +273,10 @@ test('LivePitch worklet schedule honors auto, punch and smooth pitch engine mode
     Module: async () => wasm,
     WaveformPitch: MockWaveform,
   };
-  vm.runInNewContext(`(${registerLivePitch})(Module, WaveformPitch, 'live-test')`, scope);
+  vm.runInNewContext(
+    `(${registerLivePitch})(Module, WaveformPitch, 'live-test')`,
+    scope,
+  );
   const processor = new Processor({ outputChannelCount: [2] });
   await new Promise((resolve) => setImmediate(resolve));
 

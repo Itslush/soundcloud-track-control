@@ -7,7 +7,7 @@ const HERO_SELECTOR =
 const PLAY_BUTTON_SELECTOR =
   'button.sc-button-play, a.sc-button-play, .soundTitle__playButton button, .playableTile__playButton button, .trackItem__playButton button, .compactTrackListItem__playButton button, .heroPlayButton button';
 const IGNORE_ANCESTORS =
-  '.playControls, #soundcloud-tempo-control, [data-tempo-dj-ignore]';
+  '.playControls, #soundcloud-tempo-control, [data-tempo-dj-ignore], .tempo-dj-pills, .tempo-dj-pill';
 const STYLE_ID = 'soundcloud-tempo-dj-style';
 const PILLS_CLASS = 'tempo-dj-pills';
 
@@ -22,22 +22,45 @@ const DJ_STYLE_CSS = `
 }
 .tempo-dj-pill {
   appearance: none;
-  font: 700 11px/1 system-ui, -apple-system, sans-serif;
-  padding: 4px 7px;
-  min-height: 22px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 85, 0, 0.72);
-  background: rgba(20, 20, 20, 0.88);
-  color: #fff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 5px 7px;
+  min-height: 24px;
+  border-radius: 3px;
+  border: 1px solid var(--tempo-page-line, #767676);
+  background: var(--tempo-page-surface, #181818);
+  color: var(--tempo-page-ink, #fff);
   cursor: pointer;
   white-space: nowrap;
 }
 .tempo-dj-pill:hover,
 .tempo-dj-pill:focus-visible {
-  background: #f50;
-  border-color: #f50;
+  background: var(--tempo-page-accent, #ff5500);
+  border-color: var(--tempo-page-accent, #ff5500);
   color: #141414;
-  outline: none;
+}
+html[data-tempo-appearance="light"] .tempo-dj-pill:hover,
+html[data-tempo-appearance="light"] .tempo-dj-pill:focus-visible {
+  color: #fff;
+}
+.tempo-dj-pill:focus-visible {
+  outline: 2px solid var(--tempo-page-accent, #ff5500);
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  .tempo-dj-pill {
+    background: ButtonFace;
+    color: ButtonText;
+    border-color: ButtonText;
+  }
+  .tempo-dj-pill:hover,
+  .tempo-dj-pill:focus-visible {
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
 }
 `;
 
@@ -87,7 +110,12 @@ export function createDjMode({
     if (!enabled || disposed) return;
     ensureStyle(doc);
     for (const button of doc.querySelectorAll(PLAY_BUTTON_SELECTOR)) {
-      if (button.closest(IGNORE_ANCESTORS)) continue;
+      if (
+        button.classList.contains('tempo-dj-pill') ||
+        button.closest(`.${PILLS_CLASS}`) ||
+        button.closest(IGNORE_ANCESTORS)
+      )
+        continue;
       if (button.nextElementSibling?.classList?.contains(PILLS_CLASS)) continue;
       const track = trackFor(button, doc);
       if (!track) continue;

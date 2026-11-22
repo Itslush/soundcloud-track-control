@@ -406,7 +406,13 @@ test('per-track pitch shift, hot cues and new preferences roundtrip while reject
   first.map.set('soundcloud.tempo.crossfadeCueEntry', 'true');
   first.map.set(
     'soundcloud.tempo.fx',
-    JSON.stringify({ bassDb: 5, filter: -0.4, space: 0.5, room: 'cavern', softClip: true }),
+    JSON.stringify({
+      bassDb: 5,
+      filter: -0.4,
+      space: 0.5,
+      room: 'cavern',
+      softClip: true,
+    }),
   );
   first.map.set(
     'soundcloud.tempo.keybinds',
@@ -414,7 +420,9 @@ test('per-track pitch shift, hot cues and new preferences roundtrip while reject
   );
   first.map.set(
     'soundcloud.tempo.presets',
-    JSON.stringify([{ name: 'Custom1', rate: 0.9, keyShift: -1, preserve: true }]),
+    JSON.stringify([
+      { name: 'Custom1', rate: 0.9, keyShift: -1, preserve: true },
+    ]),
   );
 
   const exported = first.store.exportBackup();
@@ -427,7 +435,12 @@ test('per-track pitch shift, hot cues and new preferences roundtrip while reject
     keyShift: -2.5,
     preserve: true,
   });
-  assert.deepEqual(JSON.parse(JSON.stringify(second.store.cues(track))), [12.5, 45.25, null, null]);
+  assert.deepEqual(JSON.parse(JSON.stringify(second.store.cues(track))), [
+    12.5,
+    45.25,
+    null,
+    null,
+  ]);
 
   // Legacy plain rate entries remain bare numbers cleanly.
   second.store.set('/other/legacy', 'speed', { rate: 1.25, enabled: true });
@@ -442,7 +455,13 @@ test('per-track pitch shift, hot cues and new preferences roundtrip while reject
     { ...base, preferences: { ...base.preferences, outputMaxDb: -20 } },
     { ...base, preferences: { ...base.preferences, outputMaxDb: 10000 } },
     { ...base, preferences: { ...base.preferences, pitchEngine: 'broken' } },
-    { ...base, preferences: { ...base.preferences, fx: { bassDb: 99, filter: 0, space: 0, room: 'room', softClip: false } } },
+    {
+      ...base,
+      preferences: {
+        ...base.preferences,
+        fx: { bassDb: 99, filter: 0, space: 0, room: 'room', softClip: false },
+      },
+    },
     { ...base, tracks: [{ track, cues: [1, 2, 3, 4, 5] }] },
     { ...base, tracks: [{ track, cues: [null, null, null, null] }] },
   ];

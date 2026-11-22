@@ -7,36 +7,43 @@ export const tempoExtrasStyle = `
   gap: 8px;
   margin-block: 6px;
 }
-#pitch-engine,
-#fx-room,
-#dj-target {
-  min-height: 28px;
-  padding: 2px 6px;
-  border: 1px solid var(--tempo-track);
-  border-radius: 3px;
-  background: var(--tempo-surface, transparent);
+.settings-subsection {
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--tempo-fg) 24%, transparent);
 }
-#output-max-db {
-  width: 84px;
-  min-height: 32px;
-  padding: 4px 8px;
-  border: 1px solid var(--tempo-track);
-  border-radius: 2px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+.settings-subsection:first-child {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: 0;
 }
-.extras-nested {
-  margin-top: 6px;
-  padding-top: 4px;
-  border-top: 1px solid color-mix(in srgb, var(--tempo-fg) 14%, transparent);
+.settings-section-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
 }
-.extras-nested > summary {
+.settings-subtitle {
+  margin: 8px 0 4px;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 700;
+}
+.diagnostics-group {
+  margin-top: 10px;
+  padding-top: 6px;
+  border-top: 1px solid color-mix(in srgb, var(--tempo-fg) 24%, transparent);
+}
+.diagnostics-group > summary {
   font-weight: 600;
+}
+.crossfade-options,
+.star-speed-wrap {
+  margin-top: 8px;
 }
 .extras-stack {
   display: grid;
   gap: 8px;
-  padding: 6px 0 4px;
+  padding: 2px 0 4px;
 }
 .fx-row {
   display: grid;
@@ -50,7 +57,7 @@ export const tempoExtrasStyle = `
 }
 .fx-row output {
   font-variant-numeric: tabular-nums;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 .fx-row input[type='range'] {
   width: 100%;
@@ -68,12 +75,28 @@ export const tempoExtrasStyle = `
 .settings .cue-pad,
 .settings .cue-clear,
 .settings .kb-key {
-  min-height: 28px;
+  min-height: 32px;
   padding: 4px 10px;
-  border: 1px solid color-mix(in srgb, var(--tempo-fg) 28%, transparent);
+  border: 1px solid var(--tempo-border, #767676);
   border-radius: 3px;
-  background: color-mix(in srgb, var(--tempo-fg) 4%, transparent);
+  background: var(--tempo-btn-bg, #262626);
   font-variant-numeric: tabular-nums;
+}
+#fx-reset,
+#preset-save {
+  min-width: 114px;
+  min-height: 36px;
+  text-align: center;
+}
+#loop-a,
+#loop-b,
+#loop-clear {
+  min-width: 68px;
+  text-align: center;
+}
+.settings .kb-key {
+  min-width: 124px;
+  text-align: center;
 }
 .settings .extras-btn:hover:not(:disabled),
 .settings .preset-chip:hover:not(:disabled),
@@ -82,14 +105,14 @@ export const tempoExtrasStyle = `
 .settings .kb-key:hover:not(:disabled),
 .settings .kb-clear:hover:not(:disabled),
 .settings .preset-del:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--tempo-fg) 12%, transparent);
+  background: var(--tempo-hover, #2c2c2c);
 }
 .settings .extras-btn[aria-pressed='true'],
 .settings .preset-chip[aria-pressed='true'],
 .settings .cue-pad[data-set='true'],
 .settings .kb-key[data-recording='true'] {
-  border-color: var(--tempo-accent);
-  color: var(--tempo-accent);
+  border-color: var(--tempo-accent-ink, var(--tempo-accent));
+  color: var(--tempo-accent-ink, var(--tempo-accent));
   font-weight: 600;
 }
 .tool-row {
@@ -97,6 +120,33 @@ export const tempoExtrasStyle = `
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+}
+.dj-row {
+  justify-content: space-between;
+}
+.deck-disclosure {
+  border-top: 1px solid color-mix(in srgb, var(--tempo-fg) 20%, transparent);
+  padding-top: 6px;
+  margin-top: 4px;
+}
+.deck-disclosure summary {
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+.deck-disclosure summary::before {
+  content: '▸';
+  margin-right: 6px;
+}
+.deck-disclosure[open] summary::before {
+  content: '▾';
+}
+.extras-note {
+  margin: 0;
+  font-size: 11px;
+  opacity: 0.85;
 }
 .tool-section-label {
   font-weight: 600;
@@ -108,32 +158,34 @@ export const tempoExtrasStyle = `
   gap: 6px;
 }
 .preset-item {
-  display: inline-flex;
+  display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: 2px;
 }
-.settings .preset-del {
-  min-height: 28px;
-  min-width: 24px;
-  padding: 2px 6px;
-  border: 1px solid color-mix(in srgb, var(--tempo-fg) 28%, transparent);
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--tempo-fg) 4%, transparent);
+.preset-chip {
+  flex: 1 1 auto;
+  text-align: center;
 }
-.preset-save-row input[type='text'],
-#bpm-target {
-  min-height: 28px;
-  padding: 3px 6px;
-  border: 1px solid var(--tempo-track);
+.settings .preset-del {
+  min-height: 32px;
+  min-width: 28px;
+  padding: 2px 6px;
+  border: 1px solid var(--tempo-border, #767676);
   border-radius: 3px;
-  background: transparent;
+  background: var(--tempo-btn-bg, #262626);
 }
 .preset-save-row input[type='text'] {
   flex: 1 1 120px;
   min-width: 0;
+  min-height: 36px;
+  padding: 4px 8px;
+  border: 1px solid var(--tempo-track);
+  border-radius: 3px;
+  background: transparent;
 }
-#bpm-target {
-  width: 72px;
+.bpm-entry .tempo-number input {
+  width: 64px;
   text-align: center;
 }
 .cue-grid {
@@ -180,19 +232,26 @@ export const tempoExtrasStyle = `
 }
 .hud-meter-track {
   height: 6px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--tempo-fg) 15%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--tempo-fg) 22%, transparent);
   overflow: hidden;
 }
 .hud-meter-fill {
   height: 100%;
-  width: 0%;
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
   background: var(--tempo-accent);
-  transition: width 60ms linear;
+  transition: transform 60ms linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hud-meter-fill {
+    transition: none;
+  }
 }
 .settings .hud-clip[data-clipped='true'] {
-  border-color: var(--tempo-accent);
-  color: var(--tempo-accent);
+  border-color: var(--tempo-accent-ink, var(--tempo-accent));
+  color: var(--tempo-accent-ink, var(--tempo-accent));
   font-weight: 700;
 }
 .keybinds-mount {
@@ -211,10 +270,21 @@ export const tempoExtrasStyle = `
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.kb-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.8;
+  margin: 8px 0 2px;
+}
+.kb-group-title:first-child {
+  margin-top: 2px;
+}
 .settings .kb-clear {
-  min-height: 28px;
-  padding: 3px 8px;
-  border: 1px solid color-mix(in srgb, var(--tempo-fg) 28%, transparent);
+  min-height: 32px;
+  min-width: 56px;
+  padding: 4px 8px;
+  text-align: center;
+  border: 1px solid var(--tempo-border, #767676);
   border-radius: 3px;
   background: transparent;
 }

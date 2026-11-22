@@ -179,7 +179,10 @@ export function createSharesApp({
       state: data.state,
       expires: data.expires,
       ...(data.state === 'ready'
-        ? { url: `${publicOrigin}${base}listen/${id}` }
+        ? {
+            url: `${publicOrigin}${base}listen/${id}`,
+            ...(data.title ? { title: data.title } : {}),
+          }
         : {}),
       ...(data.state === 'failed' ? { error: data.error } : {}),
     };

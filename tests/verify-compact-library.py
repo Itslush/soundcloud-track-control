@@ -132,7 +132,7 @@ with sync_playwright() as runtime:
                 page.locator('.saved-undo').click()
                 expect(page.locator('.saved-setting[data-type=speed] input[type=number]')).to_have_value('0.925')
                 page.locator('#saved-filter').fill('')
-                page.locator('.advanced-audio > summary').click()
+                page.locator('[data-settings-tab="audio"]').click()
                 page.locator('#output-level').scroll_into_view_if_needed()
                 expect(page.locator('#output-level')).to_be_in_viewport()
                 page.locator('#tempo-settings').screenshot(path=str(ROOT / 'test-results/compact-library-expanded.png'))

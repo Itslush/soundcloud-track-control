@@ -53,7 +53,10 @@ if (require.main === module) {
     'utf8',
   );
   const evidence = JSON.parse(
-    fs.readFileSync(path.join(root, 'docs/screenshot-evidence.json'), 'utf8'),
+    fs.readFileSync(
+      path.join(root, 'docs/feature-capture-evidence.json'),
+      'utf8',
+    ),
   );
   console.log(JSON.stringify(verify(code, evidence)));
 }

@@ -82,7 +82,10 @@ test('tempo-keybinds validates chords, prevents bare printable overrides, resolv
 
   // Input elements and recording state suppress shortcuts.
   assert.equal(
-    store.match({ ...matchEvent, composedPath: () => [{ matches: () => true }] }),
+    store.match({
+      ...matchEvent,
+      composedPath: () => [{ matches: () => true }],
+    }),
     null,
   );
   store.setRecording(true);
@@ -118,7 +121,13 @@ test('tempo-presets ships defaults and supports custom preset save, overwrite, l
       rate: 0.88,
       keyShift: -2,
       preserve: true,
-      fx: { bassDb: 4, filter: -0.1, space: 0.3, room: 'cavern', softClip: true },
+      fx: {
+        bassDb: 4,
+        filter: -0.1,
+        space: 0.3,
+        room: 'cavern',
+        softClip: true,
+      },
     },
     storage,
   );
@@ -198,7 +207,11 @@ test('track-deck-tools manages A-B loop with zero idle rAF, 4 hot cues, Tap BPM 
 
   audio.currentTime = 14;
   tools.toggleLoopStep();
-  assert.deepEqual(JSON.parse(JSON.stringify(tools.loopState())), { active: true, a: 10, b: 14 });
+  assert.deepEqual(JSON.parse(JSON.stringify(tools.loopState())), {
+    active: true,
+    a: 10,
+    b: 14,
+  });
   assert.equal(rafCount, 1);
 
   // Crossing B wraps currentTime back to A on frame tick.
@@ -222,7 +235,12 @@ test('track-deck-tools manages A-B loop with zero idle rAF, 4 hot cues, Tap BPM 
   // Hot cues set / jump / clear cleanly.
   audio.currentTime = 22.5;
   tools.triggerCue(0);
-  assert.deepEqual(JSON.parse(JSON.stringify(tools.cues())), [22.5, null, null, null]);
+  assert.deepEqual(JSON.parse(JSON.stringify(tools.cues())), [
+    22.5,
+    null,
+    null,
+    null,
+  ]);
   audio.currentTime = 50;
   tools.triggerCue(0);
   assert.equal(audio.currentTime, 22.5);

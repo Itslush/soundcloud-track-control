@@ -9,7 +9,7 @@ with sync_playwright() as playwright:
     page = browser.new_page(viewport={'width': 1440, 'height': 1000})
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
-    for route, label in [('', 'Download'), ('guide/', 'Help'), ('updates/', 'Updates'), ('privacy/', None)]:
+    for route, label in [('', 'Download'), ('mixer/', 'Mixer'), ('set/', 'Set'), ('guide/', 'Help'), ('updates/', 'Updates'), ('privacy/', None)]:
         page.goto(BASE + route, wait_until='networkidle')
         active = page.locator('.site-header [aria-current=page]')
         expect(active).to_have_count(1 if label else 0)

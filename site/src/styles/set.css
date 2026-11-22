@@ -1,6 +1,12 @@
 .set-page {
   max-width: 1100px;
 }
+.set-page .button {
+  margin-top: 0;
+}
+.set-publish .discord-create {
+  margin-top: 10px;
+}
 .set-add {
   margin-block: 28px 0;
 }
@@ -63,15 +69,22 @@
 }
 .set-order,
 .set-track-tools,
-.set-pitch-mode > div,
 .set-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
+.set-pitch-mode > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 8px;
+  max-width: 280px;
+}
 .set-order [data-move] {
-  min-width: 44px;
-  padding-inline: 12px;
+  width: 46px;
+  min-width: 46px;
+  min-height: 46px;
+  padding: 0;
 }
 .set-order [data-move='-1'] svg {
   transform: rotate(180deg);

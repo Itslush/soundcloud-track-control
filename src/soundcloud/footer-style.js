@@ -177,7 +177,7 @@ export function installFooterStyle() {
       .playControls__elements.soundcloud-tempo-footer > #soundcloud-tempo-control {
         order: 10;
         flex: 1 1 416px !important;
-        min-width: 292px !important;
+        min-width: var(--tempo-compact-width, 292px) !important;
         margin: 0 4px 0 0;
       }
 

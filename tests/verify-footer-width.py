@@ -26,8 +26,7 @@ with sync_playwright() as runtime:
     for mode in ['light', 'charcoal', 'oled']:
         page.set_viewport_size({'width': 1440, 'height': 900})
         page.locator('.settings-button').click()
-        if page.locator('.appearance-settings').get_attribute('open') is None:
-            page.locator('.appearance-settings summary').click()
+        page.locator('[data-settings-tab="appearance"]').click()
         page.locator(f'[name=appearance][value={mode}]').check()
         page.locator('.close-settings').click()
         for width in [1920, 1440, 1050, 768, 390, 320]:

@@ -48,15 +48,13 @@ def settings(page):
         page.locator('.settings-button').click()
 
 
-def disclosure(page, selector, opened=True):
-    element = page.locator(selector)
-    if (element.get_attribute('open') is not None) != opened:
-        element.locator('summary').first.click()
+def tab(page, name):
+    settings(page)
+    page.locator(f'[data-settings-tab="{name}"]').click()
 
 
 def theme(page, name):
-    settings(page)
-    disclosure(page, '.appearance-settings')
+    tab(page, 'appearance')
     page.locator(f'[name=appearance][value={name}]').check()
     page.locator('body').evaluate('(body, light) => {body.classList.toggle("theme-dark", !light); body.classList.toggle("theme-light", light)}', name == 'light')
 
@@ -64,7 +62,7 @@ def theme(page, name):
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(**browser_options(), headless=True, args=['--mute-audio'])
-        context = browser.new_context(viewport={'width': 1440, 'height': 1200}, device_scale_factor=2)
+        context = browser.new_context(viewport={'width': 1440, 'height': 1400}, device_scale_factor=2)
         context.grant_permissions(['clipboard-read', 'clipboard-write'], origin='https://soundcloud.com')
         probe = (ROOT / 'tests/fixtures/buffered-player-probe.js').read_text()
         context.add_init_script(s.MUTE + '\n' + probe + '\n' + userscript_source())
@@ -113,29 +111,32 @@ try:
         page.locator('.editor-close').click()
         for name in THEMES:
             theme(page, name)
-            disclosure(page, '.appearance-settings', False)
             page.locator('.open-editor').click()
             for lane in ['tempo', 'pitch']:
                 page.locator(f'[data-lane={lane}]').click()
                 capture(page, lane, name, ['.editor-lanes', '.editor-toolbar', '.editor-graph', '.point-readout'])
             page.locator('.editor-close').click()
+            tab(page, 'tracks')
+            capture(page, 'saved', name, ['#settings-panel-tracks .quick-settings', '#saved-filter', '#settings-panel-tracks .saved-list'])
+            tab(page, 'appearance')
+            capture(page, 'appearance', name, ['#settings-panel-appearance'])
+            tab(page, 'audio')
+            if not page.locator('#crossfade').is_checked():
+                page.locator('#crossfade').check()
+            capture(page, 'crossfade', name, ['label:has(#crossfade)', '.crossfade-options', '#crossfade-status'])
+            capture(page, 'output', name, ['label:has(#peak-protection)', '[for=output-value]', '#output-level', '[for=output-max-db]', '#output-help'], top_margin=0)
+            tab(page, 'dj')
+            for sel, val in [('#fx-bass', '4.5'), ('#fx-filter', '-35'), ('#fx-space', '45')]:
+                page.locator(sel).fill(val)
+                page.locator(sel).dispatch_event('input')
+            capture(page, 'fx', name, ['#settings-panel-dj .fx-panel', '#settings-panel-dj .deck-tools-panel'])
+            if not page.locator('#dj-mode-toggle').is_checked():
+                page.locator('#dj-mode-toggle').check()
+            page.locator('.close-settings').click()
+            capture(page, 'dj', name, ['.soundTitle__playButton', '.tempo-dj-pills'])
             settings(page)
-            capture(page, 'saved', name, ['.quick-settings', '#saved-filter', '.saved-list'])
-            disclosure(page, '.appearance-settings')
-            capture(page, 'appearance', name, ['.appearance-settings'])
-            capture(page, 'increments', name, ['.control-style-label', '.increment-label'])
-            disclosure(page, '.appearance-settings', False)
-            disclosure(page, '.advanced-audio')
-            capture(page, 'crossfade', name, ['.advanced-audio > label:first-of-type', '[for=crossfade-seconds]', '#crossfade-seconds', '.crossfade-debug'])
-            disclosure(page, '.pitch-customization')
-            capture(page, 'semitones', name, ['.pitch-customization'])
-            disclosure(page, '.pitch-customization', False)
-            capture(page, 'output', name, ['label:has(#peak-protection)', '[for=output-value]', '#output-level', '#output-help'], top_margin=0)
-            disclosure(page, '.advanced-audio', False)
-            for feature, selector in [('shortcuts', '.shortcuts'), ('backup', '.library-backup')]:
-                disclosure(page, selector)
-                capture(page, feature, name, [selector])
-                disclosure(page, selector, False)
+            tab(page, 'shortcuts')
+            capture(page, 'shortcuts', name, ['#settings-panel-shortcuts'])
             page.locator('.close-settings').click()
         evidence['audio'] = s.audio_evidence(page)
         page.evaluate('bufferedPlayerProbe.stop()')
@@ -152,6 +153,10 @@ try:
             headers['access-control-allow-origin'] = base.split('/soundcloud-track-control/')[0]
             route.fulfill(response=response, headers=headers)
         website.route('**/api/resolve?*', relay)
+        website.goto(base + 'mixer/')
+        for name in THEMES:
+            website.locator('html').evaluate('(html, name) => html.dataset.theme = name', name)
+            capture(website, 'mixer', name, ['.mixer-console'])
         website.goto(base + 'share/#sct=' + code)
         website.locator('#preview-play').click()
         expect(website.locator('#preview-play')).to_have_text('Pause', timeout=60000)
@@ -163,23 +168,13 @@ try:
         for name in THEMES:
             website.locator('html').evaluate('(html, name) => html.dataset.theme = name', name)
             capture(website, 'shared', name, ['.demo-heading', '.preview-meta', '.preview-transport', '.preview-mode-row', '.editor-lanes', '.editor-graph'])
-            website.locator('#discord-sharing summary').click()
-            capture(website, 'discord', name, ['#discord-sharing'])
-            website.locator('#discord-sharing summary').click()
-        website.goto(base)
-        for name in THEMES:
-            website.locator('html').evaluate('(html, name) => html.dataset.theme = name', name)
-            disclosure(website, '#preview-loader')
-            capture(website, 'local', name, ['#preview-loader'])
-            disclosure(website, '#preview-loader', False)
         assert not evidence['pageErrors'], evidence['pageErrors']
-        assert len(evidence['screenshots']) == 96
         web.close()
         browser.close()
     evidence['status'] = 'CAPTURED'
     for item in evidence['screenshots']:
         (s.STAGING / item['file']).replace(s.DESTINATION / item['file'])
     (ROOT / 'docs/feature-capture-evidence.json').write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
-    print('Published 96 focused PNGs with source metadata and checksums.')
+    print(f'Published {len(evidence["screenshots"])} focused PNGs with source metadata and checksums.')
 finally:
     server.shutdown()

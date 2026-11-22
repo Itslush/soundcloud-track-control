@@ -7,6 +7,15 @@ export function enhanceTempoFields(root) {
     wrap.className = 'tempo-number';
     input.before(wrap);
     wrap.append(input);
+    const unit =
+      wrap.nextElementSibling?.tagName === 'SPAN' &&
+      !wrap.nextElementSibling.classList.contains('key-unit')
+        ? wrap.nextElementSibling
+        : null;
+    if (unit) {
+      unit.classList.add('tempo-number-unit');
+      wrap.append(unit);
+    }
     const arrows = document.createElement('span');
     arrows.className = 'tempo-number-arrows';
     wrap.append(arrows);
@@ -88,7 +97,10 @@ export function enhanceTempoFields(root) {
     trigger.type = 'button';
     trigger.className = 'tempo-choice-trigger';
     const caption = document.createElement('span');
-    const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const chevron = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'svg',
+    );
     chevron.setAttribute('viewBox', '0 0 10 8');
     chevron.setAttribute('aria-hidden', 'true');
     chevron.innerHTML = '<path d="m2 3 3 3 3-3"/>';
@@ -222,6 +234,7 @@ export const tempoFieldStyle = `
 }
 .tempo-number { display:inline-flex; align-items:center; min-width:0; vertical-align:middle; }
 .tempo-number input { appearance:textfield; min-width:0; width:64px; }
+.tempo-number-unit { padding-right:5px; opacity:.8; font-size:11px; white-space:nowrap; pointer-events:none; }
 .tempo-number input::-webkit-inner-spin-button,.tempo-number input::-webkit-outer-spin-button { appearance:none; margin:0; }
 .tempo-number-arrows { display:grid; flex-shrink:0; }
 .tempo-number-arrows button { display:grid; place-items:center; min-height:16px; width:22px; padding:0; border:0; background:transparent; color:inherit; }

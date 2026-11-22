@@ -40,17 +40,62 @@ export function createFooterVisuals({ readUI, readPlayback, themeChanged }) {
       '--tempo-rail-offset',
       `${Math.abs(offset) <= 8 ? offset : 0}px`,
     );
+    const resolvedAccent =
+      accent && accent !== 'rgba(0, 0, 0, 0)' ? accent : '#ff5500';
+    const isOrange =
+      resolvedAccent === 'rgb(255, 85, 0)' || resolvedAccent === '#ff5500';
+    ui.host.style.setProperty('--tempo-accent', resolvedAccent);
     ui.host.style.setProperty(
-      '--tempo-accent',
-      accent && accent !== 'rgba(0, 0, 0, 0)' ? accent : '#ff5500',
+      '--tempo-accent-ink',
+      isOrange ? (dark ? '#ff8547' : '#9e3400') : resolvedAccent,
     );
-    ui.host.style.setProperty('--tempo-track', dark ? '#888' : '#777');
     const surface = getComputedStyle(document.documentElement)
       .getPropertyValue('--tempo-page-surface')
       .trim();
+    const bg = surface || (dark ? '#303030' : '#f2f2f2');
     ui.host.style.setProperty(
-      '--tempo-surface',
-      surface || (dark ? '#303030' : '#f2f2f2'),
+      '--tempo-accent-hover',
+      surface ? (dark ? '#282828' : '#ededeb') : '#282828',
+    );
+    ui.host.style.setProperty(
+      '--tempo-selection-fg',
+      dark ? '#141414' : '#ffffff',
+    );
+    ui.host.style.setProperty('--tempo-track', dark ? '#888' : '#6d6d6d');
+    ui.host.style.setProperty('--tempo-surface', bg);
+    ui.host.style.setProperty(
+      '--tempo-border',
+      dark
+        ? bg === '#0b0b0b'
+          ? '#6c6c6c'
+          : bg === '#202020'
+            ? '#7c7c7c'
+            : '#909090'
+        : '#6e6e6e',
+    );
+    ui.host.style.setProperty(
+      '--tempo-btn-bg',
+      dark
+        ? bg === '#0b0b0b'
+          ? '#121212'
+          : bg === '#202020'
+            ? '#262626'
+            : '#363636'
+        : bg === '#ffffff'
+          ? '#f7f7f5'
+          : '#eaeaea',
+    );
+    ui.host.style.setProperty(
+      '--tempo-hover',
+      dark
+        ? bg === '#0b0b0b'
+          ? '#1c1c1c'
+          : bg === '#202020'
+            ? '#2c2c2c'
+            : '#3a3a3a'
+        : bg === '#ffffff'
+          ? '#ebebea'
+          : '#e0e0e0',
     );
     ui.host.style.setProperty('--tempo-accent-surface', surface || '#242424');
     ui.host.style.colorScheme = dark ? 'dark' : 'light';
@@ -107,7 +152,7 @@ export function createFooterVisuals({ readUI, readPlayback, themeChanged }) {
             border: 1px solid #161616;
             border-radius: 3px;
             background: #ff5500;
-            color: #fff;
+            color: #141414;
             --logo-cutout: #ff5500;
             z-index: 1;
             line-height: 0;

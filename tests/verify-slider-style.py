@@ -194,7 +194,7 @@ def run_context(browser, touch):
         footer = native.locator('#rate-slider')
         check_states(native, footer, captures, touch)
         native.locator('.settings-button').click()
-        native.locator('.advanced-audio > summary').click()
+        native.locator('[data-settings-tab="audio"]').click()
         output = native.locator('#output-level')
         check_states(native, output, captures, touch)
         native.evaluate('''() => {

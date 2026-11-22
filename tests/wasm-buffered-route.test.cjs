@@ -274,7 +274,8 @@ test('crossfade keeps the outgoing processor alive and restores native gain on c
     assert.notEqual([...output.connections][0].kind, 'shaper');
   }
   f.api.setPeakProtection(true);
-  for (const output of outputs) assert.equal([...output.connections][0].kind, 'shaper');
+  for (const output of outputs)
+    assert.equal([...output.connections][0].kind, 'shaper');
   assert.equal(gainTo(f.mediaSource, f.output), 0);
   downstreamUnchanged(f);
   f.audio.dispatchEvent(new Event('emptied'));

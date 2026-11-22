@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0
+
+- Reorganized Tempo settings into five sticky-header tabs (`Tracks`, `FX & DJ`, `Audio`, `Appearance`, `Shortcuts`) with collapsible per-track loop/cue/BPM disclosures, docked-mixer collision protection, and 3 grouped keybind categories (`Playback`, `Mixer & DJ`, `Loops, Cues & Export`).
+- Rebuilt the homepage feature showcase into five category tabs (`Speed & Pitch`, `Timelines & Sets`, `Mixer & DJ`, `Audio & FX`, `Customize & Library`) with 90 populated 3-theme screenshots and tucked inline timeline toolbar controls under `Advanced`.
+- Unified control proportions and symmetry across the plugin and website (`114×36` flush-right settings boxes with enclosed `st`/`dB`/`×` units, `68×32` bordered saved-track pills, `34×34` timeline zoom squares, 50/50 mode toggles, and mirror-symmetrical `/mixer/` & `/set/` rows) alongside 5-theme WCAG AA solid contrast tokens and Light-theme docked mixer synchronization.
+- Appended the track or set title directly onto the masked Discord share link and redesigned single-track and multi-track MP4 video renders with a `#141414` Studio HUD deck, `#ff5500` orange accent rails, hierarchical track/artist typography, and a recessed DSP readout pill.
+
 ## 1.2.9
 
 - Added DJ click-to-deck mode (toggle with `Alt+Shift+D` by default or the docked `DJ` button) with inline `+A`/`+B` pills beside track play buttons and automatic Deck A/B routing when clicking play on SoundCloud tracks.

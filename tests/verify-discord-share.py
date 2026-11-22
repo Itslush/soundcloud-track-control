@@ -46,7 +46,7 @@ try:
         page.locator('.discord-copy').click()
         expect(page.locator('.discord-status')).to_have_text('Link copied.')
         site_url = json.loads((ROOT / 'release.config.json').read_text())['siteUrl']
-        label = site_url.removeprefix('https://').removeprefix('http://').rstrip('/') + '/'
+        label = site_url.removeprefix('https://').removeprefix('http://').rstrip('/') + '/shared-song'
         assert page.evaluate('navigator.clipboard.readText()') == f'[{label}]({link})'
         page.evaluate('() => {navigator.clipboard.writeText = async () => {throw new Error("denied")}}')
         page.locator('.discord-copy').click()

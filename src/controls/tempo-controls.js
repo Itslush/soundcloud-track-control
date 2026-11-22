@@ -1,28 +1,13 @@
 import { createTempoExtrasUi } from './tempo-extras-ui.js';
-import {
-  initMixerDock,
-  isMixerVisible,
-  readShowMixer,
-  setMixerVisible,
-} from './tempo-mixer.js';
+import { createSettingsTabs } from './tempo-settings-tabs.js';
+import { initMixerDock, isMixerVisible, mixerDockHeight, readShowMixer, setMixerVisible } from './tempo-mixer.js';
 import { controlsTemplate } from './tempo-controls-template.js';
 import { enhanceTempoFields } from './tempo-fields.js';
 import { syncTempoRange } from './tempo-range.js';
-import {
-  readTempoIncrement,
-  validTempoIncrement,
-  tempoIncrementKey,
-} from './tempo-increment.js';
-import {
-  readPitchSettings,
-  validPitchSettings,
-  pitchSettingsKey,
-} from './tempo-pitch-settings.js';
+import { readTempoIncrement, validTempoIncrement, tempoIncrementKey } from './tempo-increment.js';
+import { readPitchSettings, validPitchSettings, pitchSettingsKey } from './tempo-pitch-settings.js';
 import { createTempoLibrary } from '../library/tempo-library.js';
-import {
-  peakProtectionKey,
-  readPeakProtection,
-} from '../audio/pitch-quality.mjs';
+import { peakProtectionKey, readPeakProtection } from '../audio/pitch-quality.mjs';
 
 export function createTempoControls({
   playback,
@@ -45,6 +30,7 @@ export function createTempoControls({
   const SAVED_STORAGE = 'soundcloud.tempo.applySaved';
   let ui;
   let savedRefreshFrame = 0;
+  let settingsTabs;
   function createView() {
     const host = document.createElement('span');
     host.id = 'soundcloud-tempo-control';
@@ -106,6 +92,7 @@ export function createTempoControls({
       positionSettings,
       populateSavedTracks,
       scheduleSavedTracks,
+      selectSettingsTab: (tabId) => settingsTabs?.select(tabId),
     });
     onCreate(ui);
     syncControlStyle();
@@ -128,13 +115,20 @@ export function createTempoControls({
     });
     get('.fader-reset').addEventListener('click', () => actions.setRate(1));
     const starMotion = get('#star-motion');
-    starMotion.checked = services.appearance.motion() === 'on';
-    starMotion.addEventListener('change', () =>
-      services.appearance.setMotion(starMotion.checked ? 'on' : 'off'),
-    );
     const starSpeed = get('#star-speed');
+    const starSpeedWrap = get('.star-speed-wrap');
+    const syncStarSpeed = () => {
+      const enabled = starMotion.checked;
+      starSpeed.disabled = !enabled;
+      if (starSpeedWrap) starSpeedWrap.hidden = !enabled;
+    };
+    starMotion.checked = services.appearance.motion() === 'on';
+    syncStarSpeed();
+    starMotion.addEventListener('change', () => {
+      services.appearance.setMotion(starMotion.checked ? 'on' : 'off');
+      syncStarSpeed();
+    });
     starSpeed.value = String(services.appearance.speed());
-    starSpeed.disabled = !starMotion.checked;
     syncTempoRange(starSpeed);
     get('#star-speed-value').value = `${services.appearance.speed()}×`;
     starSpeed.addEventListener('input', () =>
@@ -152,8 +146,11 @@ export function createTempoControls({
     for (const id of ['#crossfade', '#crossfade-seconds'])
       get(id).addEventListener('change', () => {
         try {
+          const enabled = get('#crossfade').checked;
+          const wrap = get('.crossfade-options');
+          if (wrap) wrap.hidden = !enabled;
           services.crossfade.set(
-            get('#crossfade').checked,
+            enabled,
             Number(get('#crossfade-seconds').value),
             {
               bassSwap: get('#crossfade-bass-swap')?.checked ?? false,
@@ -190,8 +187,8 @@ export function createTempoControls({
       get('#crossfade-debug-output').textContent = report;
       return report;
     };
-    get('.crossfade-debug').addEventListener('toggle', () => {
-      if (get('.crossfade-debug').open) refreshCrossfadeDebug();
+    get('.diagnostics-group')?.addEventListener('toggle', () => {
+      if (get('.diagnostics-group')?.open) refreshCrossfadeDebug();
     });
     get('#crossfade-debug-refresh').addEventListener(
       'click',
@@ -467,14 +464,13 @@ export function createTempoControls({
         playback,
         (visible) => {
           showMixerInput.checked = Boolean(visible);
+          positionSettings();
         },
-        services.djMode
-          ? {
-              getState: () => services.djMode.state(),
-              onToggle: () => services.djMode.toggle(),
-              onCycleTarget: () => services.djMode.cycleTarget(),
-            }
-          : undefined,
+        services.djMode && {
+          getState: () => services.djMode.state(),
+          onToggle: () => services.djMode.toggle(),
+          onCycleTarget: () => services.djMode.cycleTarget(),
+        },
       );
       showMixerInput.addEventListener('change', () => {
         const saved = setMixerVisible(showMixerInput.checked, true);
@@ -546,6 +542,7 @@ export function createTempoControls({
       }
     });
     document.addEventListener('pointerdown', (event) => {
+      if (settingsTabs?.isPinned()) return;
       if (
         !event.composedPath().includes(ui.settings) &&
         !event.composedPath().includes(ui.memory) &&
@@ -716,6 +713,11 @@ export function createTempoControls({
       services,
       actions,
     });
+    settingsTabs = createSettingsTabs({
+      root,
+      settings: ui.settings,
+      onTabChange: (tabId) => ui.extras?.onTabChange?.(tabId),
+    });
     render();
     return ui;
   }
@@ -765,6 +767,8 @@ export function createTempoControls({
     if (!ui) {
       return;
     }
+    settingsTabs?.setChooserMode(false);
+    settingsTabs?.setPinned(false);
     if (ui.settings.hasAttribute('data-choosing-style')) {
       try {
         localStorage.setItem(
@@ -794,13 +798,16 @@ export function createTempoControls({
   }
 
   function positionSettings() {
-    if (!ui || ui.settings.hidden) {
-      return;
-    }
+    if (!ui || ui.settings.hidden) return;
+    const dockH = website ? mixerDockHeight() : 0;
     const width = Math.min(600, Math.max(0, innerWidth - 24));
+    const maxH = Math.max(180, innerHeight - (dockH ? dockH + 74 : 80));
     ui.settings.style.width = `${width}px`;
+    ui.settings.style.maxHeight = `${maxH}px`;
     ui.settings.style.left = `${(innerWidth - width) / 2}px`;
-    ui.settings.style.top = '50%';
+    ui.settings.style.top = dockH
+      ? `${Math.round((innerHeight - dockH - 50) / 2)}px`
+      : '50%';
     ui.settings.style.bottom = 'auto';
     ui.settings.style.transform = 'translateY(-50%)';
   }
@@ -823,7 +830,15 @@ export function createTempoControls({
       ui.settings.showPopover();
     }
     ui.extras?.onSettingsOpen();
-    ui.savedToggle.focus();
+    const choosing = ui.settings.hasAttribute('data-choosing-style');
+    settingsTabs?.setChooserMode(choosing);
+    if (choosing) {
+      settingsTabs?.select('appearance');
+    } else if (settingsTabs?.active() === 'tracks') {
+      ui.savedToggle.focus();
+    } else {
+      ui.root.querySelector('.settings-tab[aria-selected="true"]')?.focus();
+    }
   }
 
   function populateSavedTracks() {
@@ -857,13 +872,14 @@ export function createTempoControls({
       'aria-label',
       `Decrease speed by ${increment}×; Shift for 0.01×`,
     );
-    ui.root.querySelector('#crossfade').checked =
-      services.crossfade?.enabled() ?? false;
+    const crossfadeOn = services.crossfade?.enabled() ?? false;
+    ui.root.querySelector('#crossfade').checked = crossfadeOn;
+    const crossfadeOptions = ui.root.querySelector('.crossfade-options');
+    if (crossfadeOptions) crossfadeOptions.hidden = !crossfadeOn;
     ui.root.querySelector('#crossfade-seconds').value = String(
       services.crossfade?.seconds() ?? 5,
     );
-    ui.root.querySelector('#crossfade-seconds').disabled =
-      !services.crossfade?.enabled();
+    ui.root.querySelector('#crossfade-seconds').disabled = !crossfadeOn;
     syncTempoRange(ui.root.querySelector('#crossfade-seconds'));
     ui.root.querySelector('#crossfade-value').value =
       `${services.crossfade?.seconds() ?? 5} seconds`;

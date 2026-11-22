@@ -24,6 +24,10 @@ function applyTheme(value: string | null | undefined) {
   return theme;
 }
 
+document
+  .querySelector('#site-theme-status')
+  ?.closest('details')
+  ?.removeAttribute('hidden');
 applyTheme(document.documentElement.dataset.theme);
 for (const button of buttons) {
   button.addEventListener('click', () => {

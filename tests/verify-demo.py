@@ -50,7 +50,7 @@ with sync_playwright() as p:
     page.locator('#demo-speed-number').fill('0.75')
     page.locator('#demo-speed-number').press('Tab')
     assert page.locator('audio').evaluate('(audio) => audio.playbackRate') == .75
-    expect(page.locator('#preview-follow')).not_to_be_checked()
+    expect(page.locator('#preview-timeline')).to_have_attribute('aria-pressed', 'false')
     page.locator('#preview-play').click()
     assert page.locator('audio').evaluate('(audio) => audio.paused')
     page.locator('#preview-seek').fill('12')
@@ -58,7 +58,7 @@ with sync_playwright() as p:
     page.reload(wait_until='networkidle')
     assert page.locator('audio').evaluate('(audio) => audio.paused && audio.currentTime < 0.2')
     expect(trigger).to_contain_text('Natural')
-    expect(page.locator('#preview-follow')).to_be_checked()
+    expect(page.locator('#preview-timeline')).to_have_attribute('aria-pressed', 'true')
     expect(page.locator('#demo-copy')).to_be_disabled()
     page.locator('#preview-loader summary').click()
     page.route('**/api/resolve?*', lambda route: route.fulfill(status=502, json={'error': 'Track could not be loaded.'}))
@@ -76,10 +76,12 @@ with sync_playwright() as p:
         assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), width
         page.locator('#preview-loader').evaluate('(el) => el.open = false')
         page.locator('.demo-details').first.evaluate('(el) => el.open = false')
-        page.locator('.feature-details').evaluate('element => element.open = true')
-        for image in page.locator('.capture-surface img').all():
-            image.scroll_into_view_if_needed()
-            image.evaluate('(image) => image.decode()')
+        for feature_tab in page.locator('[data-feature-tab]').all():
+            feature_tab.click()
+            for image in page.locator('.feature-panel:not([hidden]) .capture-surface img').all():
+                image.scroll_into_view_if_needed()
+                image.evaluate('(image) => image.decode()')
+        page.locator('[data-feature-tab]').first.click()
         page.evaluate('scrollTo(0,0)')
         if width in [390, 1440]: page.screenshot(path=str(ROOT/'test-results'/f'release-site-{width}.png'), full_page=True)
     page.locator('#preview-fixed').click()

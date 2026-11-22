@@ -1,7 +1,6 @@
 ---
 import Icon from './Icon.astro';
 import { route } from '../lib/release';
-import evidence from '../../../docs/screenshot-evidence.json';
 import features from '../../../docs/feature-capture-evidence.json';
 
 interface Props {
@@ -15,9 +14,7 @@ interface Props {
 
 const { image, mobile, title, alt, variant = '', themed = false } = Astro.props;
 const findCapture = (name: string) => {
-  const capture = [...evidence.screenshots, ...features.screenshots].find(
-    (item) => item.file === name,
-  );
+  const capture = features.screenshots.find((item) => item.file === name);
   if (!capture) throw new Error(`Missing verified capture: ${name}`);
   return capture;
 };

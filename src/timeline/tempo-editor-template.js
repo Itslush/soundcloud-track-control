@@ -2,17 +2,7 @@ import { tempoFieldStyle } from '../controls/tempo-fields.js';
 import { editorStyle } from './tempo-editor-style.js';
 
 export function editorTemplate(inline = false) {
-  return `
-      <style>${editorStyle}${tempoFieldStyle}
-.editor-lanes,.pitch-options{display:flex;align-items:center;gap:8px;margin:12px 0;flex-wrap:wrap}
-.editor-lanes [aria-pressed="true"]{color:var(--tempo-fg);border-color:var(--tempo-accent)}
-</style>
-      <header><strong>Tempo timeline</strong><button class="editor-close" type="button">Close</button></header>
-      <a class="editor-track" target="_blank" rel="noopener noreferrer" ${inline ? 'hidden' : ''}></a>
-      <output class="playback-state" aria-live="polite" ${inline ? 'hidden' : ''}></output>
-      <label class="editor-enable" hidden><input class="editor-enabled" type="checkbox">Use saved timeline</label>
-      <div class="editor-lanes" role="group" aria-label="Automation lane"><button type="button" data-lane="tempo" aria-pressed="true">Tempo</button><button type="button" data-lane="pitch" aria-pressed="false">Pitch</button></div>
-      <div class="pitch-options" hidden><label>Arrow step <input class="pitch-step" type="number" min="0.001" max="12" step="0.1" value="0.5"> st</label><button type="button" class="pitch-clear">Remove pitch automation</button></div>
+  const toolbar = `
       <div class="editor-toolbar">
         <button class="zoom-out" type="button" aria-label="Zoom out timeline">−</button>
         <button class="zoom-in" type="button" aria-label="Zoom in timeline">+</button>
@@ -24,7 +14,20 @@ export function editorTemplate(inline = false) {
           <label>Min <input class="speed-min" type="number" min="0.25" max="4" step="0.001" value="0.75" aria-label="Graph minimum value"><span class="axis-unit">×</span></label>
           <label>Max <input class="speed-max" type="number" min="0.25" max="4" step="0.001" value="1.5" aria-label="Graph maximum value"><span class="axis-unit">×</span></label>
         </div>
-      </div>
+      </div>`;
+  return `
+      <style>${editorStyle}${tempoFieldStyle}
+.editor-lanes,.pitch-options{display:flex;align-items:center;gap:8px;margin:12px 0;flex-wrap:wrap}
+.editor-lanes button{min-width:76px;text-align:center}
+.editor-lanes [aria-pressed="true"]{color:var(--tempo-fg);border-color:var(--tempo-accent-ink,var(--tempo-accent))}
+</style>
+      <header><strong>Tempo timeline</strong><button class="editor-close" type="button">Close</button></header>
+      <a class="editor-track" target="_blank" rel="noopener noreferrer" ${inline ? 'hidden' : ''}></a>
+      <output class="playback-state" aria-live="polite" ${inline ? 'hidden' : ''}></output>
+      <label class="editor-enable" hidden><input class="editor-enabled" type="checkbox">Use saved timeline</label>
+      <div class="editor-lanes" role="group" aria-label="Automation lane"><button type="button" data-lane="tempo" aria-pressed="true">Tempo</button><button type="button" data-lane="pitch" aria-pressed="false">Pitch</button></div>
+      <div class="pitch-options" hidden><label>Arrow step <input class="pitch-step" type="number" min="0.001" max="12" step="0.1" value="0.5"><span>st</span></label><button type="button" class="pitch-clear">Remove pitch automation</button></div>
+      ${inline ? '' : toolbar}
       <svg class="editor-graph" viewBox="0 0 660 220" preserveAspectRatio="none" role="group" aria-label="Tempo over original song time"></svg>
       <div class="timeline-navigation" hidden>
         <div class="editor-readout"><label for="timeline-pan">Scroll timeline</label><output class="view-window" for="timeline-pan"></output></div>
@@ -32,7 +35,7 @@ export function editorTemplate(inline = false) {
         <div class="timeline-limits" aria-hidden="true"><span>0:00</span><span class="timeline-end"></span></div>
       </div>
       <div class="editor-readout"><span class="point-readout"></span></div>
-      ${inline ? '<details class="editor-advanced"><summary>Advanced<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></summary>' : ''}
+      ${inline ? '<details class="editor-advanced"><summary>Advanced<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></summary>' + toolbar : ''}
       <label>Point <select class="editor-point-picker" aria-label="Selected tempo point"></select></label>
       <div class="editor-fields">
         <label>Reach at (seconds)<input class="point-time" type="number" min="0" step="0.1"></label>
@@ -45,15 +48,15 @@ export function editorTemplate(inline = false) {
         <button class="point-remove" type="button">Remove point</button>
       </div>
       <label class="editor-pitch-label">Pitch<select class="editor-pitch"><option value="natural">Natural</option><option value="preserve">Preserve key</option></select></label>
-      <label class="editor-pitch-label">Key shift<input class="editor-key-shift" type="number" min="-12" max="12" step="0.5" value="0"> semitones</label>
+      <label class="editor-pitch-label">Key shift<input class="editor-key-shift" type="number" min="-12" max="12" step="0.5" value="0"><span>st</span></label>
       ${inline ? '</details>' : ''}
       <div class="editor-actions">
         <button class="editor-revert" type="button" hidden>Discard edits</button>
-        <button class="editor-link" type="button">Copy link</button>
+        <button class="editor-link" type="button" ${inline ? 'hidden' : ''}>Copy link</button>
         <button class="editor-apply-once" type="button" aria-pressed="false" ${inline ? 'hidden' : ''}>Apply once</button>
-        <button class="editor-save primary" type="button">Save timeline</button>
+        <button class="editor-save primary" type="button" ${inline ? 'hidden' : ''}>Save timeline</button>
       </div>
-      <details class="editor-sharing">
+      <details class="editor-sharing" ${inline ? 'hidden' : ''}>
         <summary>Advanced sharing</summary>
         <button class="editor-copy" type="button">Copy code</button>
         <label>Import link or code<textarea class="editor-code" spellcheck="false" placeholder="Paste a tempo link or SCT1 code"></textarea></label>

@@ -155,6 +155,12 @@ try:
             assert page.evaluate(
                 'document.documentElement.scrollWidth<=innerWidth+1'
             ), width
+        page.set_viewport_size({'width': 360, 'height': 800})
+        page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
+        page.wait_for_timeout(120)
+        fader_box = page.locator('.mixer-fader').bounding_box()
+        last_control_box = page.get_by_role('region', name='Deck B', exact=True).locator('input, button').last.bounding_box()
+        assert fader_box['y'] >= last_control_box['y'] + last_control_box['height'] - 1, (fader_box, last_control_box)
         assert not errors, errors
         page.close()
 
@@ -187,7 +193,7 @@ try:
         routes(page)
         expect(page.locator('#soundcloud-tempo-control .mixer-button')).to_have_count(0)
         page.get_by_role('button', name='Tempo settings').click()
-        page.locator('.appearance-settings summary').click()
+        page.locator('[data-settings-tab="appearance"]').click()
         page.locator('#show-mixer').check()
         page.keyboard.press('Escape')
 

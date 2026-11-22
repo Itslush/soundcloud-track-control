@@ -23,7 +23,6 @@ export function initDemo(sharedProfile?: TempoProfile) {
   const keyInput = get<HTMLInputElement>('demo-key-shift');
   const keySlider = get<HTMLInputElement>('demo-key-slider');
   const status = get<HTMLElement>('demo-status');
-  const follow = get<HTMLInputElement>('preview-follow');
   const seek = get<HTMLInputElement>('preview-seek');
   const play = get<HTMLButtonElement>('preview-play');
   const copy = get<HTMLButtonElement>('demo-copy');
@@ -84,11 +83,12 @@ export function initDemo(sharedProfile?: TempoProfile) {
   let currentFile: Blob | null = null;
   let currentName = demoTrack.title;
   let fixedRate = sharedProfile?.points[0].r ?? 1;
+  let timelineMode = true;
   if (sharedProfile) {
     pitchInput.value = sharedProfile.pitch ?? 'natural';
     keyInput.value = String(sharedProfile.keyShift ?? 0);
     keySlider.value = keyInput.value;
-    follow.checked =
+    timelineMode =
       sharedProfile.points.length > 1 || Boolean(sharedProfile.pitchPoints);
     get('preview-title').textContent = sharedProfile.track
       .slice(1)
@@ -130,22 +130,19 @@ export function initDemo(sharedProfile?: TempoProfile) {
 
   function currentRate() {
     if (original) return 1;
-    return follow.checked
+    return timelineMode
       ? (editor.draftPlayback(preview.audio.currentTime)?.rate ?? fixedRate)
       : fixedRate;
   }
 
   function syncMode() {
-    surface.dataset.mode = follow.checked ? 'timeline' : 'fixed';
+    surface.dataset.mode = timelineMode ? 'timeline' : 'fixed';
     surface.dataset.compare = original ? 'original' : 'adjusted';
-    get('preview-fixed').setAttribute('aria-pressed', String(!follow.checked));
-    get('preview-timeline').setAttribute(
-      'aria-pressed',
-      String(follow.checked),
-    );
-    get<HTMLElement>('preview-fixed-controls').hidden = follow.checked;
-    get<HTMLElement>('demo-shared-editor').hidden = !follow.checked;
-    pitchInput.closest<HTMLElement>('.select-control')!.hidden = follow.checked;
+    get('preview-fixed').setAttribute('aria-pressed', String(!timelineMode));
+    get('preview-timeline').setAttribute('aria-pressed', String(timelineMode));
+    get<HTMLElement>('preview-fixed-controls').hidden = timelineMode;
+    get<HTMLElement>('demo-shared-editor').hidden = !timelineMode;
+    pitchInput.closest<HTMLElement>('.select-control')!.hidden = timelineMode;
     compare.setAttribute('aria-pressed', String(original));
     compare.textContent = original ? 'Back to adjusted' : 'Listen to original';
     get('demo-copy-label').textContent = original
@@ -160,7 +157,7 @@ export function initDemo(sharedProfile?: TempoProfile) {
   }
 
   function setMode(timeline: boolean) {
-    follow.checked = timeline;
+    timelineMode = timeline;
     original = false;
     syncMode();
   }
@@ -172,14 +169,14 @@ export function initDemo(sharedProfile?: TempoProfile) {
       v: 1,
       track: trackPath,
       duration,
-      ...(follow.checked ? draft : {}),
-      points: follow.checked
+      ...(timelineMode ? draft : {}),
+      points: timelineMode
         ? draft.points
         : [{ t: 0, r: fixedRate, d: 0, c: 'instant' }],
-      pitch: follow.checked
+      pitch: timelineMode
         ? (draft.pitch ?? pitchInput.value)
         : pitchInput.value,
-      keyShift: follow.checked
+      keyShift: timelineMode
         ? (draft.keyShift ?? 0)
         : Number(keyInput.value) || 0,
     };
@@ -216,14 +213,13 @@ export function initDemo(sharedProfile?: TempoProfile) {
     input.addEventListener('dblclick', () => setSimpleSpeed(1));
   get('preview-fixed').addEventListener('click', () => setMode(false));
   get('preview-timeline').addEventListener('click', () => setMode(true));
-  follow.addEventListener('change', () => setMode(follow.checked));
   compare.addEventListener('click', () => {
     original = !original;
     syncMode();
   });
 
   function applyAudio(labels = true) {
-    const draft = follow.checked
+    const draft = timelineMode
       ? editor.draftPlayback(preview.audio.currentTime)
       : null;
     preview.apply(
@@ -231,7 +227,7 @@ export function initDemo(sharedProfile?: TempoProfile) {
       !original && (draft?.pitch ?? pitchInput.value) === 'preserve',
       original
         ? 0
-        : follow.checked
+        : timelineMode
           ? (draft?.keyShift ?? 0)
           : Number(keyInput.value) || 0,
     );
@@ -244,13 +240,13 @@ export function initDemo(sharedProfile?: TempoProfile) {
     if (labels) {
       const shift = original
         ? 0
-        : follow.checked
+        : timelineMode
           ? (editor.draftPlayback(time)?.keyShift ?? 0)
           : Number(keyInput.value) || 0;
       const notice = phase === 'ready' ? formatPitchNotice(shift) : '';
       const preserve =
         !original &&
-        (follow.checked
+        (timelineMode
           ? (editor.draftPlayback(time)?.pitch ?? pitchInput.value)
           : pitchInput.value) === 'preserve';
       artwork.style.filter =

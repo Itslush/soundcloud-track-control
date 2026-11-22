@@ -94,11 +94,14 @@ try:
                 btn.textContent = 'Play';
                 btn.style.cssText = 'padding:6px 10px;border:1px solid #666;border-radius:3px;';
                 btn.addEventListener('click', () => { window.nativePlays++; });
+                const playWrap = document.createElement('div');
+                playWrap.className = 'soundTitle__playButton';
+                playWrap.append(btn);
                 const link = document.createElement('a');
                 link.className = linkCls;
                 link.href = href;
                 link.textContent = title;
-                card.append(btn, link);
+                card.append(playWrap, link);
                 return card;
             };
             main.append(
@@ -125,7 +128,10 @@ try:
         expect(dj_btn).to_have_attribute('aria-pressed', 'true')
         expect(page.locator('.tempo-dj-pills')).to_have_count(2)
         expect(page.locator('#soundcloud-tempo-dj-style')).to_have_count(1)
-        page.wait_for_timeout(200)
+        page.wait_for_timeout(300)
+        expect(page.locator('.tempo-dj-pills')).to_have_count(2)
+        expect(page.locator('.soundTitle__playButton .tempo-dj-pill')).to_have_count(4)
+        expect(page.locator('.sound .soundTitle__playButton .tempo-dj-pill')).to_have_count(2)
         page.screenshot(path=str(ROOT / 'test-results/dj-mode-desktop.png'))
 
         # Click play buttons -> blocks SoundCloud native play and auto-routes A -> B.
@@ -158,7 +164,7 @@ try:
 
         # Customize DJ mode keybind in Shortcuts settings.
         page.get_by_role('button', name='Tempo settings', exact=True).click()
-        page.locator('.shortcuts summary').click()
+        page.locator('[data-settings-tab="shortcuts"]').click()
         dj_kb = page.locator('.kb-key[data-action="djMode"]')
         expect(dj_kb).to_be_visible()
         expect(dj_kb).to_have_text('Alt+Shift+D')
@@ -179,12 +185,21 @@ try:
 
         # Reset shortcuts -> restored to Alt+Shift+D.
         page.get_by_role('button', name='Tempo settings', exact=True).click()
+        page.locator('[data-settings-tab="shortcuts"]').click()
         page.locator('#kb-reset').click()
         expect(dj_kb).to_have_text('Alt+Shift+D')
-        page.locator('.shortcuts summary').click()
+
+        # Verify Pin keeps settings open when clicking outside, and unpinning restores outside-click close.
+        pin_btn = page.locator('.pin-settings')
+        pin_btn.click()
+        expect(pin_btn).to_have_attribute('aria-pressed', 'true')
+        page.locator('#other-input').click()
+        expect(page.locator('#tempo-settings')).to_be_visible()
+        pin_btn.click()
+        expect(pin_btn).to_have_attribute('aria-pressed', 'false')
 
         # Verify unlimited Volume Cap persistence & Master FX / Presets / Tools / DSP HUD.
-        page.locator('.advanced-audio > summary').click()
+        page.locator('[data-settings-tab="audio"]').click()
         cap_input = page.locator('#output-max-db')
         val_input = page.locator('#output-value')
         cap_input.fill('36')
@@ -199,19 +214,16 @@ try:
         expect(page.locator('#tempo-settings .settings-status')).to_contain_text('Enter a dB')
         expect(val_input).to_have_value('30')
 
-        page.locator('.fx-panel > summary').scroll_into_view_if_needed()
-        page.locator('.fx-panel > summary').click()
-        expect(page.locator('.fx-panel')).to_have_attribute('open', '')
+        page.locator('[data-settings-tab="dj"]').click()
         page.locator('#fx-soft-clip').scroll_into_view_if_needed()
         page.locator('#fx-soft-clip').check()
-        page.locator('.deck-tools-panel > summary').scroll_into_view_if_needed()
-        page.locator('.deck-tools-panel > summary').click()
         slowed_btn = page.get_by_role('button', name='Slowed + Reverb', exact=True)
         slowed_btn.scroll_into_view_if_needed()
         slowed_btn.click()
         expect(page.locator('#rate-number')).to_have_value('0.85')
-        page.locator('.dsp-hud > summary').scroll_into_view_if_needed()
-        page.locator('.dsp-hud > summary').click()
+        page.locator('[data-settings-tab="audio"]').click()
+        page.locator('.diagnostics-group > summary').scroll_into_view_if_needed()
+        page.locator('.diagnostics-group > summary').click()
         expect(page.locator('#hud-engine')).to_be_visible()
         page.wait_for_timeout(120)
         page.screenshot(path=str(ROOT / 'test-results/settings-extras-desktop.png'))
@@ -220,7 +232,7 @@ try:
         page.reload()
         expect(page.locator('#rate-slider')).to_be_visible()
         page.get_by_role('button', name='Tempo settings', exact=True).click()
-        page.locator('.advanced-audio > summary').click()
+        page.locator('[data-settings-tab="audio"]').click()
         expect(page.locator('#output-max-db')).to_have_value('36')
         expect(page.locator('#output-value')).to_have_value('30')
         expect(page.locator('#output-level')).to_have_attribute('max', '36')

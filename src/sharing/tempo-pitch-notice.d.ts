@@ -1,1 +1,4 @@
-export function formatPitchNotice(shift: number | number[], prefix?: string): string;
+export function formatPitchNotice(
+  shift: number | number[],
+  prefix?: string,
+): string;

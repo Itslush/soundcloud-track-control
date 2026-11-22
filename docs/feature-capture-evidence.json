@@ -1,72 +1,72 @@
 {
   "capturedAt": "2026-11-15T17:06:39.316095+00:00",
   "capture": "Unedited screenshots of the exact built userscript on the public Drown track and the built website, using the plugin’s Light, Charcoal and OLED appearances. A test-only CORS relay loads real public metadata for the local shared player. No audio is audible. Website sharing captures are before publication, not fabricated render results.",
-  "artifactSha256": "57267d74f9d534e5c5ea4bc15b453f393e62dcb4092a7f3736d406ecd559d42f",
+  "artifactSha256": "dc21e97f0ac9a4f626fef22490f2689ba6cbcfe5fcb2e7494bac6128c2ae7b8f",
   "deviceScaleFactor": 2,
   "screenshots": [
     {
       "file": "feature-player-charcoal.png",
-      "width": 924,
+      "width": 856,
       "height": 88,
-      "cssWidth": 462,
+      "cssWidth": 428,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "player controls, charcoal variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 548.828125,
-        "y": 1154,
-        "width": 462,
+        "x": 566,
+        "y": 1353.5,
+        "width": 428,
         "height": 44
       },
-      "sha256": "c671814473841fd58a91350f80a68f6d3a54062ef5f6f1d8d594f929feca8b74"
+      "sha256": "6459edd8d583ad2774b19fb26f70748b2b3cf523f82304fa24af17d4a66bd73d"
     },
     {
       "file": "feature-player-charcoal-mobile.png",
-      "width": 924,
+      "width": 856,
       "height": 88,
-      "cssWidth": 462,
+      "cssWidth": 428,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "player controls, charcoal variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 548.828125,
-        "y": 1154,
-        "width": 462,
+        "x": 566,
+        "y": 1353.5,
+        "width": 428,
         "height": 44
       },
-      "sha256": "c671814473841fd58a91350f80a68f6d3a54062ef5f6f1d8d594f929feca8b74"
+      "sha256": "d047e08340eebf627d6ebd48537c5530722e58978d0874f29390d4e9423a9847"
     },
     {
       "file": "feature-dial-charcoal.png",
-      "width": 716,
+      "width": 648,
       "height": 88,
-      "cssWidth": 358,
+      "cssWidth": 324,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "dial controls, charcoal variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 597,
-        "y": 1154,
-        "width": 358,
+        "x": 618,
+        "y": 1353.5,
+        "width": 324,
         "height": 44
       },
-      "sha256": "cb8292ff433edf5db3805c77205d0aa6089e65e217f961482aefcd6c9b1d5de2"
+      "sha256": "3e4974a3c0b65a69757b9fd87b65708df10d70de159885c4b2e351692ab7ccf9"
     },
     {
       "file": "feature-dial-charcoal-mobile.png",
-      "width": 716,
+      "width": 648,
       "height": 88,
-      "cssWidth": 358,
+      "cssWidth": 324,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "dial controls, charcoal variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 597,
-        "y": 1154,
-        "width": 358,
+        "x": 618,
+        "y": 1353.5,
+        "width": 324,
         "height": 44
       },
-      "sha256": "cb8292ff433edf5db3805c77205d0aa6089e65e217f961482aefcd6c9b1d5de2"
+      "sha256": "3e4974a3c0b65a69757b9fd87b65708df10d70de159885c4b2e351692ab7ccf9"
     },
     {
       "file": "feature-vertical-charcoal.png",
@@ -77,12 +77,12 @@
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "vertical controls, charcoal variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 651,
-        "y": 904,
+        "x": 672,
+        "y": 1102,
         "width": 108,
         "height": 246
       },
-      "sha256": "b69e729f40976d927cf5d5f49e0fb44cfdd62985dfa1e6f6637d1c9079c79da4"
+      "sha256": "596a72b7fab904e225417697382e8693ec764c98c88989c1e1e9de287ee4520c"
     },
     {
       "file": "feature-vertical-charcoal-mobile.png",
@@ -93,76 +93,364 @@
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "vertical controls, charcoal variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 651,
-        "y": 904,
+        "x": 672,
+        "y": 1102,
         "width": 108,
         "height": 246
       },
-      "sha256": "3258283b5cae636466d33a67cf179e87a657b68657e49c4904794951f2bfb1f0"
+      "sha256": "596a72b7fab904e225417697382e8693ec764c98c88989c1e1e9de287ee4520c"
+    },
+    {
+      "file": "feature-tempo-charcoal.png",
+      "width": 1396,
+      "height": 688,
+      "cssWidth": 698,
+      "cssHeight": 344,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "tempo controls, charcoal variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 371,
+        "y": 404,
+        "width": 698,
+        "height": 344
+      },
+      "sha256": "e3f892966f4d1afb70d8d3c88b8b86fd0ebee670eb9e40fb33ce6df71926cf8f"
+    },
+    {
+      "file": "feature-tempo-charcoal-mobile.png",
+      "width": 688,
+      "height": 856,
+      "cssWidth": 344,
+      "cssHeight": 428,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "tempo controls, charcoal variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 23,
+        "y": 328,
+        "width": 344,
+        "height": 428
+      },
+      "sha256": "911fa7c2f788b92d000d9f87c1cfc690d9978f59af883967f711c02e1bee1c03"
+    },
+    {
+      "file": "feature-pitch-charcoal.png",
+      "width": 1396,
+      "height": 780,
+      "cssWidth": 698,
+      "cssHeight": 390,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "pitch controls, charcoal variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 371,
+        "y": 381,
+        "width": 698,
+        "height": 390
+      },
+      "sha256": "7958577d74e0044090b4a7554a03a4a395e55588ee135a2c1a69b4fc710bf24d"
+    },
+    {
+      "file": "feature-pitch-charcoal-mobile.png",
+      "width": 688,
+      "height": 948,
+      "cssWidth": 344,
+      "cssHeight": 474,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "pitch controls, charcoal variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 23,
+        "y": 305,
+        "width": 344,
+        "height": 474
+      },
+      "sha256": "de232ebbd39d0389e21f34cd653cccb66b15176485ca7aa868df8d4589bc4899"
+    },
+    {
+      "file": "feature-saved-charcoal.png",
+      "width": 1164,
+      "height": 360,
+      "cssWidth": 582,
+      "cssHeight": 180,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "saved controls, charcoal variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 630,
+        "width": 582,
+        "height": 180
+      },
+      "sha256": "bc5bbf430bf1ab6448e0d28077e3d50c544560cac1df9bb775deceddf2cd58a1"
+    },
+    {
+      "file": "feature-saved-charcoal-mobile.png",
+      "width": 696,
+      "height": 360,
+      "cssWidth": 348,
+      "cssHeight": 180,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "saved controls, charcoal variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 638,
+        "width": 348,
+        "height": 180
+      },
+      "sha256": "ca43dc209ee9808adbfe786a728164d0844404d49190e2bf87654565505065d1"
+    },
+    {
+      "file": "feature-appearance-charcoal.png",
+      "width": 1164,
+      "height": 680,
+      "cssWidth": 582,
+      "cssHeight": 340,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "appearance controls, charcoal variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 571.25,
+        "width": 582,
+        "height": 340.5
+      },
+      "sha256": "ac52a1c6e0598e5eb99fcc2375e16301dfed11fd3d3ad0a748fb34ab51aef0f6"
+    },
+    {
+      "file": "feature-appearance-charcoal-mobile.png",
+      "width": 696,
+      "height": 680,
+      "cssWidth": 348,
+      "cssHeight": 340,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "appearance controls, charcoal variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 579.25,
+        "width": 348,
+        "height": 340.5
+      },
+      "sha256": "629df207e43282ae609f80d2f5e7e6be8f2563fc6d8f1b1a1762d17a7b79effd"
+    },
+    {
+      "file": "feature-crossfade-charcoal.png",
+      "width": 1164,
+      "height": 304,
+      "cssWidth": 582,
+      "cssHeight": 152,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "crossfade controls, charcoal variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 911,
+        "width": 582,
+        "height": 152
+      },
+      "sha256": "f8a9f6aaaa9b722cb5a7f2f195e08f4c30ae6545d1d319ac2fdf52a8ca6d8e09"
+    },
+    {
+      "file": "feature-crossfade-charcoal-mobile.png",
+      "width": 696,
+      "height": 304,
+      "cssWidth": 348,
+      "cssHeight": 152,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "crossfade controls, charcoal variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 937,
+        "width": 348,
+        "height": 152
+      },
+      "sha256": "25429eb314d07e12085f7de6d947e489e1e8dc65d0ab8a733401d0fb30f7b44b"
+    },
+    {
+      "file": "feature-output-charcoal.png",
+      "width": 1164,
+      "height": 404,
+      "cssWidth": 582,
+      "cssHeight": 202,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "output controls, charcoal variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 672,
+        "width": 582,
+        "height": 202
+      },
+      "sha256": "8c00303741421990a55b8a2317002a3ca10ecdca16b6c746ac4990753343656f"
+    },
+    {
+      "file": "feature-output-charcoal-mobile.png",
+      "width": 696,
+      "height": 440,
+      "cssWidth": 348,
+      "cssHeight": 220,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "output controls, charcoal variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 680,
+        "width": 348,
+        "height": 220
+      },
+      "sha256": "699ff94950089ad85a4e4f7c0270b07e82ad221d60f1da1946459485b100a69c"
+    },
+    {
+      "file": "feature-fx-charcoal.png",
+      "width": 1164,
+      "height": 1218,
+      "cssWidth": 582,
+      "cssHeight": 609,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "fx controls, charcoal variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 437,
+        "width": 582,
+        "height": 609
+      },
+      "sha256": "1c892beb4c323da39a5356912fa768ffa04ea31e22dae466e0f0c2fb2ec449ba"
+    },
+    {
+      "file": "feature-fx-charcoal-mobile.png",
+      "width": 696,
+      "height": 1294,
+      "cssWidth": 348,
+      "cssHeight": 647,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "fx controls, charcoal variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 426,
+        "width": 348,
+        "height": 647
+      },
+      "sha256": "4f568205896c6d12db405497dd1e0780084992fc61dc4878d755120ec3b683f6"
+    },
+    {
+      "file": "feature-shortcuts-charcoal.png",
+      "width": 1164,
+      "height": 1366,
+      "cssWidth": 582,
+      "cssHeight": 683,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "shortcuts controls, charcoal variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 345.75,
+        "width": 582,
+        "height": 683.5
+      },
+      "sha256": "fcb07981c5267b80e130015017e8cf33db38a4d416309437f48696683e92ab4e"
+    },
+    {
+      "file": "feature-shortcuts-charcoal-mobile.png",
+      "width": 696,
+      "height": 1366,
+      "cssWidth": 348,
+      "cssHeight": 683,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "shortcuts controls, charcoal variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 355.75,
+        "width": 348,
+        "height": 683.5
+      },
+      "sha256": "273a63053e1a48d6623dbcaf5575c90f4727589fdc49507c79135221619b21b0"
+    },
+    {
+      "file": "feature-dj-charcoal.png",
+      "width": 1144,
+      "height": 140,
+      "cssWidth": 572,
+      "cssHeight": 70,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "dj controls, charcoal variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 26,
+        "y": 173.53125,
+        "width": 572,
+        "height": 70
+      },
+      "sha256": "39ebd176b0d3a2aebc6b30baaa6eb051d6b9ad7b6b5b069804ed8a5c9628cd48"
+    },
+    {
+      "file": "feature-dj-charcoal-mobile.png",
+      "width": 676,
+      "height": 156,
+      "cssWidth": 338,
+      "cssHeight": 78,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "dj controls, charcoal variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 26,
+        "y": 192.71875,
+        "width": 338,
+        "height": 78
+      },
+      "sha256": "617fe89b0ba2657f583e419456cdd4577cd4fdbcf4227af33ea83f8154f24b53"
     },
     {
       "file": "feature-player-light.png",
-      "width": 924,
+      "width": 856,
       "height": 88,
-      "cssWidth": 462,
+      "cssWidth": 428,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "player controls, light variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 548.828125,
-        "y": 1154,
-        "width": 462,
+        "x": 566,
+        "y": 1353.5,
+        "width": 428,
         "height": 44
       },
-      "sha256": "f92dfd00abad9020b4b105ff567f84a6be006969866ae82cfc819f384193f879"
+      "sha256": "57656995c402296f7ea1b0d5205f46dcc706dee16243a7cc31ec915a0939fd80"
     },
     {
       "file": "feature-player-light-mobile.png",
-      "width": 924,
+      "width": 856,
       "height": 88,
-      "cssWidth": 462,
+      "cssWidth": 428,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "player controls, light variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 548.828125,
-        "y": 1154,
-        "width": 462,
+        "x": 566,
+        "y": 1353.5,
+        "width": 428,
         "height": 44
       },
-      "sha256": "f92dfd00abad9020b4b105ff567f84a6be006969866ae82cfc819f384193f879"
+      "sha256": "57656995c402296f7ea1b0d5205f46dcc706dee16243a7cc31ec915a0939fd80"
     },
     {
       "file": "feature-dial-light.png",
-      "width": 716,
+      "width": 648,
       "height": 88,
-      "cssWidth": 358,
+      "cssWidth": 324,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "dial controls, light variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 597,
-        "y": 1154,
-        "width": 358,
+        "x": 618,
+        "y": 1353.5,
+        "width": 324,
         "height": 44
       },
-      "sha256": "98141e26366e1eee7cf4a13abf26f1c887791e2596272a4c501e0c7c27507fdf"
+      "sha256": "7f3e95b392a4ea8dcb59529b53e3f5167fbcc36060d036f615c1de1c5ba654f7"
     },
     {
       "file": "feature-dial-light-mobile.png",
-      "width": 716,
+      "width": 648,
       "height": 88,
-      "cssWidth": 358,
+      "cssWidth": 324,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "dial controls, light variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 597,
-        "y": 1154,
-        "width": 358,
+        "x": 618,
+        "y": 1353.5,
+        "width": 324,
         "height": 44
       },
-      "sha256": "98141e26366e1eee7cf4a13abf26f1c887791e2596272a4c501e0c7c27507fdf"
+      "sha256": "7f3e95b392a4ea8dcb59529b53e3f5167fbcc36060d036f615c1de1c5ba654f7"
     },
     {
       "file": "feature-vertical-light.png",
@@ -173,12 +461,12 @@
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "vertical controls, light variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 651,
-        "y": 904,
+        "x": 672,
+        "y": 1102,
         "width": 108,
         "height": 246
       },
-      "sha256": "193ca07ae7e1078053ac01616f73500487b982bab909fca505882026f371a85e"
+      "sha256": "c4aa5c8d05d244fb27c392f13f01b2212f28916d2d766a363e3b5b535e0a5fea"
     },
     {
       "file": "feature-vertical-light-mobile.png",
@@ -189,76 +477,364 @@
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "vertical controls, light variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 651,
-        "y": 904,
+        "x": 672,
+        "y": 1102,
         "width": 108,
         "height": 246
       },
-      "sha256": "e876c97128b7f00eb48c886c973632c13f47d94181f6a686ff3a3ca0277809d6"
+      "sha256": "c4aa5c8d05d244fb27c392f13f01b2212f28916d2d766a363e3b5b535e0a5fea"
+    },
+    {
+      "file": "feature-tempo-light.png",
+      "width": 1396,
+      "height": 688,
+      "cssWidth": 698,
+      "cssHeight": 344,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "tempo controls, light variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 371,
+        "y": 404,
+        "width": 698,
+        "height": 344
+      },
+      "sha256": "e095abc6e186cc6e89b53082bbd87d0dc9567ab6a31fcb2bbb9a2ce7a6a54c5e"
+    },
+    {
+      "file": "feature-tempo-light-mobile.png",
+      "width": 688,
+      "height": 856,
+      "cssWidth": 344,
+      "cssHeight": 428,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "tempo controls, light variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 23,
+        "y": 328,
+        "width": 344,
+        "height": 428
+      },
+      "sha256": "132f9babdbe65d24304d9481e04bcdf83b35e2513698ac413b534c6fd88e474b"
+    },
+    {
+      "file": "feature-pitch-light.png",
+      "width": 1396,
+      "height": 780,
+      "cssWidth": 698,
+      "cssHeight": 390,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "pitch controls, light variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 371,
+        "y": 381,
+        "width": 698,
+        "height": 390
+      },
+      "sha256": "adc4a122165b821396fe3a3dd291f6bb21b1e2a712de5afef1c274df5af946fb"
+    },
+    {
+      "file": "feature-pitch-light-mobile.png",
+      "width": 688,
+      "height": 948,
+      "cssWidth": 344,
+      "cssHeight": 474,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "pitch controls, light variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 23,
+        "y": 305,
+        "width": 344,
+        "height": 474
+      },
+      "sha256": "2b2c786f77cf7ab2c45ac63b804edcafca4b79801e67728258e7a3862dcb3cd8"
+    },
+    {
+      "file": "feature-saved-light.png",
+      "width": 1164,
+      "height": 360,
+      "cssWidth": 582,
+      "cssHeight": 180,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "saved controls, light variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 578,
+        "width": 582,
+        "height": 180
+      },
+      "sha256": "dc5a64525a87f38b417f6b5428b39ddfab6f532b01f1f1629f396f4bc4e5180d"
+    },
+    {
+      "file": "feature-saved-light-mobile.png",
+      "width": 696,
+      "height": 360,
+      "cssWidth": 348,
+      "cssHeight": 180,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "saved controls, light variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 586,
+        "width": 348,
+        "height": 180
+      },
+      "sha256": "1bebfdc0232df982af9a3d1a25de8a6abd6a43253a634a92f181a7543b786995"
+    },
+    {
+      "file": "feature-appearance-light.png",
+      "width": 1164,
+      "height": 680,
+      "cssWidth": 582,
+      "cssHeight": 340,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "appearance controls, light variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 502.25,
+        "width": 582,
+        "height": 340.5
+      },
+      "sha256": "2c7f3b759daa17d9cb367772dd6ee986eb2963fd134d3daf454cf6e20a5ad774"
+    },
+    {
+      "file": "feature-appearance-light-mobile.png",
+      "width": 696,
+      "height": 680,
+      "cssWidth": 348,
+      "cssHeight": 340,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "appearance controls, light variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 527.25,
+        "width": 348,
+        "height": 340.5
+      },
+      "sha256": "3c21aad98010b9d08146c3f826e9e24c2d8b872040c735d79bda8b10fbb0ea8d"
+    },
+    {
+      "file": "feature-crossfade-light.png",
+      "width": 1164,
+      "height": 304,
+      "cssWidth": 582,
+      "cssHeight": 152,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "crossfade controls, light variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 842,
+        "width": 582,
+        "height": 152
+      },
+      "sha256": "c6fda3fce6bb31ad45722a38dd92362d2b5ef656b60977a26f2171cf0d852d7e"
+    },
+    {
+      "file": "feature-crossfade-light-mobile.png",
+      "width": 696,
+      "height": 304,
+      "cssWidth": 348,
+      "cssHeight": 152,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "crossfade controls, light variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 885,
+        "width": 348,
+        "height": 152
+      },
+      "sha256": "c39294ab317631c84e5ce443d55680cde20c303b243ba83156fc018b3a03f58a"
+    },
+    {
+      "file": "feature-output-light.png",
+      "width": 1164,
+      "height": 404,
+      "cssWidth": 582,
+      "cssHeight": 202,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "output controls, light variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 603,
+        "width": 582,
+        "height": 202
+      },
+      "sha256": "942c212c769f9d964f2faa86f900fe7ff6f39f7a3db44356928b59c946245285"
+    },
+    {
+      "file": "feature-output-light-mobile.png",
+      "width": 696,
+      "height": 440,
+      "cssWidth": 348,
+      "cssHeight": 220,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "output controls, light variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 628,
+        "width": 348,
+        "height": 220
+      },
+      "sha256": "f92a2f6504b69ee5c6e742758779f6796f9360227dbc8f7d22eae8caeac6c916"
+    },
+    {
+      "file": "feature-fx-light.png",
+      "width": 1164,
+      "height": 1254,
+      "cssWidth": 582,
+      "cssHeight": 627,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "fx controls, light variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 376,
+        "width": 582,
+        "height": 627
+      },
+      "sha256": "486df812730099de86e1a917cba3454004bd942b455461f8e3c40adb0d158783"
+    },
+    {
+      "file": "feature-fx-light-mobile.png",
+      "width": 696,
+      "height": 1330,
+      "cssWidth": 348,
+      "cssHeight": 665,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "fx controls, light variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 363,
+        "width": 348,
+        "height": 665
+      },
+      "sha256": "4b75193ca877dba799cff171b1e626e7b4a21547f61fd932fbb78235b9cfc468"
+    },
+    {
+      "file": "feature-shortcuts-light.png",
+      "width": 1164,
+      "height": 1366,
+      "cssWidth": 582,
+      "cssHeight": 683,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "shortcuts controls, light variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 330.75,
+        "width": 582,
+        "height": 683.5
+      },
+      "sha256": "0dc1892babf7b1925a85a238358c6f657f0ed4971ce0ec26333f6d92a5bb0799"
+    },
+    {
+      "file": "feature-shortcuts-light-mobile.png",
+      "width": 696,
+      "height": 1366,
+      "cssWidth": 348,
+      "cssHeight": 683,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "shortcuts controls, light variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 355.75,
+        "width": 348,
+        "height": 683.5
+      },
+      "sha256": "dc92b27207e25a25f348b1fac204d55a0df7c1df9a61ce121583e3c55e3186aa"
+    },
+    {
+      "file": "feature-dj-light.png",
+      "width": 1144,
+      "height": 140,
+      "cssWidth": 572,
+      "cssHeight": 70,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "dj controls, light variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 26,
+        "y": 173.53125,
+        "width": 572,
+        "height": 70
+      },
+      "sha256": "4274bebc455085648e40109adeaa6c2ddd611403a747987c0ae295c3d4e21758"
+    },
+    {
+      "file": "feature-dj-light-mobile.png",
+      "width": 676,
+      "height": 156,
+      "cssWidth": 338,
+      "cssHeight": 78,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "dj controls, light variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 26,
+        "y": 192.71875,
+        "width": 338,
+        "height": 78
+      },
+      "sha256": "8ce164a0dcb1fc057bff8bfeb146814ef02f616d2e656c84cda4fae6d3a796a8"
     },
     {
       "file": "feature-player-oled.png",
-      "width": 924,
+      "width": 856,
       "height": 88,
-      "cssWidth": 462,
+      "cssWidth": 428,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "player controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 548.828125,
-        "y": 1154,
-        "width": 462,
+        "x": 566,
+        "y": 1353.5,
+        "width": 428,
         "height": 44
       },
-      "sha256": "e16030ee79df5842fa45e3e81118f104c5870fec4d9ebf8d96f8c0ae6b9c29fc"
+      "sha256": "9c9998b79bb47f84e2e1af24634b55e3898b53971fb4c444197d1d05d20f1bc6"
     },
     {
       "file": "feature-player-oled-mobile.png",
-      "width": 924,
+      "width": 856,
       "height": 88,
-      "cssWidth": 462,
+      "cssWidth": 428,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "player controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 548.828125,
-        "y": 1154,
-        "width": 462,
+        "x": 566,
+        "y": 1353.5,
+        "width": 428,
         "height": 44
       },
-      "sha256": "e16030ee79df5842fa45e3e81118f104c5870fec4d9ebf8d96f8c0ae6b9c29fc"
+      "sha256": "9c9998b79bb47f84e2e1af24634b55e3898b53971fb4c444197d1d05d20f1bc6"
     },
     {
       "file": "feature-dial-oled.png",
-      "width": 716,
+      "width": 648,
       "height": 88,
-      "cssWidth": 358,
+      "cssWidth": 324,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "dial controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 597,
-        "y": 1154,
-        "width": 358,
+        "x": 618,
+        "y": 1353.5,
+        "width": 324,
         "height": 44
       },
-      "sha256": "9dca291442fab84ba803a1ca18080ade4b796e5926494c11d2649bddb8c8d32e"
+      "sha256": "27dbe7c5f013413313f3773d5b6175e58f39bb222e68949d2450bb2304955663"
     },
     {
       "file": "feature-dial-oled-mobile.png",
-      "width": 716,
+      "width": 648,
       "height": 88,
-      "cssWidth": 358,
+      "cssWidth": 324,
       "cssHeight": 44,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "dial controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 597,
-        "y": 1154,
-        "width": 358,
+        "x": 618,
+        "y": 1353.5,
+        "width": 324,
         "height": 44
       },
-      "sha256": "9dca291442fab84ba803a1ca18080ade4b796e5926494c11d2649bddb8c8d32e"
+      "sha256": "27dbe7c5f013413313f3773d5b6175e58f39bb222e68949d2450bb2304955663"
     },
     {
       "file": "feature-vertical-oled.png",
@@ -269,12 +845,12 @@
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "vertical controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 651,
-        "y": 904,
+        "x": 672,
+        "y": 1102,
         "width": 108,
         "height": 246
       },
-      "sha256": "3e67b107b3ac0e53e67b5fd8f3c6b880ed27386da1de26c70d4f02e0e43f74e9"
+      "sha256": "3891f8372b12b328c51eb81452db9c2778fce74c366ed8d43d2820d7c649a180"
     },
     {
       "file": "feature-vertical-oled-mobile.png",
@@ -285,1329 +861,590 @@
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "vertical controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 651,
-        "y": 904,
+        "x": 672,
+        "y": 1102,
         "width": 108,
         "height": 246
       },
-      "sha256": "ea3482b652beb6757c0a141c26499810a7d04fa67d3da31a032aeaa97c1697c9"
-    },
-    {
-      "file": "feature-tempo-charcoal.png",
-      "width": 1396,
-      "height": 672,
-      "cssWidth": 698,
-      "cssHeight": 336,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "tempo controls, charcoal variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 371,
-        "y": 319,
-        "width": 698,
-        "height": 336
-      },
-      "sha256": "2178700e9508e4a40c2ac91d730c269b01110958bf65a7dcc5e611612a07d42b"
-    },
-    {
-      "file": "feature-tempo-charcoal-mobile.png",
-      "width": 688,
-      "height": 816,
-      "cssWidth": 344,
-      "cssHeight": 408,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "tempo controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 23,
-        "y": 250,
-        "width": 344,
-        "height": 408
-      },
-      "sha256": "bf5f383836de551826ac2e53e45d400f7b652fa2289b9f544e8d5fc677e85c04"
-    },
-    {
-      "file": "feature-pitch-charcoal.png",
-      "width": 1396,
-      "height": 760,
-      "cssWidth": 698,
-      "cssHeight": 380,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "pitch controls, charcoal variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 371,
-        "y": 297,
-        "width": 698,
-        "height": 380
-      },
-      "sha256": "baa5f47abc7f0fe5f5d0aae964e865c207f89dd72bfdeeaaa3a24d1a08c6f096"
-    },
-    {
-      "file": "feature-pitch-charcoal-mobile.png",
-      "width": 688,
-      "height": 832,
-      "cssWidth": 344,
-      "cssHeight": 416,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "pitch controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 23,
-        "y": 246,
-        "width": 344,
-        "height": 416
-      },
-      "sha256": "0ffcae2102faaddb3ac8c35d3f1b8d0397c613cc2292b3954fbbf8bdcf9e7553"
-    },
-    {
-      "file": "feature-saved-charcoal.png",
-      "width": 1172,
-      "height": 360,
-      "cssWidth": 586,
-      "cssHeight": 180,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "saved controls, charcoal variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 465.5,
-        "width": 586,
-        "height": 180
-      },
-      "sha256": "ff34212d128ff6c9a99e6001c1556038add84c75932702c9f147f20a35c990f4"
-    },
-    {
-      "file": "feature-saved-charcoal-mobile.png",
-      "width": 704,
-      "height": 360,
-      "cssWidth": 352,
-      "cssHeight": 180,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "saved controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 465.5,
-        "width": 352,
-        "height": 180
-      },
-      "sha256": "4c6cb155bfc5b730b1d94db061d4b4b82226dde8e148df84b5aaa6377da8ca96"
-    },
-    {
-      "file": "feature-appearance-charcoal.png",
-      "width": 1172,
-      "height": 564,
-      "cssWidth": 586,
-      "cssHeight": 282,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "appearance controls, charcoal variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 525.5,
-        "width": 586,
-        "height": 282
-      },
-      "sha256": "bd0f22543fbc939c3e856ca4a84d0a4f0d19701340142409fa60d185786f25a3"
-    },
-    {
-      "file": "feature-appearance-charcoal-mobile.png",
-      "width": 704,
-      "height": 564,
-      "cssWidth": 352,
-      "cssHeight": 282,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "appearance controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 525.5,
-        "width": 352,
-        "height": 282
-      },
-      "sha256": "450cc2e8b45718c6ad48c6335aaf4cf4c823ae9a60adc70c0bb06c72986f25d8"
-    },
-    {
-      "file": "feature-increments-charcoal.png",
-      "width": 1172,
-      "height": 192,
-      "cssWidth": 586,
-      "cssHeight": 96,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "increments controls, charcoal variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 583.5,
-        "width": 586,
-        "height": 96
-      },
-      "sha256": "88e29798b056d33f92329d3998f97455154dc6807307f41b6ec78b6f6bf12131"
-    },
-    {
-      "file": "feature-increments-charcoal-mobile.png",
-      "width": 704,
-      "height": 192,
-      "cssWidth": 352,
-      "cssHeight": 96,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "increments controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 583.5,
-        "width": 352,
-        "height": 96
-      },
-      "sha256": "157e9e4b04949a34753f374a3e9187f48814f782ab100c3da6058f13575a5cda"
-    },
-    {
-      "file": "feature-crossfade-charcoal.png",
-      "width": 1172,
-      "height": 312,
-      "cssWidth": 586,
-      "cssHeight": 156,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "crossfade controls, charcoal variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 460.5,
-        "width": 586,
-        "height": 156
-      },
-      "sha256": "48485524b8ce0e5eec8826ce6a669de7393b0c05201cbd48ce13a00f5e7ab14b"
-    },
-    {
-      "file": "feature-crossfade-charcoal-mobile.png",
-      "width": 704,
-      "height": 312,
-      "cssWidth": 352,
-      "cssHeight": 156,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "crossfade controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 451.5,
-        "width": 352,
-        "height": 156
-      },
-      "sha256": "47337f4a964f0371d9e9d0b063070c646f97f0aa1ed758d05ce09c2c3fb4e869"
-    },
-    {
-      "file": "feature-semitones-charcoal.png",
-      "width": 1172,
-      "height": 428,
-      "cssWidth": 586,
-      "cssHeight": 214,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "semitones controls, charcoal variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 517.5,
-        "width": 586,
-        "height": 214
-      },
-      "sha256": "0c674bacac1da2fdc6b0ef55c43d07eec6408b63fcf7891ddc575c6683d40166"
-    },
-    {
-      "file": "feature-semitones-charcoal-mobile.png",
-      "width": 704,
-      "height": 428,
-      "cssWidth": 352,
-      "cssHeight": 214,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "semitones controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 508.5,
-        "width": 352,
-        "height": 214
-      },
-      "sha256": "fdae844e40a6ea027bb679beb64e17da0490067711e459eed324f004a6acd84e"
-    },
-    {
-      "file": "feature-output-charcoal.png",
-      "width": 1172,
-      "height": 296,
-      "cssWidth": 586,
-      "cssHeight": 148,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "output controls, charcoal variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 796.5,
-        "width": 586,
-        "height": 148
-      },
-      "sha256": "498d7d74c468d03bbe381d44fdf03b19cf8961805539c167cc6ad01933dd1d73"
-    },
-    {
-      "file": "feature-output-charcoal-mobile.png",
-      "width": 704,
-      "height": 332,
-      "cssWidth": 352,
-      "cssHeight": 166,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "output controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 787.5,
-        "width": 352,
-        "height": 166
-      },
-      "sha256": "d8bc81f0dc418dd3f92b982200abf4403512a65e99bb4f9be8b0cf90a3482516"
-    },
-    {
-      "file": "feature-shortcuts-charcoal.png",
-      "width": 1172,
-      "height": 236,
-      "cssWidth": 586,
-      "cssHeight": 118,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "shortcuts controls, charcoal variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 657.5,
-        "width": 586,
-        "height": 118
-      },
-      "sha256": "3f44d8f5bb26ac15224a51ac2c690492701d7fd3e7be278fb3994ce9a10ce597"
-    },
-    {
-      "file": "feature-shortcuts-charcoal-mobile.png",
-      "width": 704,
-      "height": 236,
-      "cssWidth": 352,
-      "cssHeight": 118,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "shortcuts controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 657.5,
-        "width": 352,
-        "height": 118
-      },
-      "sha256": "75941e9a4b33bb534b885d5ac00b752715d318e015a78c5a0d5b21fdfb6db646"
-    },
-    {
-      "file": "feature-backup-charcoal.png",
-      "width": 1172,
-      "height": 156,
-      "cssWidth": 586,
-      "cssHeight": 78,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "backup controls, charcoal variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 706.5,
-        "width": 586,
-        "height": 78
-      },
-      "sha256": "1d84adcd5a2305274f41e71fab8417cabf1d0c0814a2c46c789199a1f5043bce"
-    },
-    {
-      "file": "feature-backup-charcoal-mobile.png",
-      "width": 704,
-      "height": 156,
-      "cssWidth": 352,
-      "cssHeight": 78,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "backup controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 706.5,
-        "width": 352,
-        "height": 78
-      },
-      "sha256": "3c978a807de38e8ad719f4ab05d82bf79b66935f917fe3ed445158f0322ace35"
-    },
-    {
-      "file": "feature-tempo-light.png",
-      "width": 1396,
-      "height": 672,
-      "cssWidth": 698,
-      "cssHeight": 336,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "tempo controls, light variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 371,
-        "y": 319,
-        "width": 698,
-        "height": 336
-      },
-      "sha256": "a36bab80df60c9a021ecb4b1983f395f4594c57f9e5fd5173efda9b27a389bc8"
-    },
-    {
-      "file": "feature-tempo-light-mobile.png",
-      "width": 688,
-      "height": 816,
-      "cssWidth": 344,
-      "cssHeight": 408,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "tempo controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 23,
-        "y": 250,
-        "width": 344,
-        "height": 408
-      },
-      "sha256": "a32bb0441c1604f3b55018868fb326a6432ddcec97575d0831b4f6456c8145da"
-    },
-    {
-      "file": "feature-pitch-light.png",
-      "width": 1396,
-      "height": 760,
-      "cssWidth": 698,
-      "cssHeight": 380,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "pitch controls, light variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 371,
-        "y": 297,
-        "width": 698,
-        "height": 380
-      },
-      "sha256": "714cc4799b7bdf026a6cd369907f6920dd06a1dce211f21246427845fbebaea9"
-    },
-    {
-      "file": "feature-pitch-light-mobile.png",
-      "width": 688,
-      "height": 832,
-      "cssWidth": 344,
-      "cssHeight": 416,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "pitch controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 23,
-        "y": 246,
-        "width": 344,
-        "height": 416
-      },
-      "sha256": "b0ae2d358be0e6a08721d6769ea00b034d70c983e7722d22e7f614cd8cf80c85"
-    },
-    {
-      "file": "feature-saved-light.png",
-      "width": 1172,
-      "height": 360,
-      "cssWidth": 586,
-      "cssHeight": 180,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "saved controls, light variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 465.5,
-        "width": 586,
-        "height": 180
-      },
-      "sha256": "7dbe3562ea30e5ade59d0280f9ba0fa3c00a374f359edc00f6a5ea86558871f6"
-    },
-    {
-      "file": "feature-saved-light-mobile.png",
-      "width": 704,
-      "height": 360,
-      "cssWidth": 352,
-      "cssHeight": 180,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "saved controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 465.5,
-        "width": 352,
-        "height": 180
-      },
-      "sha256": "329ba521803ae67b4bc7627b8ef2a094c1ed5a7c2460cecca9ff2bce347727b9"
-    },
-    {
-      "file": "feature-appearance-light.png",
-      "width": 1172,
-      "height": 564,
-      "cssWidth": 586,
-      "cssHeight": 282,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "appearance controls, light variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 525.5,
-        "width": 586,
-        "height": 282
-      },
-      "sha256": "12aac21d319ce7723067b88ee112917654f8fde820fb5c2f5eb90d1cbaa1b574"
-    },
-    {
-      "file": "feature-appearance-light-mobile.png",
-      "width": 704,
-      "height": 564,
-      "cssWidth": 352,
-      "cssHeight": 282,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "appearance controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 525.5,
-        "width": 352,
-        "height": 282
-      },
-      "sha256": "6c7081a6e2a9aac81bb5fd4128c2a3bb022b99ae47494ed382a32a569327f1df"
-    },
-    {
-      "file": "feature-increments-light.png",
-      "width": 1172,
-      "height": 192,
-      "cssWidth": 586,
-      "cssHeight": 96,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "increments controls, light variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 583.5,
-        "width": 586,
-        "height": 96
-      },
-      "sha256": "fc50cdc3ebbf003b133ce85685d9dcbdcfb18d905b2d5eaf26ff88084f0dd4ac"
-    },
-    {
-      "file": "feature-increments-light-mobile.png",
-      "width": 704,
-      "height": 192,
-      "cssWidth": 352,
-      "cssHeight": 96,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "increments controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 583.5,
-        "width": 352,
-        "height": 96
-      },
-      "sha256": "b4fca512768e5c7743b10325e1441beaef68d1f45ebc65dcd50f240e119a526d"
-    },
-    {
-      "file": "feature-crossfade-light.png",
-      "width": 1172,
-      "height": 312,
-      "cssWidth": 586,
-      "cssHeight": 156,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "crossfade controls, light variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 460.5,
-        "width": 586,
-        "height": 156
-      },
-      "sha256": "e4ec47a16bc8d16c23df2c331de6986329b2bb9bce1e2d3e5b16eb952464e682"
-    },
-    {
-      "file": "feature-crossfade-light-mobile.png",
-      "width": 704,
-      "height": 312,
-      "cssWidth": 352,
-      "cssHeight": 156,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "crossfade controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 451.5,
-        "width": 352,
-        "height": 156
-      },
-      "sha256": "291954c5d49aa0f17b2a664123fba73b42cbbf28c4c00ad23609002f6e3af21d"
-    },
-    {
-      "file": "feature-semitones-light.png",
-      "width": 1172,
-      "height": 428,
-      "cssWidth": 586,
-      "cssHeight": 214,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "semitones controls, light variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 517.5,
-        "width": 586,
-        "height": 214
-      },
-      "sha256": "1e1b2ca58461b0a4026e291cdd8eda48a09eb83bb28273f36d4a1f1fa005e8ea"
-    },
-    {
-      "file": "feature-semitones-light-mobile.png",
-      "width": 704,
-      "height": 428,
-      "cssWidth": 352,
-      "cssHeight": 214,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "semitones controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 508.5,
-        "width": 352,
-        "height": 214
-      },
-      "sha256": "57ea986c4cf19aa1c9ebcfd84a47ba0328d5c618831b83a1b30bd718379d1dda"
-    },
-    {
-      "file": "feature-output-light.png",
-      "width": 1172,
-      "height": 296,
-      "cssWidth": 586,
-      "cssHeight": 148,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "output controls, light variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 796.5,
-        "width": 586,
-        "height": 148
-      },
-      "sha256": "0aa43caa44044b913481299998683177fec87c287e03ec577c98b407db9bfc55"
-    },
-    {
-      "file": "feature-output-light-mobile.png",
-      "width": 704,
-      "height": 332,
-      "cssWidth": 352,
-      "cssHeight": 166,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "output controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 787.5,
-        "width": 352,
-        "height": 166
-      },
-      "sha256": "747acbc5b57c58f2faeb1d7f611b1e8029732743bcfae29d020f27e99980aa21"
-    },
-    {
-      "file": "feature-shortcuts-light.png",
-      "width": 1172,
-      "height": 236,
-      "cssWidth": 586,
-      "cssHeight": 118,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "shortcuts controls, light variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 657.5,
-        "width": 586,
-        "height": 118
-      },
-      "sha256": "cbdc1b4eb0f21bb73b2c4aecf7686c0060bdef24ba3e03de0ccf6501aa601e25"
-    },
-    {
-      "file": "feature-shortcuts-light-mobile.png",
-      "width": 704,
-      "height": 236,
-      "cssWidth": 352,
-      "cssHeight": 118,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "shortcuts controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 657.5,
-        "width": 352,
-        "height": 118
-      },
-      "sha256": "6861deab85385be6db5ef1c848e4ba5a095a00a16eaedc0d95c19bcccf4a6d12"
-    },
-    {
-      "file": "feature-backup-light.png",
-      "width": 1172,
-      "height": 156,
-      "cssWidth": 586,
-      "cssHeight": 78,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "backup controls, light variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 706.5,
-        "width": 586,
-        "height": 78
-      },
-      "sha256": "7cb3504f9878ed89f5bf9ddd0590285362e41683d1a8ad46fbd2545cd59db6a5"
-    },
-    {
-      "file": "feature-backup-light-mobile.png",
-      "width": 704,
-      "height": 156,
-      "cssWidth": 352,
-      "cssHeight": 78,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "backup controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 706.5,
-        "width": 352,
-        "height": 78
-      },
-      "sha256": "4aeb69294f75ace29e7756d865fd82688e4000c6171a6a23ba9a6bb5b13ca0bb"
+      "sha256": "3891f8372b12b328c51eb81452db9c2778fce74c366ed8d43d2820d7c649a180"
     },
     {
       "file": "feature-tempo-oled.png",
       "width": 1396,
-      "height": 672,
+      "height": 688,
       "cssWidth": 698,
-      "cssHeight": 336,
+      "cssHeight": 344,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "tempo controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
         "x": 371,
-        "y": 319,
+        "y": 404,
         "width": 698,
-        "height": 336
+        "height": 344
       },
-      "sha256": "8ee02a3299e5d346e8b6fd75e9fe6f007473ddeaa3d4667c91a8834f5efd7f25"
+      "sha256": "340b5a7f26ec3bcecf72acaab60d6d810bf9faa20fd08eb6737879a6ee46a630"
     },
     {
       "file": "feature-tempo-oled-mobile.png",
       "width": 688,
-      "height": 816,
+      "height": 856,
       "cssWidth": 344,
-      "cssHeight": 408,
+      "cssHeight": 428,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "tempo controls, oled variant at 390px; playback paused or not started.",
       "clip": {
         "x": 23,
-        "y": 250,
+        "y": 328,
         "width": 344,
-        "height": 408
+        "height": 428
       },
-      "sha256": "46b900bd28ec101258decfd2f47c70c2176cf5e3a8fb5cc21aeff8a3cc638c79"
+      "sha256": "5ff8b2254be6765628faad256ba456593b85d11ee0da2c41d203a9f751cd825a"
     },
     {
       "file": "feature-pitch-oled.png",
       "width": 1396,
-      "height": 760,
+      "height": 780,
       "cssWidth": 698,
-      "cssHeight": 380,
+      "cssHeight": 390,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "pitch controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
         "x": 371,
-        "y": 297,
+        "y": 381,
         "width": 698,
-        "height": 380
+        "height": 390
       },
-      "sha256": "aef0d4dcb4c785371aa058e959393ae4a5c714d4f800999f76fc0db7f4c9c668"
+      "sha256": "a6b874fc2d81f84a8fe94709c663285660cf456909cf3a78bd4b60cb097d25d2"
     },
     {
       "file": "feature-pitch-oled-mobile.png",
       "width": 688,
-      "height": 832,
+      "height": 948,
       "cssWidth": 344,
-      "cssHeight": 416,
+      "cssHeight": 474,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "pitch controls, oled variant at 390px; playback paused or not started.",
       "clip": {
         "x": 23,
-        "y": 246,
+        "y": 305,
         "width": 344,
-        "height": 416
+        "height": 474
       },
-      "sha256": "33bb5014f18947abf6bbf1553f0fca6c0531763ef688c963930aec6ec79e2e93"
+      "sha256": "e93e7435beace17038d47d8e829cb9cba2e2d1516f78aa37776ef79d499dcd65"
     },
     {
       "file": "feature-saved-oled.png",
-      "width": 1172,
+      "width": 1164,
       "height": 360,
-      "cssWidth": 586,
+      "cssWidth": 582,
       "cssHeight": 180,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "saved controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
         "x": 427,
-        "y": 465.5,
-        "width": 586,
+        "y": 578,
+        "width": 582,
         "height": 180
       },
-      "sha256": "3398202dfb15ad75d7a5ed01d893bc26e7601ed019fc3abf9dfe35661bf8e3e9"
+      "sha256": "8ca8d4e9ad6ab51dd7821340b4adec3778012aa4068e41ce60b29a4eeae8dcd0"
     },
     {
       "file": "feature-saved-oled-mobile.png",
-      "width": 704,
+      "width": 696,
       "height": 360,
-      "cssWidth": 352,
+      "cssWidth": 348,
       "cssHeight": 180,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "saved controls, oled variant at 390px; playback paused or not started.",
       "clip": {
         "x": 19,
-        "y": 465.5,
-        "width": 352,
+        "y": 586,
+        "width": 348,
         "height": 180
       },
-      "sha256": "fbc05f1d88ee417b1d88b5fc3adfe874521b1fb234037890ee6562e53bb5ce86"
+      "sha256": "c6f6a1b2e439f569150445409220ec25d702f7d5c91d766713008328df0185cc"
     },
     {
       "file": "feature-appearance-oled.png",
-      "width": 1172,
-      "height": 564,
-      "cssWidth": 586,
-      "cssHeight": 282,
+      "width": 1164,
+      "height": 680,
+      "cssWidth": 582,
+      "cssHeight": 340,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "appearance controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
         "x": 427,
-        "y": 525.5,
-        "width": 586,
-        "height": 282
+        "y": 502.25,
+        "width": 582,
+        "height": 340.5
       },
-      "sha256": "6e603c480d26686001a8116d87a85cd4175b3e24096e926b1652bcbc28cc4223"
+      "sha256": "f1f3da43571e41c295efbfee07d1a66e0322f7cacc5d39806f51c0e2040a4ef6"
     },
     {
       "file": "feature-appearance-oled-mobile.png",
-      "width": 704,
-      "height": 564,
-      "cssWidth": 352,
-      "cssHeight": 282,
+      "width": 696,
+      "height": 680,
+      "cssWidth": 348,
+      "cssHeight": 340,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "appearance controls, oled variant at 390px; playback paused or not started.",
       "clip": {
         "x": 19,
-        "y": 525.5,
-        "width": 352,
-        "height": 282
+        "y": 527.25,
+        "width": 348,
+        "height": 340.5
       },
-      "sha256": "7539571fc2f1de5421007685244a14127d972e47e1e5bf8fedb0eddca9406e95"
-    },
-    {
-      "file": "feature-increments-oled.png",
-      "width": 1172,
-      "height": 192,
-      "cssWidth": 586,
-      "cssHeight": 96,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "increments controls, oled variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 583.5,
-        "width": 586,
-        "height": 96
-      },
-      "sha256": "c9d87fc931c09b791024850c8e256beb69a46ed64e97bb1001fbc89e468f29a5"
-    },
-    {
-      "file": "feature-increments-oled-mobile.png",
-      "width": 704,
-      "height": 192,
-      "cssWidth": 352,
-      "cssHeight": 96,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "increments controls, oled variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 583.5,
-        "width": 352,
-        "height": 96
-      },
-      "sha256": "5dc143275bbdcbd2b802c0b1bba48ae3eee7b7dc5e00a5d2351704e611b7e33f"
+      "sha256": "0cc64b910694d9554da43d9beba5f1f0a4211dbe71502edaf1c26f0bcb0c744e"
     },
     {
       "file": "feature-crossfade-oled.png",
-      "width": 1172,
-      "height": 312,
-      "cssWidth": 586,
-      "cssHeight": 156,
+      "width": 1164,
+      "height": 304,
+      "cssWidth": 582,
+      "cssHeight": 152,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "crossfade controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
         "x": 427,
-        "y": 460.5,
-        "width": 586,
-        "height": 156
+        "y": 842,
+        "width": 582,
+        "height": 152
       },
-      "sha256": "08b9165b38fa18a77b5234b25095bcc93ea52fef2d928ed1ef0ea7f86cebdc5c"
+      "sha256": "3c47b9795f8ec10bfa4038ae982cad58c4a322d144562f4cdb3b22b23fa60ff4"
     },
     {
       "file": "feature-crossfade-oled-mobile.png",
-      "width": 704,
-      "height": 312,
-      "cssWidth": 352,
-      "cssHeight": 156,
+      "width": 696,
+      "height": 304,
+      "cssWidth": 348,
+      "cssHeight": 152,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "crossfade controls, oled variant at 390px; playback paused or not started.",
       "clip": {
         "x": 19,
-        "y": 451.5,
-        "width": 352,
-        "height": 156
+        "y": 885,
+        "width": 348,
+        "height": 152
       },
-      "sha256": "5ca97a4673982e3ed78d92588e4fe02aa1129222e6097328759f0781e11de7be"
-    },
-    {
-      "file": "feature-semitones-oled.png",
-      "width": 1172,
-      "height": 428,
-      "cssWidth": 586,
-      "cssHeight": 214,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "semitones controls, oled variant at 1440px; playback paused or not started.",
-      "clip": {
-        "x": 427,
-        "y": 517.5,
-        "width": 586,
-        "height": 214
-      },
-      "sha256": "67cce84b0e977600a4633cd816965b88dc137a33929660e7c388525538bd6770"
-    },
-    {
-      "file": "feature-semitones-oled-mobile.png",
-      "width": 704,
-      "height": 428,
-      "cssWidth": 352,
-      "cssHeight": 214,
-      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "semitones controls, oled variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 19,
-        "y": 508.5,
-        "width": 352,
-        "height": 214
-      },
-      "sha256": "2262a4c6b1d0dd08c986c61f34599f13539800fd33c54771d2a010eb6ef847c0"
+      "sha256": "b338ac18e43bcc1c2b6e84aa33db78a3387d89ba16f677d0773c5b85476eb247"
     },
     {
       "file": "feature-output-oled.png",
-      "width": 1172,
-      "height": 296,
-      "cssWidth": 586,
-      "cssHeight": 148,
+      "width": 1164,
+      "height": 404,
+      "cssWidth": 582,
+      "cssHeight": 202,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "output controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
         "x": 427,
-        "y": 796.5,
-        "width": 586,
-        "height": 148
+        "y": 603,
+        "width": 582,
+        "height": 202
       },
-      "sha256": "714b0d06ee6beb450098baf510257507ab1ed69aece20bb4f8e71e6bccef7366"
+      "sha256": "33a3cc27640ec1a1b8bc00e86909b60477a6b8d5790d3f6907a0a0bbd2a95575"
     },
     {
       "file": "feature-output-oled-mobile.png",
-      "width": 704,
-      "height": 332,
-      "cssWidth": 352,
-      "cssHeight": 166,
+      "width": 696,
+      "height": 440,
+      "cssWidth": 348,
+      "cssHeight": 220,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "output controls, oled variant at 390px; playback paused or not started.",
       "clip": {
         "x": 19,
-        "y": 787.5,
-        "width": 352,
-        "height": 166
+        "y": 611,
+        "width": 348,
+        "height": 220
       },
-      "sha256": "82d2344bc6e6428f3939458436d035e9f96301cb2b0245b8ccd8db589299f1bf"
+      "sha256": "fad65d2b2d3b742b2dc86e8aeff633926c75646a69e833d2369b98d1644908b2"
+    },
+    {
+      "file": "feature-fx-oled.png",
+      "width": 1164,
+      "height": 1254,
+      "cssWidth": 582,
+      "cssHeight": 627,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "fx controls, oled variant at 1440px; playback paused or not started.",
+      "clip": {
+        "x": 427,
+        "y": 376,
+        "width": 582,
+        "height": 627
+      },
+      "sha256": "7b66a8a69f79d2ca79369112c8ef58d60bb3265dd631cf7bd7d7aa5f42cd8a4f"
+    },
+    {
+      "file": "feature-fx-oled-mobile.png",
+      "width": 696,
+      "height": 1330,
+      "cssWidth": 348,
+      "cssHeight": 665,
+      "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
+      "state": "fx controls, oled variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 19,
+        "y": 363,
+        "width": 348,
+        "height": 665
+      },
+      "sha256": "96554b84e6c5d791bee7152531caf1223b64fa3a2f6fe7c9dc328b6820c28b47"
     },
     {
       "file": "feature-shortcuts-oled.png",
-      "width": 1172,
-      "height": 236,
-      "cssWidth": 586,
-      "cssHeight": 118,
+      "width": 1164,
+      "height": 1366,
+      "cssWidth": 582,
+      "cssHeight": 683,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "shortcuts controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
         "x": 427,
-        "y": 657.5,
-        "width": 586,
-        "height": 118
+        "y": 330.75,
+        "width": 582,
+        "height": 683.5
       },
-      "sha256": "5a995925936f987398243c094254384053085e88c7fa06b0597d956116d18a9a"
+      "sha256": "c3cc17c5625243de336536934e2fc6bf5e79be853c267932acc00c6c24792f91"
     },
     {
       "file": "feature-shortcuts-oled-mobile.png",
-      "width": 704,
-      "height": 236,
-      "cssWidth": 352,
-      "cssHeight": 118,
+      "width": 696,
+      "height": 1366,
+      "cssWidth": 348,
+      "cssHeight": 683,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
       "state": "shortcuts controls, oled variant at 390px; playback paused or not started.",
       "clip": {
         "x": 19,
-        "y": 657.5,
-        "width": 352,
-        "height": 118
+        "y": 355.75,
+        "width": 348,
+        "height": 683.5
       },
-      "sha256": "797ab147096d9631a9598c75872386b9efdf6fab9dc593e3a8473e61e66e25d9"
+      "sha256": "1564105fe67a09581069aea66c36cee9dece79a2596d47f23d984c78f1f38717"
     },
     {
-      "file": "feature-backup-oled.png",
-      "width": 1172,
-      "height": 156,
-      "cssWidth": 586,
-      "cssHeight": 78,
+      "file": "feature-dj-oled.png",
+      "width": 1144,
+      "height": 140,
+      "cssWidth": 572,
+      "cssHeight": 70,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "backup controls, oled variant at 1440px; playback paused or not started.",
+      "state": "dj controls, oled variant at 1440px; playback paused or not started.",
       "clip": {
-        "x": 427,
-        "y": 706.5,
-        "width": 586,
-        "height": 78
+        "x": 26,
+        "y": 173.53125,
+        "width": 572,
+        "height": 70
       },
-      "sha256": "cf7bd1d9d151147c6da33ed41be850da7cbafa6af4e8aadaa20e8ed5ca7a1508"
+      "sha256": "f3c5f939edc417afcea1f0c24fc056261d296c71f1c38051b5906674d2088b27"
     },
     {
-      "file": "feature-backup-oled-mobile.png",
-      "width": 704,
+      "file": "feature-dj-oled-mobile.png",
+      "width": 676,
       "height": 156,
-      "cssWidth": 352,
+      "cssWidth": 338,
       "cssHeight": 78,
       "url": "https://soundcloud.com/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
-      "state": "backup controls, oled variant at 390px; playback paused or not started.",
+      "state": "dj controls, oled variant at 390px; playback paused or not started.",
       "clip": {
-        "x": 19,
-        "y": 706.5,
-        "width": 352,
+        "x": 26,
+        "y": 192.71875,
+        "width": 338,
         "height": 78
       },
-      "sha256": "cfd93d96a72ec2229cf93ee1a5a8b15121c4dfb41928875fb250af839ab386a7"
+      "sha256": "4e4d30d18f7580c1f37e44e13947d07040ec94eab17e027771a06db9e84fda46"
+    },
+    {
+      "file": "feature-mixer-charcoal.png",
+      "width": 2004,
+      "height": 1952,
+      "cssWidth": 1002,
+      "cssHeight": 976,
+      "url": "https://itslush.github.io/soundcloud-track-control/mixer/",
+      "state": "mixer controls, charcoal variant at 1200px; playback paused or not started.",
+      "clip": {
+        "x": 99,
+        "y": 216.890625,
+        "width": 1002,
+        "height": 976.453125
+      },
+      "sha256": "a56343eb8935da8a67699cb131b09a842d9f2e8b476d9978aa8719dec67098ae"
+    },
+    {
+      "file": "feature-mixer-charcoal-mobile.png",
+      "width": 732,
+      "height": 2130,
+      "cssWidth": 366,
+      "cssHeight": 1065,
+      "url": "https://itslush.github.io/soundcloud-track-control/mixer/",
+      "state": "mixer controls, charcoal variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 12,
+        "y": 182.265625,
+        "width": 366,
+        "height": 1065.796875
+      },
+      "sha256": "473dfadf13e71d620628d1f70993cf3a15e28263a6270f7347654d1b33b95f5e"
+    },
+    {
+      "file": "feature-mixer-light.png",
+      "width": 2004,
+      "height": 1952,
+      "cssWidth": 1002,
+      "cssHeight": 976,
+      "url": "https://itslush.github.io/soundcloud-track-control/mixer/",
+      "state": "mixer controls, light variant at 1200px; playback paused or not started.",
+      "clip": {
+        "x": 99,
+        "y": 216.890625,
+        "width": 1002,
+        "height": 976.453125
+      },
+      "sha256": "ed6ad681297382f3931649b624841dda1528272a851d7cd930dac64c51e9aca0"
+    },
+    {
+      "file": "feature-mixer-light-mobile.png",
+      "width": 732,
+      "height": 2130,
+      "cssWidth": 366,
+      "cssHeight": 1065,
+      "url": "https://itslush.github.io/soundcloud-track-control/mixer/",
+      "state": "mixer controls, light variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 12,
+        "y": 182.265625,
+        "width": 366,
+        "height": 1065.796875
+      },
+      "sha256": "fd5e9e85bc1e6b57db7a67bbd2f6e3b6926481e03788b5a63efb852909d3dc6f"
+    },
+    {
+      "file": "feature-mixer-oled.png",
+      "width": 2004,
+      "height": 1952,
+      "cssWidth": 1002,
+      "cssHeight": 976,
+      "url": "https://itslush.github.io/soundcloud-track-control/mixer/",
+      "state": "mixer controls, oled variant at 1200px; playback paused or not started.",
+      "clip": {
+        "x": 99,
+        "y": 216.890625,
+        "width": 1002,
+        "height": 976.453125
+      },
+      "sha256": "90534e7a9bba410b86a1cf4f269d0d095c9cf5ce9352d2ba433613e402beb7af"
+    },
+    {
+      "file": "feature-mixer-oled-mobile.png",
+      "width": 732,
+      "height": 2130,
+      "cssWidth": 366,
+      "cssHeight": 1065,
+      "url": "https://itslush.github.io/soundcloud-track-control/mixer/",
+      "state": "mixer controls, oled variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 12,
+        "y": 182.265625,
+        "width": 366,
+        "height": 1065.796875
+      },
+      "sha256": "c7af819814c9225db57d017627f581ca09107d090582985762183f1018126aba"
+    },
+    {
+      "file": "feature-set-charcoal.png",
+      "width": 2096,
+      "height": 1530,
+      "cssWidth": 1048,
+      "cssHeight": 765,
+      "url": "https://itslush.github.io/soundcloud-track-control/set/",
+      "state": "set controls, charcoal variant at 1100px; playback paused or not started.",
+      "clip": {
+        "x": 26,
+        "y": 589.1875,
+        "width": 1048,
+        "height": 765.890625
+      },
+      "sha256": "99d5483f6234c3450bc1af3d59e750b9d5d673c2cb27277e0885563e935fd6f0"
+    },
+    {
+      "file": "feature-set-charcoal-mobile.png",
+      "width": 732,
+      "height": 2512,
+      "cssWidth": 366,
+      "cssHeight": 1256,
+      "url": "https://itslush.github.io/soundcloud-track-control/set/",
+      "state": "set controls, charcoal variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 12,
+        "y": 668.9375,
+        "width": 366,
+        "height": 1256.234375
+      },
+      "sha256": "3e8cfa2031af825145bd2c674e7a268d5e7ade8552dcb1efd6b9a40b59af7042"
+    },
+    {
+      "file": "feature-set-light.png",
+      "width": 2096,
+      "height": 1530,
+      "cssWidth": 1048,
+      "cssHeight": 765,
+      "url": "https://itslush.github.io/soundcloud-track-control/set/",
+      "state": "set controls, light variant at 1100px; playback paused or not started.",
+      "clip": {
+        "x": 26,
+        "y": 589.1875,
+        "width": 1048,
+        "height": 765.890625
+      },
+      "sha256": "10948cf52b323297b31eb7f624fce5b0cd01c4ec1b59a30cff7e2fbc6752c859"
+    },
+    {
+      "file": "feature-set-light-mobile.png",
+      "width": 732,
+      "height": 2512,
+      "cssWidth": 366,
+      "cssHeight": 1256,
+      "url": "https://itslush.github.io/soundcloud-track-control/set/",
+      "state": "set controls, light variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 12,
+        "y": 668.9375,
+        "width": 366,
+        "height": 1256.234375
+      },
+      "sha256": "17bb3bc5a18af655b6a5c24e5802412a479442d2157c18971c44c7308596b214"
+    },
+    {
+      "file": "feature-set-oled.png",
+      "width": 2096,
+      "height": 1530,
+      "cssWidth": 1048,
+      "cssHeight": 765,
+      "url": "https://itslush.github.io/soundcloud-track-control/set/",
+      "state": "set controls, oled variant at 1100px; playback paused or not started.",
+      "clip": {
+        "x": 26,
+        "y": 589.1875,
+        "width": 1048,
+        "height": 765.890625
+      },
+      "sha256": "773fc436bd5f503231739a402ffacde60d93cf7c45ce43ebd724c071dd0ce376"
+    },
+    {
+      "file": "feature-set-oled-mobile.png",
+      "width": 732,
+      "height": 2512,
+      "cssWidth": 366,
+      "cssHeight": 1256,
+      "url": "https://itslush.github.io/soundcloud-track-control/set/",
+      "state": "set controls, oled variant at 390px; playback paused or not started.",
+      "clip": {
+        "x": 12,
+        "y": 668.9375,
+        "width": 366,
+        "height": 1256.234375
+      },
+      "sha256": "876c07ccb53bde38dfc8f0bdd39a52440a62a316503ac5a2578096b9c36c332f"
     },
     {
       "file": "feature-shared-charcoal.png",
       "width": 1988,
-      "height": 1292,
+      "height": 1158,
       "cssWidth": 994,
-      "cssHeight": 646,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "cssHeight": 579,
+      "url": "https://itslush.github.io/soundcloud-track-control/share/#sct=SCT1.eyJ2IjogMSwgInRyYWNrIjogIi9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwgImR1cmF0aW9uIjogMjQ1LCAicG9pbnRzIjogW3sidCI6IDAsICJyIjogMSwgImQiOiAwLCAiYyI6ICJpbnN0YW50In0sIHsidCI6IDc1LCAiciI6IDAuNzUsICJkIjogMzUsICJjIjogInNtb290aCJ9LCB7InQiOiAxODAsICJyIjogMC45LCAiZCI6IDQ1LCAiYyI6ICJzbW9vdGgifV0sICJwaXRjaCI6ICJuYXR1cmFsIiwgImtleVNoaWZ0IjogLTN9",
       "state": "shared controls, charcoal variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 53,
         "y": 315.421875,
         "width": 994,
-        "height": 646.375
+        "height": 579.15625
       },
-      "sha256": "83631b02cfc119e3b237dc1820f8b05c9de38e4a5f6e142810be519848bb46a8"
+      "sha256": "ab55d0ba691e7e5f79afaa2d0077e8579fc72d3757c66d313fc3d35579ea8e5f"
     },
     {
       "file": "feature-shared-charcoal-mobile.png",
       "width": 680,
-      "height": 2000,
+      "height": 1610,
       "cssWidth": 340,
-      "cssHeight": 1000,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "cssHeight": 805,
+      "url": "https://itslush.github.io/soundcloud-track-control/share/#sct=SCT1.eyJ2IjogMSwgInRyYWNrIjogIi9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwgImR1cmF0aW9uIjogMjQ1LCAicG9pbnRzIjogW3sidCI6IDAsICJyIjogMSwgImQiOiAwLCAiYyI6ICJpbnN0YW50In0sIHsidCI6IDc1LCAiciI6IDAuNzUsICJkIjogMzUsICJjIjogInNtb290aCJ9LCB7InQiOiAxODAsICJyIjogMC45LCAiZCI6IDQ1LCAiYyI6ICJzbW9vdGgifV0sICJwaXRjaCI6ICJuYXR1cmFsIiwgImtleVNoaWZ0IjogLTN9",
       "state": "shared controls, charcoal variant at 390px; playback paused or not started.",
       "clip": {
         "x": 25,
-        "y": 299.171875,
+        "y": 355.171875,
         "width": 340,
-        "height": 1007.15625
+        "height": 805.15625
       },
-      "sha256": "3fd4f2c90446791750bc8db1948c52f25a35049577821bf8978965168e7c0016"
-    },
-    {
-      "file": "feature-discord-charcoal.png",
-      "width": 2096,
-      "height": 416,
-      "cssWidth": 1048,
-      "cssHeight": 208,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
-      "state": "discord controls, charcoal variant at 1100px; playback paused or not started.",
-      "clip": {
-        "x": 26,
-        "y": 1091.96875,
-        "width": 1048,
-        "height": 213.96875
-      },
-      "sha256": "e3dfcecb3fc8510191a9987e368a176253322c673b87d652dce7d4edefab9eff"
-    },
-    {
-      "file": "feature-discord-charcoal-mobile.png",
-      "width": 732,
-      "height": 530,
-      "cssWidth": 366,
-      "cssHeight": 265,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
-      "state": "discord controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 12,
-        "y": 577.5,
-        "width": 366,
-        "height": 265.15625
-      },
-      "sha256": "f79da4414fcf1f8535a671347c1b82483ba9e2bf5c73a0dcfa49faf5c7c0cc0a"
+      "sha256": "428f829d3e92d1005c036a5a89d64bc8395dd906e36617b9192c6ad672c8d547"
     },
     {
       "file": "feature-shared-light.png",
       "width": 1988,
-      "height": 1292,
+      "height": 1158,
       "cssWidth": 994,
-      "cssHeight": 646,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "cssHeight": 579,
+      "url": "https://itslush.github.io/soundcloud-track-control/share/#sct=SCT1.eyJ2IjogMSwgInRyYWNrIjogIi9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwgImR1cmF0aW9uIjogMjQ1LCAicG9pbnRzIjogW3sidCI6IDAsICJyIjogMSwgImQiOiAwLCAiYyI6ICJpbnN0YW50In0sIHsidCI6IDc1LCAiciI6IDAuNzUsICJkIjogMzUsICJjIjogInNtb290aCJ9LCB7InQiOiAxODAsICJyIjogMC45LCAiZCI6IDQ1LCAiYyI6ICJzbW9vdGgifV0sICJwaXRjaCI6ICJuYXR1cmFsIiwgImtleVNoaWZ0IjogLTN9",
       "state": "shared controls, light variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 53,
         "y": 315.421875,
         "width": 994,
-        "height": 646.375
+        "height": 579.15625
       },
-      "sha256": "992cad5388603ca57d1af6e5cbcea989fd4536b017416dcc612686d765b2201a"
+      "sha256": "e4c871ec8034638cd440d7aab190b870c04ed80c099ebea1b956b744c41c4e9c"
     },
     {
       "file": "feature-shared-light-mobile.png",
       "width": 680,
-      "height": 2000,
+      "height": 1610,
       "cssWidth": 340,
-      "cssHeight": 1000,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "cssHeight": 805,
+      "url": "https://itslush.github.io/soundcloud-track-control/share/#sct=SCT1.eyJ2IjogMSwgInRyYWNrIjogIi9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwgImR1cmF0aW9uIjogMjQ1LCAicG9pbnRzIjogW3sidCI6IDAsICJyIjogMSwgImQiOiAwLCAiYyI6ICJpbnN0YW50In0sIHsidCI6IDc1LCAiciI6IDAuNzUsICJkIjogMzUsICJjIjogInNtb290aCJ9LCB7InQiOiAxODAsICJyIjogMC45LCAiZCI6IDQ1LCAiYyI6ICJzbW9vdGgifV0sICJwaXRjaCI6ICJuYXR1cmFsIiwgImtleVNoaWZ0IjogLTN9",
       "state": "shared controls, light variant at 390px; playback paused or not started.",
       "clip": {
         "x": 25,
-        "y": 299.171875,
+        "y": 355.171875,
         "width": 340,
-        "height": 1007.15625
+        "height": 805.15625
       },
-      "sha256": "94c18aee4917f3e134d83dbf20d782c3dd49e62626d544330f7b82f99f96bf3e"
-    },
-    {
-      "file": "feature-discord-light.png",
-      "width": 2096,
-      "height": 416,
-      "cssWidth": 1048,
-      "cssHeight": 208,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
-      "state": "discord controls, light variant at 1100px; playback paused or not started.",
-      "clip": {
-        "x": 26,
-        "y": 1091.96875,
-        "width": 1048,
-        "height": 213.96875
-      },
-      "sha256": "e719886cadc14b6da32a2b7162805a913fe73da51869d7e694447f5674c62af3"
-    },
-    {
-      "file": "feature-discord-light-mobile.png",
-      "width": 732,
-      "height": 530,
-      "cssWidth": 366,
-      "cssHeight": 265,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
-      "state": "discord controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 12,
-        "y": 577.5,
-        "width": 366,
-        "height": 265.15625
-      },
-      "sha256": "98504ad059b2ecd2d49fd4a0044aace9e8fd8d7601847b16e5b00b4e17d611f4"
+      "sha256": "ca3c2cc8e497212f7aadf22e42e8bd92b4559872fe1223d09c8bd69410c06876"
     },
     {
       "file": "feature-shared-oled.png",
       "width": 1988,
-      "height": 1292,
+      "height": 1158,
       "cssWidth": 994,
-      "cssHeight": 646,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "cssHeight": 579,
+      "url": "https://itslush.github.io/soundcloud-track-control/share/#sct=SCT1.eyJ2IjogMSwgInRyYWNrIjogIi9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwgImR1cmF0aW9uIjogMjQ1LCAicG9pbnRzIjogW3sidCI6IDAsICJyIjogMSwgImQiOiAwLCAiYyI6ICJpbnN0YW50In0sIHsidCI6IDc1LCAiciI6IDAuNzUsICJkIjogMzUsICJjIjogInNtb290aCJ9LCB7InQiOiAxODAsICJyIjogMC45LCAiZCI6IDQ1LCAiYyI6ICJzbW9vdGgifV0sICJwaXRjaCI6ICJuYXR1cmFsIiwgImtleVNoaWZ0IjogLTN9",
       "state": "shared controls, oled variant at 1100px; playback paused or not started.",
       "clip": {
         "x": 53,
         "y": 315.421875,
         "width": 994,
-        "height": 646.375
+        "height": 579.15625
       },
-      "sha256": "f50fb7522e7afb66e21d86da71551ba8c60223fdf02b3fcd43f9774b102c9267"
+      "sha256": "2b518acd3306729d0fc28373e20412744ab5fc11d7365ea27b53124f214bfd56"
     },
     {
       "file": "feature-shared-oled-mobile.png",
       "width": 680,
-      "height": 2000,
+      "height": 1610,
       "cssWidth": 340,
-      "cssHeight": 1000,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
+      "cssHeight": 805,
+      "url": "https://itslush.github.io/soundcloud-track-control/share/#sct=SCT1.eyJ2IjogMSwgInRyYWNrIjogIi9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwgImR1cmF0aW9uIjogMjQ1LCAicG9pbnRzIjogW3sidCI6IDAsICJyIjogMSwgImQiOiAwLCAiYyI6ICJpbnN0YW50In0sIHsidCI6IDc1LCAiciI6IDAuNzUsICJkIjogMzUsICJjIjogInNtb290aCJ9LCB7InQiOiAxODAsICJyIjogMC45LCAiZCI6IDQ1LCAiYyI6ICJzbW9vdGgifV0sICJwaXRjaCI6ICJuYXR1cmFsIiwgImtleVNoaWZ0IjogLTN9",
       "state": "shared controls, oled variant at 390px; playback paused or not started.",
       "clip": {
         "x": 25,
-        "y": 299.171875,
+        "y": 355.171875,
         "width": 340,
-        "height": 1007.15625
+        "height": 805.15625
       },
-      "sha256": "8b1d57129a073914afd311f20e10b97d9056c905b1629204b3c50377dd678f81"
-    },
-    {
-      "file": "feature-discord-oled.png",
-      "width": 2096,
-      "height": 416,
-      "cssWidth": 1048,
-      "cssHeight": 208,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
-      "state": "discord controls, oled variant at 1100px; playback paused or not started.",
-      "clip": {
-        "x": 26,
-        "y": 1091.96875,
-        "width": 1048,
-        "height": 213.96875
-      },
-      "sha256": "5e5b3e2375954417557356b1eaa47e756a9cb4b75d223200c3478015b070807e"
-    },
-    {
-      "file": "feature-discord-oled-mobile.png",
-      "width": 732,
-      "height": 530,
-      "cssWidth": 366,
-      "cssHeight": 265,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/share/#sct=SCT1.eyJ2IjoxLCJ0cmFjayI6Ii9zZXdlcnNsdnQvYnJpbmctbWUtdGhlLWhvcml6b24tZHJvd24tc2V3ZXJzbHZ0LXJlbWl4IiwiZHVyYXRpb24iOjQ5Ni41MDM1NTk5OTk5OTk4LCJwb2ludHMiOlt7InQiOjAsInIiOjEsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsInIiOjAuNzUsImQiOjEyNCwiYyI6InNtb290aCJ9LHsidCI6MzcyLCJyIjowLjksImQiOjE2NiwiYyI6InNtb290aCJ9XSwicGl0Y2giOiJuYXR1cmFsIiwia2V5U2hpZnQiOi0zLCJwaXRjaFBvaW50cyI6W3sidCI6MCwiayI6LTMsImQiOjAsImMiOiJpbnN0YW50In0seyJ0IjoxNjYsImsiOjAsImQiOjIwLCJjIjoic21vb3RoIn0seyJ0IjozNzIsImsiOjIsImQiOjIwLCJjIjoic21vb3RoIn1dfQ",
-      "state": "discord controls, oled variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 12,
-        "y": 577.5,
-        "width": 366,
-        "height": 265.15625
-      },
-      "sha256": "f04c0fa70e3461f80e6fccc46500d5a77f4d5bdce26853e9d79e88d0da0fe427"
-    },
-    {
-      "file": "feature-local-charcoal.png",
-      "width": 1196,
-      "height": 440,
-      "cssWidth": 598,
-      "cssHeight": 220,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/",
-      "state": "local controls, charcoal variant at 1100px; playback paused or not started.",
-      "clip": {
-        "x": 449,
-        "y": 1016.9375,
-        "width": 598,
-        "height": 220.984375
-      },
-      "sha256": "604b5066f334521f3649d4c2ffdfd3ed5aeb729a7c9826061cedf97c2025dd64"
-    },
-    {
-      "file": "feature-local-charcoal-mobile.png",
-      "width": 680,
-      "height": 440,
-      "cssWidth": 340,
-      "cssHeight": 220,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/",
-      "state": "local controls, charcoal variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 25,
-        "y": 600.09375,
-        "width": 340,
-        "height": 220.984375
-      },
-      "sha256": "1cd38daf1a983b807924e5c4848d3860c41e0fad7bfab317708403ffabf99b35"
-    },
-    {
-      "file": "feature-local-light.png",
-      "width": 1196,
-      "height": 440,
-      "cssWidth": 598,
-      "cssHeight": 220,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/",
-      "state": "local controls, light variant at 1100px; playback paused or not started.",
-      "clip": {
-        "x": 449,
-        "y": 657.9375,
-        "width": 598,
-        "height": 220.984375
-      },
-      "sha256": "ae80a5a0e3445a4c24fa201d50338db2e599c1e239db05e42071a1ce5e8caaac"
-    },
-    {
-      "file": "feature-local-light-mobile.png",
-      "width": 680,
-      "height": 440,
-      "cssWidth": 340,
-      "cssHeight": 220,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/",
-      "state": "local controls, light variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 25,
-        "y": 600.09375,
-        "width": 340,
-        "height": 220.984375
-      },
-      "sha256": "3c2493f2d7b7e9abcf18ca9c72c9b48f9536863e712b15489451c68a8f61d713"
-    },
-    {
-      "file": "feature-local-oled.png",
-      "width": 1196,
-      "height": 440,
-      "cssWidth": 598,
-      "cssHeight": 220,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/",
-      "state": "local controls, oled variant at 1100px; playback paused or not started.",
-      "clip": {
-        "x": 449,
-        "y": 657.9375,
-        "width": 598,
-        "height": 220.984375
-      },
-      "sha256": "a970d3fb6df34682d0ac6feeda3bcb51f2e97fb03c9d74ad73c060ca45b6304c"
-    },
-    {
-      "file": "feature-local-oled-mobile.png",
-      "width": 680,
-      "height": 440,
-      "cssWidth": 340,
-      "cssHeight": 220,
-      "url": "http://127.0.0.1:58913/soundcloud-track-control/",
-      "state": "local controls, oled variant at 390px; playback paused or not started.",
-      "clip": {
-        "x": 25,
-        "y": 600.09375,
-        "width": 340,
-        "height": 220.984375
-      },
-      "sha256": "072a2f90a1241264c0aea52d7365e949b7717fecda74344a62856cc8240de753"
-    },
-    {
-      "file": "feature-set-charcoal.png",
-      "width": 2072,
-      "height": 1446,
-      "cssWidth": 1036,
-      "cssHeight": 723,
-      "url": "http://127.0.0.1:55902/soundcloud-track-control/set/",
-      "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. charcoal at 1100px. No render submitted or audio played.",
-      "clip": null,
-      "sha256": "730ba50b32cdeb80d0f4f9e50312adf267eecde30b1db8bcac84d12f8647798c"
-    },
-    {
-      "file": "feature-set-charcoal-mobile.png",
-      "width": 708,
-      "height": 2468,
-      "cssWidth": 354,
-      "cssHeight": 1234,
-      "url": "http://127.0.0.1:55902/soundcloud-track-control/set/",
-      "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. charcoal at 390px. No render submitted or audio played.",
-      "clip": null,
-      "sha256": "07f7c9adc8eedf21909b3957a2e426ad542f430747baeb7c686df1323fff77a4"
-    },
-    {
-      "file": "feature-set-light.png",
-      "width": 2072,
-      "height": 1446,
-      "cssWidth": 1036,
-      "cssHeight": 723,
-      "url": "http://127.0.0.1:55902/soundcloud-track-control/set/",
-      "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. light at 1100px. No render submitted or audio played.",
-      "clip": null,
-      "sha256": "7e64b369802ea11f8a68d142772f85ba967b5e436e11123b8b00abc941216d82"
-    },
-    {
-      "file": "feature-set-light-mobile.png",
-      "width": 708,
-      "height": 2468,
-      "cssWidth": 354,
-      "cssHeight": 1234,
-      "url": "http://127.0.0.1:55902/soundcloud-track-control/set/",
-      "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. light at 390px. No render submitted or audio played.",
-      "clip": null,
-      "sha256": "4d4dd4cf05d8506bdd9e730f9d608a067e2482d936ea3792e3aec4c10e8eb512"
-    },
-    {
-      "file": "feature-set-oled.png",
-      "width": 2072,
-      "height": 1446,
-      "cssWidth": 1036,
-      "cssHeight": 723,
-      "url": "http://127.0.0.1:55902/soundcloud-track-control/set/",
-      "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. oled at 1100px. No render submitted or audio played.",
-      "clip": null,
-      "sha256": "58fd81eeb035f10c4891d439ad14ee2c6499f0557bdfa16919f3a2cfa2128c20"
-    },
-    {
-      "file": "feature-set-oled-mobile.png",
-      "width": 708,
-      "height": 2468,
-      "cssWidth": 354,
-      "cssHeight": 1234,
-      "url": "http://127.0.0.1:55902/soundcloud-track-control/set/",
-      "state": "Two real public tracks added through the set editor, using a test-only CORS relay to the public resolver; first at 0.9x, second at -3 st; 5 second crossfade. oled at 390px. No render submitted or audio played.",
-      "clip": null,
-      "sha256": "6635d167b7217e51e1b9a7c589f14bed790d4181c5ef0fe0f5e377c640c1b8c6"
+      "sha256": "22db4d886fb3597c930ba6f63b81a0eee9ae74b65cc9355161f818ccfc5a420c"
     }
   ],
-  "pageErrors": [],
   "profile": {
     "v": 1,
     "track": "/sewerslvt/bring-me-the-horizon-drown-sewerslvt-remix",
@@ -1693,5 +1530,6 @@
       }
     ]
   },
+  "pageErrors": [],
   "status": "CAPTURED"
 }

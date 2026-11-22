@@ -10,5 +10,9 @@
     "types": ["astro/client"],
     "skipLibCheck": true
   },
-  "include": ["site/src/scripts/**/*.ts", "site/src/scripts/**/*.tsx", "site/src/components/**/*.tsx"]
+  "include": [
+    "site/src/scripts/**/*.ts",
+    "site/src/scripts/**/*.tsx",
+    "site/src/components/**/*.tsx"
+  ]
 }

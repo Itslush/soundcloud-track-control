@@ -14,7 +14,7 @@ import {
   KEYBIND_STORAGE,
   createKeybindStore,
 } from '../controls/tempo-keybinds.js';
-import { tempoIncrementKey } from '../controls/tempo-increment.js';
+import { readTempoIncrement, tempoIncrementKey } from '../controls/tempo-increment.js';
 import { pitchSettingsKey } from '../controls/tempo-pitch-settings.js';
 import { loadMixerDeck, setMixerVisible, syncMixerDjState } from '../controls/tempo-mixer.js';
 import { PRESETS_STORAGE } from '../controls/tempo-presets.js';
@@ -163,8 +163,17 @@ export function createInlineExtras({
     onChange: () => mutations.render(),
   });
 
+  let previousPresetSnapshot = null;
+
   function applyPreset(preset) {
     if (!preset) return;
+    const current = readState();
+    previousPresetSnapshot = {
+      rate: current.rate,
+      keyShift: current.keyShift(),
+      preserve: Boolean(current.preservesKey()),
+      fx: readFxSettings(),
+    };
     const fx = normalizeFxSettings(preset.fx);
     try {
       localStorage.setItem(FX_STORAGE, JSON.stringify(fx));
@@ -180,6 +189,32 @@ export function createInlineExtras({
     timeline.clearKeyOverride?.();
     getCrossfade()?.settingsChanged();
     mutations.updateAll();
+  }
+
+  function undoPreset() {
+    if (!previousPresetSnapshot) return false;
+    const snap = previousPresetSnapshot;
+    previousPresetSnapshot = null;
+    try {
+      localStorage.setItem(FX_STORAGE, JSON.stringify(snap.fx));
+      localStorage.setItem(storageKeys.KEY_SHIFT_STORAGE, String(snap.keyShift));
+      localStorage.setItem(storageKeys.PITCH_STORAGE, String(Boolean(snap.preserve)));
+    } catch {}
+    wasmAudio.setFx(snap.fx);
+    mutations.setPresetState({
+      rate: snap.rate,
+      keyShift: snap.keyShift,
+      preserve: Boolean(snap.preserve),
+    });
+    timeline.clearKeyOverride?.();
+    getCrossfade()?.settingsChanged();
+    mutations.updateAll();
+    mutations.announce('Reverted preset.');
+    return true;
+  }
+
+  function canUndoPreset() {
+    return Boolean(previousPresetSnapshot);
   }
 
   function exportWav(signal, onProgress) {
@@ -211,15 +246,21 @@ export function createInlineExtras({
     event.preventDefault();
     event.stopPropagation();
     const currentRate = readState().rate;
-    if (action === 'tempoDown') mutations.setRate(currentRate - 0.05);
-    else if (action === 'tempoUp') mutations.setRate(currentRate + 0.05);
+    const increment = readTempoIncrement();
+    if (action === 'tempoDown') mutations.setRate(currentRate - increment);
+    else if (action === 'tempoUp') mutations.setRate(currentRate + increment);
     else if (action === 'tempoReset') mutations.setRate(1);
     else if (action === 'djMode') djMode.toggle();
     else if (action === 'loopToggle') deckTools.toggleLoopStep();
     else if (action === 'tapBpm') deckTools.tapBpm();
     else if (action.startsWith('cue'))
       deckTools.triggerCue(Number(action.slice(3)) - 1);
-    else if (action === 'exportWav') void exportWav().catch(() => {});
+    else if (action === 'exportWav')
+      void exportWav().catch((error) => {
+        mutations.announce(
+          error instanceof Error ? error.message : 'WAV export failed.',
+        );
+      });
     return true;
   }
 
@@ -285,6 +326,8 @@ export function createInlineExtras({
     deckTools,
     handleShortcut,
     applyPreset,
+    undoPreset,
+    canUndoPreset,
     exportWav,
     handleStorage,
     importSettings,

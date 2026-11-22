@@ -25,16 +25,36 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
     <section id="mixer">
       <h2>Mix two tracks</h2>
       <p>
-        Turn on “Show two-deck mixer” under Appearance in settings, or
-        <a href={route('mixer/')}>open the mixer here</a>. Load a public
-        SoundCloud track or an audio file into each deck. In SoundCloud, hover
-        or focus a track and press <kbd>Alt+Shift+1</kbd> for deck A or <kbd
-          >Alt+Shift+2</kbd
-        > for deck B to open the docked mixer and load that deck, or press <kbd
-          >Alt+Shift+D</kbd
-        > (or the docked <strong>DJ</strong> button) to turn on click-to-deck routing with inline <code>+A</code>/<code>+B</code> pills. All shortcuts can be customized under Shortcuts in settings. Start each deck
-        when you want to hear it, then move the crossfader. Choose More A or More
-        B on a deck to adjust tempo, pitch, Gain, Volume cap, 3-band EQ, DJ filter and Tap/Sync BPM.
+        Turn on “Show two-deck mixer” under Appearance in settings, or{' '}<a
+          href={route('mixer/')}>open the standalone mixer here</a
+        >. In SoundCloud, click <strong>More A</strong> or{' '}
+        <strong>More B</strong> on the docked mixer for extra EQ, filter, Gain, Volume
+        cap and Tap/Sync BPM controls, or open the full mixer page.
+      </p>
+      <p>
+        Hover or focus any SoundCloud track and press <kbd>Alt+Shift+1</kbd> for
+        deck A or <kbd>Alt+Shift+2</kbd> for deck B, or press{' '}
+        <kbd>Alt+Shift+D</kbd> (or the docked <strong>DJ</strong> button) to enable
+        click-to-deck routing with inline <code>+A</code>/<code>+B</code>{' '}
+        pills. All hotkeys can be customized or cleared under Shortcuts.
+      </p>
+    </section>
+    <section id="settings-tabs">
+      <h2>Settings overview</h2>
+      <p>
+        Open the gear menu in SoundCloud’s player bar to switch across five
+        tabs:{' '}
+        <strong>Tracks</strong> (saved speeds and JSON backup),{' '}
+        <strong>FX &amp; DJ</strong> (Master Bass shelf, DJ filter, Slowed + Reverb,
+        soft-clip saturation, Presets, A-B loop, hot cues, Tap/Sync BPM, DJ mode
+        and WAV export), <strong>Audio</strong> (key shift, pitch lock, Peak protection,
+        Volume cap, crossfade and live DSP meter),{' '}
+        <strong>Appearance</strong> (themes, control style, increments and star motion),
+        and <strong>Shortcuts</strong>.
+      </p>
+      <p>
+        Click <strong>Pin</strong> in the settings header to keep the panel open
+        while clicking SoundCloud waveforms to locate loops or hot cues.
       </p>
     </section>
     <section id="desktop">
@@ -95,15 +115,14 @@ import { installUrl, rpcPluginUrl, route } from '../lib/release';
         as you speed up or slow down a track.
       </p><p>
         Key shift moves the song up or down by up to 12 semitones. Set it in the
-        Pitch control beside the tempo slider, Advanced audio or the tempo
+        Pitch control beside the tempo slider, the Audio tab or the tempo
         editor. It needs access to the player's audio; with Preserve key, the
         chosen shift stays independent of playback speed.
       </p><p>
         The arrows move in half-semitone steps by default. Type a finer value,
-        or change the default increment and range under Advanced audio →
-        Semitone controls. Appearance lets you hide the player’s semitone
-        control and set the default tempo increment for arrows and keyboard
-        adjustments.
+        or change the limits and default increment under Audio → Key shift
+        limits &amp; arrows. Appearance lets you toggle the player’s key shift
+        control and choose the default tempo arrow increment.
       </p><p>
         To change pitch during a song, open the tempo editor and choose Pitch.
         Add points, set their times and choose how they fade into each other.

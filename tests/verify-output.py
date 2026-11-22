@@ -25,7 +25,7 @@ with sync_playwright() as p:
     page = context.new_page()
     page.goto('https://soundcloud.com/test-artist/first-track')
     page.locator('.settings-button').click()
-    page.locator('.advanced-audio > summary').click()
+    page.locator('[data-settings-tab="audio"]').click()
     expect(page.locator('#output-level')).to_have_value('-6')
     result = page.evaluate('''() => {
       window.audio = new Audio(); audio.volume = 0.8; audio.playbackRate = 1;
@@ -82,7 +82,7 @@ with sync_playwright() as p:
         assert page.evaluate('localStorage.getItem("soundcloud.tempo.outputDb")') == db
     page.reload()
     page.locator('.settings-button').click()
-    page.locator('.advanced-audio > summary').click()
+    page.locator('[data-settings-tab="audio"]').click()
     expect(page.locator('#output-value')).to_have_value('48')
     page.locator('#output-value').fill('10000')
     page.locator('#output-value').press('Tab')
@@ -145,7 +145,7 @@ with sync_playwright() as p:
     page.locator('#output-level').fill('-9')
     page.reload()
     page.locator('.settings-button').click()
-    page.locator('.advanced-audio > summary').click()
+    page.locator('[data-settings-tab="audio"]').click()
     expect(page.locator('#output-level')).to_have_value('-9')
     expect(page.locator('#use-wasm')).to_be_checked()
     page.locator('#use-wasm').uncheck()
@@ -154,7 +154,7 @@ with sync_playwright() as p:
     protection.uncheck()
     page.reload()
     page.locator('.settings-button').click()
-    page.locator('.advanced-audio > summary').click()
+    page.locator('[data-settings-tab="audio"]').click()
     expect(page.locator('#use-wasm')).not_to_be_checked()
     expect(protection).not_to_be_checked()
     other = page.context.new_page()

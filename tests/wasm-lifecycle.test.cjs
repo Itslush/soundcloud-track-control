@@ -570,7 +570,11 @@ test('crossfadeReady, nativePosition and beginCrossfade respect single-latency a
   await settle();
   // At t=0, node.latency() is 0.15 so activeAt is 0.15; dry is still playing.
   assert.equal(
-    value.api.crossfadeReady(value.audio, { preserve: false, shift: -2, rate: 1 }),
+    value.api.crossfadeReady(value.audio, {
+      preserve: false,
+      shift: -2,
+      rate: 1,
+    }),
     false,
   );
   const dryGain = [...value.boost.connections].find(
@@ -595,7 +599,11 @@ test('crossfadeReady, nativePosition and beginCrossfade respect single-latency a
   await settle();
   value.context.currentTime = 0.2;
   assert.equal(
-    value.api.crossfadeReady(value.audio, { preserve: false, shift: -2, rate: 1 }),
+    value.api.crossfadeReady(value.audio, {
+      preserve: false,
+      shift: -2,
+      rate: 1,
+    }),
     true,
   );
   const readySession = value.api.beginCrossfade(
@@ -686,11 +694,19 @@ test('track starts near 0:00 and post-seek/emptied warmups mute dry until wet ac
   const node = value.nodes[0];
   node.scheduleGate = deferred();
   await settle();
-  assert.equal(dryGain.value, 0, 'brand-new track at 0:00 mutes dry during warmup');
+  assert.equal(
+    dryGain.value,
+    0,
+    'brand-new track at 0:00 mutes dry during warmup',
+  );
   node.scheduleGate.resolve();
   await settle();
   assert.deepEqual(dryGain.events.at(-1), ['set', 0, 0]);
-  assert.equal(dryGain.value, 0, 'dry stays muted after wet takes over from muteDry');
+  assert.equal(
+    dryGain.value,
+    0,
+    'dry stays muted after wet takes over from muteDry',
+  );
 
   // Emptied track switch keeps dry muted until ready, then restores dry to 1 if pitch is disabled or node fails.
   node.scheduleGate = deferred();
@@ -706,7 +722,11 @@ test('track starts near 0:00 and post-seek/emptied warmups mute dry until wet ac
   assert.equal(dryGain.value, 0);
   node.dispatchEvent(new Event('processorerror'));
   await settle();
-  assert.equal(dryGain.value, 1, 'retire/fail restores dry gain to 1 for fallback');
+  assert.equal(
+    dryGain.value,
+    1,
+    'retire/fail restores dry gain to 1 for fallback',
+  );
 });
 
 test('beginCrossfade uses equal-power curves when supported and 8ms native anti-click fade', async () => {
@@ -725,7 +745,13 @@ test('beginCrossfade uses equal-power curves when supported and 8ms native anti-
         mid: curve[Math.floor(curve.length / 2)],
         last: curve[curve.length - 1],
       });
-      g.gain.events.push(['curve', curve[0], curve[curve.length - 1], start, duration]);
+      g.gain.events.push([
+        'curve',
+        curve[0],
+        curve[curve.length - 1],
+        start,
+        duration,
+      ]);
       g.gain.value = curve[curve.length - 1];
     };
     return g;

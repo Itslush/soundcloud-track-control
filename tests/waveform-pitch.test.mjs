@@ -132,7 +132,9 @@ test('133 BPM kick attacks never interrupt an in-progress splice fade', () => {
       const t = j / rate;
       input[hit + j] +=
         0.7 *
-        Math.sin(2 * Math.PI * (55 * t + 160 * 0.02 * (1 - Math.exp(-t / 0.02)))) *
+        Math.sin(
+          2 * Math.PI * (55 * t + 160 * 0.02 * (1 - Math.exp(-t / 0.02))),
+        ) *
         Math.exp(-t / 0.03);
     }
   }
@@ -141,8 +143,14 @@ test('133 BPM kick attacks never interrupt an in-progress splice fade', () => {
   const ratio = 2 ** (-2 / 12);
   let interrupted = 0;
   for (let i = 0; i < length; i++) {
-    const attackIndex = (processor.frame - processor.latency + processor.overlap) & processor.mask;
-    if (processor.attacks[attackIndex] && processor.phase > 0 && processor.phase < processor.overlap)
+    const attackIndex =
+      (processor.frame - processor.latency + processor.overlap) &
+      processor.mask;
+    if (
+      processor.attacks[attackIndex] &&
+      processor.phase > 0 &&
+      processor.phase < processor.overlap
+    )
       interrupted++;
     processor.process([input.subarray(i, i + 1)], [output], ratio);
   }
@@ -255,7 +263,9 @@ test('LivePitch transitions clear stale WASM frames, update ratio immediately, a
   const complexSample = (idx) => {
     let sum = 0;
     for (let h = 1; h <= 16; h++)
-      sum += Math.sin((2 * Math.PI * (110 * h * 1.07 ** (h % 5)) * idx) / rate + h);
+      sum += Math.sin(
+        (2 * Math.PI * (110 * h * 1.07 ** (h % 5)) * idx) / rate + h,
+      );
     return sum * 0.08;
   };
   const baseRmsSamples = [];
@@ -337,7 +347,8 @@ test('multi-layer music keeps steady read-head lag and hi-hat timing across -1 t
   for (const hat of hatTimes) {
     for (let j = 0; j < Math.round(rate * 0.01) && hat + j < total; j++) {
       const t = j / rate;
-      const sample = 0.5 * Math.sin(2 * Math.PI * 3500 * t) * Math.exp(-t / 0.002);
+      const sample =
+        0.5 * Math.sin(2 * Math.PI * 3500 * t) * Math.exp(-t / 0.002);
       inL[hat + j] += sample;
       inR[hat + j] -= sample * 0.8;
     }
@@ -399,8 +410,9 @@ test('kick attack anti-flam clamps backward fade length and suppresses pre-echo'
   const ratio = 2 ** (-2 / 12);
   const length = rate * 2;
   const hit = Math.round(1.0 * rate);
-  const input = Float32Array.from({ length }, (_, i) =>
-    0.15 * Math.tanh(4 * Math.sin((2 * Math.PI * 46 * i) / rate)),
+  const input = Float32Array.from(
+    { length },
+    (_, i) => 0.15 * Math.tanh(4 * Math.sin((2 * Math.PI * 46 * i) / rate)),
   );
   for (let j = 0; j < 2400; j++) {
     const t = j / rate;
@@ -438,8 +450,9 @@ test('kick attack anti-flam clamps backward fade length and suppresses pre-echo'
   }
   // Also explicitly verify backward clamping with a forced leading read head before a second hit.
   const forcedLength = rate * 2;
-  const forcedInput = Float32Array.from({ length: forcedLength }, (_, i) =>
-    0.15 * Math.tanh(4 * Math.sin((2 * Math.PI * 46 * i) / rate)),
+  const forcedInput = Float32Array.from(
+    { length: forcedLength },
+    (_, i) => 0.15 * Math.tanh(4 * Math.sin((2 * Math.PI * 46 * i) / rate)),
   );
   for (let j = 0; j < 2400; j++) {
     const t = j / rate;

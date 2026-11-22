@@ -3,6 +3,7 @@ import { release } from '../lib/release';
 export function initDiscordShare(
   code: string | (() => string),
   onReady?: (link: URL) => void,
+  trackName?: string | (() => string),
 ) {
   const root = document.querySelector<HTMLElement>('#discord-sharing');
   if (!root) return;
@@ -16,6 +17,7 @@ export function initDiscordShare(
     location.origin,
   );
   let job = '';
+  let renderedTitle = '';
   let timer: ReturnType<typeof setTimeout>;
   let deadline = 0;
   let epoch = 0;
@@ -82,6 +84,8 @@ export function initDiscordShare(
         shared.password
       )
         throw new Error('The rendered link is invalid. Try again.');
+      renderedTitle =
+        'title' in value && typeof value.title === 'string' ? value.title : '';
       link.href = shared.href;
       link.textContent = shared.href;
       result.hidden = false;
@@ -140,9 +144,19 @@ export function initDiscordShare(
   });
   copy.addEventListener('click', async () => {
     try {
-      const label = (
+      const base = (
         release.siteUrl || `${location.origin}${import.meta.env.BASE_URL}`
       ).replace(/^https?:\/\//, '');
+      const name = (
+        renderedTitle ||
+        (typeof trackName === 'function' ? trackName() : trackName) ||
+        ''
+      )
+        .replace(/[\r\n]+/g, ' ')
+        .replaceAll('[', '(')
+        .replaceAll(']', ')')
+        .trim();
+      const label = name ? `${base}${name}` : base;
       await navigator.clipboard.writeText(`[${label}](${link.href})`);
       status.textContent = 'Link copied.';
     } catch {
