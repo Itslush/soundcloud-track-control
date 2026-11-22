@@ -26,6 +26,14 @@ def seed_tracks(page):
 
 def library_layout(page, width, height):
     page.set_viewport_size({'width': width, 'height': height})
+    page.wait_for_function('''([w, h]) => {
+        const panel = document.querySelector('#soundcloud-tempo-control')?.shadowRoot?.querySelector('#tempo-settings');
+        if (!panel) return false;
+        const bounds = panel.getBoundingClientRect();
+        return innerWidth === w && innerHeight === h &&
+            bounds.x >= 0 && bounds.right <= w &&
+            bounds.y >= 0 && bounds.bottom <= h;
+    }''', arg=[width, height])
     panel = page.locator('#tempo-settings')
     metrics = panel.evaluate('''panel => {
         const list = panel.querySelector('.saved-list');

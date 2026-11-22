@@ -90,6 +90,12 @@ def fixture(browser):
                 theme(page, mode)
                 for width in [1440, 390]:
                     page.set_viewport_size({'width': width, 'height': 1000})
+                    page.wait_for_function('''w => {
+                        const panel = document.querySelector('#soundcloud-tempo-control')?.shadowRoot?.querySelector('#tempo-settings');
+                        if (!panel) return false;
+                        const bounds = panel.getBoundingClientRect();
+                        return innerWidth === w && bounds.x >= 0 && bounds.right <= w;
+                    }''', arg=width)
                     panel = page.locator('#tempo-settings')
                     assert panel.evaluate('el => el.scrollWidth <= el.clientWidth + 1')
                     panel.screenshot(path=str(ROOT / f'test-results/appearance-{host_theme}-{mode}-{width}.png'))

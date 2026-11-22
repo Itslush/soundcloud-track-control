@@ -146,6 +146,22 @@ SETUP = r'''async sampleRate => {
 }'''
 
 
+def normalize_timestamps(timestamps):
+    assert timestamps, 'Missing captured render quanta'
+    frames = []
+    for value in timestamps:
+        frame = int(value)
+        assert value == frame and frame % QUANTUM == 0, 'Non-quantum timestamp'
+        frames.append(frame)
+    assert all(b >= a for a, b in zip(frames, frames[1:])), 'Missing or duplicated render quantum'
+    origin = max(frame - index * QUANTUM for index, frame in enumerate(frames))
+    lags = [(origin + index * QUANTUM) - frame for index, frame in enumerate(frames)]
+    assert all(0 <= lag <= 8 * QUANTUM for lag in lags), 'Missing or duplicated render quantum'
+    assert all(lags[index] == 0 for index in range(1, len(frames)) if frames[index] > frames[index - 1]), 'Missing or duplicated render quantum'
+    assert sum(lag == 0 for lag in lags) >= max(1, len(frames) // 2), 'Missing or duplicated render quantum'
+    return [origin + index * QUANTUM for index in range(len(frames))]
+
+
 def decode_capture(capture):
     raw = base64.b64decode(capture.pop('pcmBase64'), validate=True)
     pcm = array.array('f')
@@ -157,7 +173,7 @@ def decode_capture(capture):
     assert len(pcm) == frames * 4 and len(capture['timestamps']) == frames // QUANTUM
     assert len(capture['inputChannels']) == frames // QUANTUM * 2
     assert all(channels == 2 for channels in capture['inputChannels']), 'A stereo capture input was missing'
-    assert all(b - a == QUANTUM for a, b in zip(capture['timestamps'], capture['timestamps'][1:])), 'Missing or duplicated render quantum'
+    capture['timestamps'] = normalize_timestamps(capture['timestamps'])
     assert all(math.isfinite(sample) for sample in pcm), 'Nonfinite captured PCM'
     assert capture['destinationGain'] == 0, capture
     return raw, pcm
